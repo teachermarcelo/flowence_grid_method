@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Flowence — Atribuições</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif;}
+body{background:#f8fafc;color:#0f172a;font-size:14px;}
+.app{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:215px;background:#f1f5f9;border-right:1px solid #dbe3ef;display:flex;flex-direction:column;justify-content:space-between;flex-shrink:0;}
+.logo{padding:20px 14px 14px;}
+.logo-title{font-size:16px;font-weight:600;}
+.logo-title .fl{color:#8b5cf6;}.logo-title .gr{color:#14b8a6;}
+.logo-subtitle{margin-top:4px;color:#64748b;font-size:11px;letter-spacing:.08em;}
+.menu-section{margin-top:14px;}
+.menu-label{padding:0 14px;margin-bottom:8px;font-size:11px;color:#7c8daa;font-weight:700;letter-spacing:.08em;}
+.menu-item{display:flex;align-items:center;gap:10px;height:32px;padding:0 14px;margin:2px 8px;border-radius:6px;color:#0f172a;font-size:13px;cursor:pointer;text-decoration:none;}
+.menu-item:hover{background:#e9eef7;}
+.menu-item.active{background:#e4e9f4;color:#4f46e5;font-weight:700;}
+.menu-icon{width:15px;text-align:center;color:#64748b;}
+.sidebar-footer{height:52px;border-top:1px solid #dbe3ef;display:flex;align-items:center;padding:8px 12px;gap:10px;}
+.avatar{width:28px;height:28px;border-radius:50%;background:#111827;color:white;display:grid;place-items:center;font-size:13px;}
+.footer-text{flex:1;}.footer-text strong{display:block;font-size:11px;}.footer-text small{color:#64748b;font-size:10px;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{height:49px;background:#fff;border-bottom:1px solid #dbe3ef;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:10;}
+.page-title{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:700;}
+.top-actions{display:flex;align-items:center;gap:10px;font-size:12px;}
+.role-select{border:1px solid #dbe3ef;border-radius:6px;padding:6px 10px;background:#fff;color:#334155;font-size:12px;}
+.top-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid #dbe3ef;border-radius:6px;background:#fff;color:#334155;font-size:12px;cursor:pointer;}
+.top-btn:hover{background:#f1f5f9;}
+.content{padding:18px;flex:1;display:flex;flex-direction:column;gap:14px;}
+
+/* PANELS */
+.panel{background:#fff;border:1px solid #dbe3ef;border-radius:12px;padding:20px 22px;}
+.panel-title{font-size:14px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+
+/* FORM GRID */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em;}
+.form-input{border:1px solid #dbe3ef;border-radius:7px;padding:8px 12px;font-size:13px;color:#0f172a;outline:none;background:#fff;}
+.form-input:focus{border-color:#8b5cf6;box-shadow:0 0 0 2px #ede9fe;}
+textarea.form-input{resize:vertical;min-height:60px;}
+
+/* BUTTONS */
+.btn-primary{display:inline-flex;align-items:center;gap:6px;background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-primary:hover{background:#6d28d9;}
+.btn-primary:disabled{background:#c4b5fd;cursor:not-allowed;}
+.btn-secondary{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#475569;border:1px solid #dbe3ef;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-secondary:hover{background:#f8fafc;}
+.btn-secondary:disabled{opacity:.5;cursor:not-allowed;}
+.btn-row{display:flex;gap:10px;align-items:center;margin-top:6px;}
+
+/* TABLE */
+.table-subhead{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:1px solid #f1f5f9;}
+thead th{padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.04em;}
+thead th:first-child{width:36px;}
+tbody tr{border-bottom:1px solid #f8fafc;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#fafbff;}
+td{padding:11px 12px;font-size:13px;vertical-align:middle;}
+.student-cell{display:flex;align-items:center;gap:10px;}
+.stu-avatar{width:28px;height:28px;border-radius:7px;background:#111827;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.checkbox{width:16px;height:16px;cursor:pointer;accent-color:#7c3aed;}
+.badge{display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px;}
+.badge.a1{background:#ccfbf1;color:#0f766e;}
+.badge.a2{background:#dbeafe;color:#0369a1;}
+.badge.b1{background:#ede9fe;color:#7c3aed;}
+.badge.b2{background:#ffedd5;color:#ea580c;}
+.badge.c1{background:#ffe4e6;color:#e11d48;}
+.dash{color:#94a3b8;}
+
+/* MISSION CHIPS */
+.mission-chips{display:flex;flex-wrap:wrap;gap:5px;}
+.chip{display:inline-flex;align-items:center;gap:4px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:20px;padding:3px 9px;font-size:11px;color:#475569;}
+.chip.green{background:#dcfce7;border-color:#bbf7d0;color:#15803d;}
+.chip.red{background:#ffe4e6;border-color:#fecdd3;color:#be123c;}
+
+.act-btn{width:27px;height:27px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;display:grid;place-items:center;cursor:pointer;font-size:12px;color:#64748b;}
+.act-btn:hover{background:#ffe4e6;border-color:#fecdd3;color:#e11d48;}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:#0f172a;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:200;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.footer{height:34px;border-top:1px solid #dbe3ef;background:white;display:grid;place-items:center;color:#64748b;font-size:11px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div>
+    <div class="logo">
+      <div class="logo-title"><span class="fl">Flowence</span> <span class="gr">Grid</span></div>
+      <div class="logo-subtitle">Method™ Management</div>
+    </div>
+    <nav>
+      <div class="menu-section">
+        <div class="menu-label">PRINCIPAL</div>
+        <a href="index.html" class="menu-item"><span class="menu-icon">▦</span>Dashboard</a>
+        <a href="alunos.html" class="menu-item"><span class="menu-icon">✉</span>Alunos</a>
+        <a href="#" class="menu-item"><span class="menu-icon">▣</span>Turmas</a>
+      </div>
+      <div class="menu-section">
+        <div class="menu-label">PLANEJAMENTO</div>
+        <a href="#" class="menu-item"><span class="menu-icon">⌁</span>Níveis CEFR</a>
+        <a href="#" class="menu-item"><span class="menu-icon">◎</span>Temas Mensais</a>
+        <a href="atribuicoes.html" class="menu-item active"><span class="menu-icon">▤</span>Atribuições</a>
+        <a href="#" class="menu-item"><span class="menu-icon">◫</span>Aulas</a>
+      </div>
+      <div class="menu-section">
+        <div class="menu-label">RECURSOS</div>
+        <a href="#" class="menu-item"><span class="menu-icon">↗</span>Materiais</a>
+        <a href="#" class="menu-item"><span class="menu-icon">🏆</span>Missões</a>
+        <a href="#" class="menu-item"><span class="menu-icon">♡</span>O Método</a>
+      </div>
+    </nav>
+  </div>
+  <div class="sidebar-footer">
+    <div class="avatar">N</div>
+    <div class="footer-text"><strong>Grid Method™ v1.0</strong><small>Todos salvos no banco</small></div>
+    <span>☼</span>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="page-title"><span>▯</span> Atribuições</div>
+    <div class="top-actions">
+      <select class="role-select"><option>👩‍🏫 Coordenador</option></select>
+      <button class="top-btn">☼</button>
+      <button class="top-btn">✥ Aluno</button>
+      <button class="top-btn">♧ Aula</button>
+      <button class="top-btn">▤ Atribuir</button>
+    </div>
+  </header>
+
+  <section class="content">
+
+    <!-- Atribuir em Massa -->
+    <div class="panel">
+      <div class="panel-title">⚡ Atribuir Tema / Missão em Massa</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>TURMA</label>
+          <select class="form-input" id="f-class">
+            <option value="">Todas as turmas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>NÍVEL</label>
+          <select class="form-input" id="f-level" onchange="onLevelChange()">
+            <option value="">Selecione o nível</option>
+            <option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>TEMA</label>
+          <select class="form-input" id="f-theme">
+            <option value="">Selecione o nível primeiro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>MÊS</label>
+          <select class="form-input" id="f-month">
+            <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+            <option value="3">Março</option><option value="4">Abril</option>
+            <option value="5">Maio</option><option value="6">Junho</option>
+            <option value="7">Julho</option><option value="8">Agosto</option>
+            <option value="9">Setembro</option><option value="10">Outubro</option>
+            <option value="11">Novembro</option><option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>MISSÃO</label>
+          <textarea class="form-input" id="f-mission" placeholder="Descreva a missão para os alunos..."></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-all" onclick="assignAll()">⚡ Atribuir a Todos (1 Click)</button>
+        <button class="btn-secondary" id="btn-selected" onclick="assignSelected()" disabled>✓ Atribuir aos Selecionados (<span id="sel-count">0</span>)</button>
+      </div>
+    </div>
+
+    <!-- Lista de Alunos -->
+    <div class="panel">
+      <div class="table-subhead">👥 Alunos (<span id="student-count">0</span>)</div>
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" class="checkbox" id="check-all" onchange="toggleAll(this)"/></th>
+            <th>Aluno</th>
+            <th>Nível</th>
+            <th>Turma</th>
+            <th>Atribuições</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="assign-tbody">
+          <tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:28px;">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+  <footer class="footer">Flowence Grid Method™ — Sistema de Gestão Educacional</footer>
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL = 'https://rvgcniaowzmsudzliozf.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2Z2NuaWFvd3ptc3Vkemxpb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjQxNzQsImV4cCI6MjA5MTQwMDE3NH0.uwwKFLuK-XyPoXPrB6_CseRTiD9d-iyMQSPWrFw-l-I';
+const HEADERS = { apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}`, 'Content-Type':'application/json', Prefer:'return=representation' };
+
+async function api(path, opts={}) {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, { headers:HEADERS, ...opts });
+  if (!r.ok) { const e = await r.text(); throw new Error(e); }
+  return r.status===204 ? null : r.json();
+}
+
+const THEMES = {
+  1: {A1:'Family & Home',A2:'Daily Routines',B1:'Travel Plans',B2:'Social Media',C1:'Philosophy of Mind'},
+  2: {A1:'Colors & Clothes',A2:'Shopping',B1:'Health & Wellness',B2:'Technology Trends',C1:'Ethics & Society'},
+  3: {A1:'Animals & Nature',A2:'Weather',B1:'Education',B2:'Global Issues',C1:'Economics'},
+  4: {A1:'Numbers & Time',A2:'Transport',B1:'Culture & Arts',B2:'Science & Innovation',C1:'Law & Justice'},
+  5: {A1:'Food and Drinks',A2:'Restaurants',B1:'Work and Career',B2:'Environment',C1:'Research Methods'},
+  6: {A1:'Sports & Games',A2:'Hobbies',B1:'Media & News',B2:'Politics',C1:'Artificial Intelligence'},
+  7: {A1:'My Body',A2:'Health',B1:'History',B2:'Literature',C1:'Neuroscience'},
+  8: {A1:'School & Supplies',A2:'Classroom',B1:'Science',B2:'Psychology',C1:'Urban Planning'},
+  9: {A1:'Jobs & Professions',A2:'Work',B1:'Environment',B2:'Culture',C1:'Geopolitics'},
+  10:{A1:'Feelings & Emotions',A2:'Relationships',B1:'Technology',B2:'Media',C1:'Cognitive Science'},
+  11:{A1:'House & Furniture',A2:'Neighborhoods',B1:'Business',B2:'Economy',C1:'Philosophy'},
+  12:{A1:'Celebrations',A2:'Traditions',B1:'World Events',B2:'Future Trends',C1:'Critical Thinking'},
+};
+
+let students = [], classes = [], assignments = [];
+let selected = new Set();
+
+async function load() {
+  // Set current month
+  document.getElementById('f-month').value = new Date().getMonth() + 1;
+
+  [students, classes, assignments] = await Promise.all([
+    api('flowence_student?select=*&order=name.asc'),
+    api('flowence_class?select=id,name'),
+    api('flowence_assignment?select=*&order=assigned_at.desc'),
+  ]);
+
+  // Populate class selects
+  const classSelects = [document.getElementById('f-class')];
+  classSelects.forEach(sel => {
+    classes.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.id; o.textContent = c.name;
+      sel.appendChild(o);
+    });
+  });
+
+  renderTable();
+}
+
+function onLevelChange() {
+  const lvl   = document.getElementById('f-level').value;
+  const month = parseInt(document.getElementById('f-month').value) || (new Date().getMonth()+1);
+  const sel   = document.getElementById('f-theme');
+  sel.innerHTML = '';
+
+  if (!lvl) {
+    sel.innerHTML = '<option value="">Selecione o nível primeiro</option>';
+    return;
+  }
+  const themes = THEMES[month] || {};
+  const theme  = themes[lvl];
+  if (theme) {
+    const o = document.createElement('option');
+    o.value = theme; o.textContent = theme;
+    sel.appendChild(o);
+  }
+  // also allow custom
+  const custom = document.createElement('option');
+  custom.value = '__custom__'; custom.textContent = '+ Tema personalizado...';
+  sel.appendChild(custom);
+}
+
+function renderTable() {
+  const tbody = document.getElementById('assign-tbody');
+  document.getElementById('student-count').textContent = students.length;
+
+  if (!students.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:28px;">Nenhum aluno cadastrado.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = students.map(s => {
+    const initials = (s.name||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    const lvlKey   = (s.level||'').toLowerCase();
+    const cls      = classes.find(c => c.id === s.class_id);
+    const stuAssign = assignments.filter(a => a.student_id === s.id).slice(0, 5);
+    const isChecked = selected.has(s.id);
+
+    const chips = stuAssign.length
+      ? stuAssign.map(a => `<span class="chip">${esc(a.theme||a.mission||'Missão')}</span>`).join('')
+      : '<span class="dash">—</span>';
+
+    return `
+    <tr>
+      <td><input type="checkbox" class="checkbox" ${isChecked?'checked':''} onchange="toggleStudent('${s.id}',this)"/></td>
+      <td>
+        <div class="student-cell">
+          <div class="stu-avatar">${initials}</div>
+          <span style="font-weight:600">${esc(s.name||'')}</span>
+        </div>
+      </td>
+      <td>${s.level ? `<span class="badge ${lvlKey}">${esc(s.level)}${s.sublevel?'.'+s.sublevel:''}</span>` : '<span class="dash">—</span>'}</td>
+      <td>${cls ? esc(cls.name) : '<span class="dash">—</span>'}</td>
+      <td><div class="mission-chips">${chips}</div></td>
+      <td><button class="act-btn" title="Remover última" onclick="removeLastAssignment('${s.id}')">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleStudent(id, el) {
+  if (el.checked) selected.add(id);
+  else selected.delete(id);
+  updateSelCount();
+}
+
+function toggleAll(el) {
+  students.forEach(s => {
+    if (el.checked) selected.add(s.id);
+    else selected.delete(s.id);
+  });
+  updateSelCount();
+  renderTable();
+}
+
+function updateSelCount() {
+  document.getElementById('sel-count').textContent = selected.size;
+  document.getElementById('btn-selected').disabled = selected.size === 0;
+}
+
+function getFormValues() {
+  const level   = document.getElementById('f-level').value;
+  const themeEl = document.getElementById('f-theme');
+  const theme   = themeEl.value === '__custom__' ? prompt('Digite o tema:') : themeEl.value;
+  const month   = parseInt(document.getElementById('f-month').value);
+  const mission = document.getElementById('f-mission').value.trim();
+  return { level, theme, month, mission };
+}
+
+async function assignAll() {
+  const { level, theme, month, mission } = getFormValues();
+  if (!mission && !theme) { showToast('Preencha o tema ou a missão'); return; }
+
+  const targets = students.filter(s => !level || (s.level||'').toUpperCase() === level.toUpperCase());
+  if (!targets.length) { showToast('Nenhum aluno corresponde ao filtro'); return; }
+
+  await doAssign(targets.map(s=>s.id), { level, theme, month, mission });
+  showToast(`✅ Atribuído para ${targets.length} aluno(s)!`);
+}
+
+async function assignSelected() {
+  if (!selected.size) return;
+  const { level, theme, month, mission } = getFormValues();
+  if (!mission && !theme) { showToast('Preencha o tema ou a missão'); return; }
+
+  await doAssign([...selected], { level, theme, month, mission });
+  showToast(`✅ Atribuído para ${selected.size} aluno(s)!`);
+  selected.clear();
+  updateSelCount();
+}
+
+async function doAssign(studentIds, { level, theme, month, mission }) {
+  const now = new Date().toISOString();
+  const rows = studentIds.map(sid => ({
+    id: crypto.randomUUID(),
+    student_id: sid,
+    level: level || null,
+    theme: theme || null,
+    month: month || null,
+    mission: mission || null,
+    assigned_at: now,
+    created_at: now,
+    updated_at: now,
+  }));
+
+  try {
+    await api('flowence_assignment', { method:'POST', body: JSON.stringify(rows) });
+    assignments = await api('flowence_assignment?select=*&order=assigned_at.desc');
+    renderTable();
+  } catch(e) {
+    console.error(e);
+    showToast('Erro ao salvar atribuições');
+  }
+}
+
+async function removeLastAssignment(studentId) {
+  const last = assignments.find(a => a.student_id === studentId);
+  if (!last) return;
+  if (!confirm('Remover a última atribuição deste aluno?')) return;
+  try {
+    await api(`flowence_assignment?id=eq.${last.id}`, { method:'DELETE' });
+    assignments = await api('flowence_assignment?select=*&order=assigned_at.desc');
+    renderTable();
+    showToast('🗑 Atribuição removida');
+  } catch(e) {
+    showToast('Erro ao remover');
+  }
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+load();
+</script>
+</body>
+</html>

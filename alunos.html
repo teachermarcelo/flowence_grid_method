@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Flowence — Alunos</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif;}
+body{background:#f8fafc;color:#0f172a;font-size:14px;}
+.app{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:215px;background:#f1f5f9;border-right:1px solid #dbe3ef;display:flex;flex-direction:column;justify-content:space-between;flex-shrink:0;}
+.logo{padding:20px 14px 14px;}
+.logo-title{font-size:16px;font-weight:600;}
+.logo-title .fl{color:#8b5cf6;}.logo-title .gr{color:#14b8a6;}
+.logo-subtitle{margin-top:4px;color:#64748b;font-size:11px;letter-spacing:.08em;}
+.menu-section{margin-top:14px;}
+.menu-label{padding:0 14px;margin-bottom:8px;font-size:11px;color:#7c8daa;font-weight:700;letter-spacing:.08em;}
+.menu-item{display:flex;align-items:center;gap:10px;height:32px;padding:0 14px;margin:2px 8px;border-radius:6px;color:#0f172a;font-size:13px;cursor:pointer;text-decoration:none;}
+.menu-item:hover{background:#e9eef7;}
+.menu-item.active{background:#e4e9f4;color:#4f46e5;font-weight:700;}
+.menu-icon{width:15px;text-align:center;color:#64748b;}
+.sidebar-footer{height:52px;border-top:1px solid #dbe3ef;display:flex;align-items:center;padding:8px 12px;gap:10px;}
+.avatar{width:28px;height:28px;border-radius:50%;background:#111827;color:white;display:grid;place-items:center;font-size:13px;}
+.footer-text{flex:1;}.footer-text strong{display:block;font-size:11px;}.footer-text small{color:#64748b;font-size:10px;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{height:49px;background:#fff;border-bottom:1px solid #dbe3ef;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:10;}
+.page-title{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:700;}
+.top-actions{display:flex;align-items:center;gap:10px;font-size:12px;}
+.role-select{border:1px solid #dbe3ef;border-radius:6px;padding:6px 10px;background:#fff;color:#334155;font-size:12px;}
+.top-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid #dbe3ef;border-radius:6px;background:#fff;color:#334155;font-size:12px;cursor:pointer;white-space:nowrap;}
+.top-btn:hover{background:#f1f5f9;}
+.content{padding:18px;flex:1;}
+
+/* FILTER BAR */
+.filter-bar{background:#fff;border:1px solid #dbe3ef;border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.search-wrap{position:relative;flex:1;min-width:200px;}
+.search-wrap input{width:100%;border:1px solid #dbe3ef;border-radius:7px;padding:8px 12px 8px 32px;font-size:12px;color:#0f172a;outline:none;background:#fff;}
+.search-wrap input:focus{border-color:#8b5cf6;box-shadow:0 0 0 2px #ede9fe;}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;}
+.filter-select{border:1px solid #dbe3ef;border-radius:7px;padding:8px 28px 8px 10px;font-size:12px;color:#334155;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E") no-repeat right 8px center;-webkit-appearance:none;appearance:none;cursor:pointer;outline:none;}
+.filter-select:focus{border-color:#8b5cf6;}
+.btn-novo{display:flex;align-items:center;gap:6px;background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-novo:hover{background:#6d28d9;}
+
+/* TABLE */
+.table-wrap{background:#fff;border:1px solid #dbe3ef;border-radius:10px;overflow:hidden;}
+.table-header{padding:14px 18px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:8px;}
+.table-header h3{font-size:14px;font-weight:700;}
+.table-header .count{color:#64748b;font-size:13px;font-weight:400;}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:1px solid #f1f5f9;}
+thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.04em;white-space:nowrap;}
+tbody tr{border-bottom:1px solid #f8fafc;transition:background .15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#fafbff;}
+td{padding:12px 14px;font-size:13px;vertical-align:middle;}
+.student-cell{display:flex;align-items:center;gap:10px;}
+.stu-avatar{width:30px;height:30px;border-radius:8px;background:#111827;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.stu-name{font-weight:700;font-size:13px;line-height:1.2;}
+.stu-email{font-size:11px;color:#94a3b8;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px;}
+.badge.a1{background:#ccfbf1;color:#0f766e;}
+.badge.a2{background:#dbeafe;color:#0369a1;}
+.badge.b1{background:#ede9fe;color:#7c3aed;}
+.badge.b2{background:#ffedd5;color:#ea580c;}
+.badge.c1{background:#ffe4e6;color:#e11d48;}
+.badge.ativo{background:#dcfce7;color:#16a34a;}
+.badge.inativo{background:#f1f5f9;color:#64748b;}
+.dash{color:#94a3b8;}
+
+/* ACTION BTNS */
+.actions{display:flex;align-items:center;gap:6px;}
+.act-btn{width:28px;height:28px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;display:grid;place-items:center;cursor:pointer;font-size:13px;color:#64748b;transition:all .15s;}
+.act-btn:hover.view{background:#ede9fe;border-color:#c4b5fd;color:#7c3aed;}
+.act-btn:hover.edit{background:#dbeafe;border-color:#bfdbfe;color:#2563eb;}
+.act-btn:hover.del{background:#ffe4e6;border-color:#fecdd3;color:#e11d48;}
+
+.links-cell{display:flex;align-items:center;gap:4px;font-size:12px;color:#64748b;}
+.missions-cell{font-size:12px;color:#64748b;}
+.empty-row td{text-align:center;color:#94a3b8;padding:32px;font-size:13px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:14px;width:520px;max-width:95vw;box-shadow:0 20px 60px rgba(15,23,42,.18);overflow:hidden;}
+.modal-head{padding:18px 22px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;}
+.modal-head h3{font-size:15px;font-weight:700;}
+.modal-close{width:28px;height:28px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;display:grid;place-items:center;cursor:pointer;font-size:16px;color:#64748b;}
+.modal-close:hover{background:#f1f5f9;}
+.modal-body{padding:20px 22px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:11px;font-weight:700;color:#475569;letter-spacing:.04em;}
+.form-input{border:1px solid #dbe3ef;border-radius:7px;padding:8px 12px;font-size:13px;color:#0f172a;outline:none;background:#fff;}
+.form-input:focus{border-color:#8b5cf6;box-shadow:0 0 0 2px #ede9fe;}
+.modal-foot{padding:14px 22px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px;}
+.btn-cancel{padding:8px 16px;border:1px solid #dbe3ef;border-radius:7px;background:#fff;color:#334155;font-size:13px;cursor:pointer;}
+.btn-cancel:hover{background:#f1f5f9;}
+.btn-save{padding:8px 20px;border:none;border-radius:7px;background:#7c3aed;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-save:hover{background:#6d28d9;}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:#0f172a;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:200;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+.footer{height:34px;border-top:1px solid #dbe3ef;background:white;display:grid;place-items:center;color:#64748b;font-size:11px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div>
+    <div class="logo">
+      <div class="logo-title"><span class="fl">Flowence</span> <span class="gr">Grid</span></div>
+      <div class="logo-subtitle">Method™ Management</div>
+    </div>
+    <nav>
+      <div class="menu-section">
+        <div class="menu-label">PRINCIPAL</div>
+        <a href="index.html" class="menu-item"><span class="menu-icon">▦</span>Dashboard</a>
+        <a href="alunos.html" class="menu-item active"><span class="menu-icon">✉</span>Alunos</a>
+        <a href="#" class="menu-item"><span class="menu-icon">▣</span>Turmas</a>
+      </div>
+      <div class="menu-section">
+        <div class="menu-label">PLANEJAMENTO</div>
+        <a href="#" class="menu-item"><span class="menu-icon">⌁</span>Níveis CEFR</a>
+        <a href="#" class="menu-item"><span class="menu-icon">◎</span>Temas Mensais</a>
+        <a href="atribuicoes.html" class="menu-item"><span class="menu-icon">▤</span>Atribuições</a>
+        <a href="#" class="menu-item"><span class="menu-icon">◫</span>Aulas</a>
+      </div>
+      <div class="menu-section">
+        <div class="menu-label">RECURSOS</div>
+        <a href="#" class="menu-item"><span class="menu-icon">↗</span>Materiais</a>
+        <a href="#" class="menu-item"><span class="menu-icon">🏆</span>Missões</a>
+        <a href="#" class="menu-item"><span class="menu-icon">♡</span>O Método</a>
+      </div>
+    </nav>
+  </div>
+  <div class="sidebar-footer">
+    <div class="avatar">N</div>
+    <div class="footer-text"><strong>Grid Method™ v1.0</strong><small>Todos salvos no banco</small></div>
+    <span>☼</span>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="page-title"><span>▯</span> Alunos</div>
+    <div class="top-actions">
+      <select class="role-select"><option>👩‍🏫 Coordenador</option></select>
+      <button class="top-btn">☼</button>
+      <button class="top-btn">✥ Aluno</button>
+      <button class="top-btn">♧ Aula</button>
+      <button class="top-btn">▤ Atribuir</button>
+    </div>
+  </header>
+
+  <section class="content">
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Buscar aluno, email ou tag..."/>
+      </div>
+      <select class="filter-select" id="filter-level">
+        <option value="">Todos os níveis</option>
+        <option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option>
+      </select>
+      <select class="filter-select" id="filter-class">
+        <option value="">Todas as turmas</option>
+      </select>
+      <select class="filter-select" id="filter-status">
+        <option value="">Todos os status</option>
+        <option>Ativo</option><option>Inativo</option>
+      </select>
+      <button class="btn-novo" onclick="openModal()">+ Novo Aluno</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>Alunos</h3>
+        <span class="count" id="table-count">(0)</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Nível</th>
+            <th>Turma</th>
+            <th>Status</th>
+            <th>Tags</th>
+            <th>Links</th>
+            <th>Missões</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="students-tbody">
+          <tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:32px;">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+  <footer class="footer">Flowence Grid Method™ — Sistema de Gestão Educacional</footer>
+</main>
+</div>
+
+<!-- MODAL NOVO/EDITAR ALUNO -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Novo Aluno</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id"/>
+      <div class="form-group full">
+        <label>NOME COMPLETO</label>
+        <input class="form-input" id="f-name" placeholder="Ex: Maria Silva"/>
+      </div>
+      <div class="form-group">
+        <label>EMAIL</label>
+        <input class="form-input" id="f-email" type="email" placeholder="email@exemplo.com"/>
+      </div>
+      <div class="form-group">
+        <label>TELEFONE</label>
+        <input class="form-input" id="f-phone" placeholder="(00) 00000-0000"/>
+      </div>
+      <div class="form-group">
+        <label>NÍVEL CEFR</label>
+        <select class="form-input" id="f-level">
+          <option value="">Selecione...</option>
+          <option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>STATUS</label>
+        <select class="form-input" id="f-status">
+          <option>Ativo</option><option>Inativo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>TURMA</label>
+        <select class="form-input" id="f-class">
+          <option value="">Sem turma</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>DATA DE NASCIMENTO</label>
+        <input class="form-input" id="f-dob" type="date"/>
+      </div>
+      <div class="form-group full">
+        <label>TAGS</label>
+        <input class="form-input" id="f-tags" placeholder="Ex: particular, online"/>
+      </div>
+      <div class="form-group full">
+        <label>OBSERVAÇÕES</label>
+        <textarea class="form-input" id="f-notes" rows="2" placeholder="Notas sobre o aluno..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveStudent()">Salvar Aluno</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL = 'https://rvgcniaowzmsudzliozf.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2Z2NuaWFvd3ptc3Vkemxpb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjQxNzQsImV4cCI6MjA5MTQwMDE3NH0.uwwKFLuK-XyPoXPrB6_CseRTiD9d-iyMQSPWrFw-l-I';
+
+const HEADERS = {
+  apikey: SB_KEY,
+  Authorization: `Bearer ${SB_KEY}`,
+  'Content-Type': 'application/json',
+  Prefer: 'return=representation',
+};
+
+async function api(path, opts = {}) {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, { headers: HEADERS, ...opts });
+  if (!r.ok) { const e = await r.text(); throw new Error(e); }
+  return r.status === 204 ? null : r.json();
+}
+
+// ── State ────────────────────────────────────────────────────
+let allStudents = [];
+let classes = [];
+let missions = [];
+let links = [];
+
+// ── Load ─────────────────────────────────────────────────────
+async function load() {
+  try {
+    [allStudents, classes, missions, links] = await Promise.all([
+      api('flowence_student?select=*&order=name.asc'),
+      api('flowence_class?select=id,name&order=name.asc'),
+      api('flowence_mission?select=id,student_id,status'),
+      api('flowence_student_link?select=id,student_id'),
+    ]);
+    populateClassFilter();
+    populateClassSelect();
+    renderTable();
+  } catch(e) {
+    console.error(e);
+    showToast('Erro ao carregar dados');
+  }
+}
+
+function populateClassFilter() {
+  const sel = document.getElementById('filter-class');
+  classes.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name;
+    sel.appendChild(o);
+  });
+}
+
+function populateClassSelect() {
+  const sel = document.getElementById('f-class');
+  sel.innerHTML = '<option value="">Sem turma</option>';
+  classes.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name;
+    sel.appendChild(o);
+  });
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderTable() {
+  const search  = document.getElementById('search-input').value.toLowerCase();
+  const lvl     = document.getElementById('filter-level').value;
+  const cls     = document.getElementById('filter-class').value;
+  const status  = document.getElementById('filter-status').value;
+
+  let filtered = allStudents.filter(s => {
+    const matchSearch = !search ||
+      (s.name||'').toLowerCase().includes(search) ||
+      (s.email||'').toLowerCase().includes(search) ||
+      (s.tags||'').toLowerCase().includes(search);
+    const matchLvl    = !lvl    || (s.level||'').toUpperCase() === lvl.toUpperCase();
+    const matchCls    = !cls    || s.class_id === cls;
+    const matchStatus = !status || (s.status||'') === status;
+    return matchSearch && matchLvl && matchCls && matchStatus;
+  });
+
+  document.getElementById('table-count').textContent = `(${filtered.length})`;
+
+  const tbody = document.getElementById('students-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Nenhum aluno encontrado.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(s => {
+    const initials = (s.name||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    const lvlKey   = (s.level||'').toLowerCase();
+    const cls      = classes.find(c => c.id === s.class_id);
+    const mTotal   = missions.filter(m => m.student_id === s.id).length;
+    const mDone    = missions.filter(m => m.student_id === s.id && (m.status==='completed'||m.status==='Completa')).length;
+    const lCount   = links.filter(l => l.student_id === s.id).length;
+
+    return `
+    <tr>
+      <td>
+        <div class="student-cell">
+          <div class="stu-avatar">${initials}</div>
+          <div>
+            <div class="stu-name">${esc(s.name||'')}</div>
+            <div class="stu-email">${esc(s.email||'')}</div>
+          </div>
+        </div>
+      </td>
+      <td>${s.level ? `<span class="badge ${lvlKey}">${esc(s.level)}${s.sublevel ? '.'+s.sublevel : ''}</span>` : '<span class="dash">—</span>'}</td>
+      <td>${cls ? esc(cls.name) : '<span class="dash">—</span>'}</td>
+      <td><span class="badge ${(s.status||'').toLowerCase()==='ativo'?'ativo':'inativo'}">${esc(s.status||'—')}</span></td>
+      <td>${s.tags ? esc(s.tags) : '<span class="dash">—</span>'}</td>
+      <td>
+        ${lCount > 0
+          ? `<div class="links-cell">🔗 ${lCount}</div>`
+          : '<span class="dash">—</span>'}
+      </td>
+      <td><span class="missions-cell">${mDone}/${mTotal}</span></td>
+      <td>
+        <div class="actions">
+          <button class="act-btn view" title="Ver" onclick="viewStudent('${s.id}')">👁</button>
+          <button class="act-btn edit" title="Editar" onclick="editStudent('${s.id}')">✏️</button>
+          <button class="act-btn del"  title="Deletar" onclick="deleteStudent('${s.id}','${esc(s.name||'')}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+function openModal(student = null) {
+  document.getElementById('modal-title').textContent = student ? 'Editar Aluno' : 'Novo Aluno';
+  document.getElementById('edit-id').value   = student?.id    || '';
+  document.getElementById('f-name').value    = student?.name  || '';
+  document.getElementById('f-email').value   = student?.email || '';
+  document.getElementById('f-phone').value   = student?.phone || '';
+  document.getElementById('f-level').value   = student?.level || '';
+  document.getElementById('f-status').value  = student?.status|| 'Ativo';
+  document.getElementById('f-class').value   = student?.class_id || '';
+  document.getElementById('f-dob').value     = student?.dob   || '';
+  document.getElementById('f-tags').value    = student?.tags  || '';
+  document.getElementById('f-notes').value   = student?.notes || '';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function editStudent(id) {
+  const s = allStudents.find(s => s.id === id);
+  if (s) openModal(s);
+}
+
+function viewStudent(id) {
+  const s = allStudents.find(s => s.id === id);
+  if (s) showToast(`👁 ${s.name} — ${s.email || 'sem email'}`);
+}
+
+async function saveStudent() {
+  const id    = document.getElementById('edit-id').value;
+  const name  = document.getElementById('f-name').value.trim();
+  if (!name) { showToast('Nome é obrigatório'); return; }
+
+  const payload = {
+    name,
+    email:    document.getElementById('f-email').value.trim() || null,
+    phone:    document.getElementById('f-phone').value.trim() || null,
+    level:    document.getElementById('f-level').value        || null,
+    status:   document.getElementById('f-status').value,
+    class_id: document.getElementById('f-class').value        || null,
+    dob:      document.getElementById('f-dob').value          || null,
+    tags:     document.getElementById('f-tags').value.trim()  || null,
+    notes:    document.getElementById('f-notes').value.trim() || null,
+    updated_at: new Date().toISOString(),
+  };
+
+  try {
+    if (id) {
+      await api(`flowence_student?id=eq.${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      });
+      showToast('✅ Aluno atualizado!');
+    } else {
+      payload.id = crypto.randomUUID();
+      payload.created_at = new Date().toISOString();
+      await api('flowence_student', { method: 'POST', body: JSON.stringify(payload) });
+      showToast('✅ Aluno cadastrado!');
+    }
+    closeModal();
+    await load();
+  } catch(e) {
+    console.error(e);
+    showToast('Erro ao salvar aluno');
+  }
+}
+
+async function deleteStudent(id, name) {
+  if (!confirm(`Deletar o aluno "${name}"? Esta ação não pode ser desfeita.`)) return;
+  try {
+    await api(`flowence_student?id=eq.${id}`, { method: 'DELETE' });
+    showToast('🗑 Aluno removido');
+    await load();
+  } catch(e) {
+    showToast('Erro ao deletar');
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Events ────────────────────────────────────────────────────
+document.getElementById('search-input').addEventListener('input', renderTable);
+document.getElementById('filter-level').addEventListener('change', renderTable);
+document.getElementById('filter-class').addEventListener('change', renderTable);
+document.getElementById('filter-status').addEventListener('change', renderTable);
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+load();
+</script>
+</body>
+</html>
