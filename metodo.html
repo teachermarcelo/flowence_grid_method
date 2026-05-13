@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>O Método — Flowence Grid Method™</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div>
+      <div class="logo">
+        <div class="logo-title"><span>Flowence</span> <span>Grid</span></div>
+        <div class="logo-subtitle">METHOD™ MANAGEMENT</div>
+      </div>
+      <nav>
+        <div class="menu-section">
+          <div class="menu-label">PRINCIPAL</div>
+          <div class="menu-item" data-href="index.html"><span class="menu-icon">▦</span>Dashboard</div>
+          <div class="menu-item" data-href="alunos.html"><span class="menu-icon">✉</span>Alunos</div>
+          <div class="menu-item" data-href="turmas.html"><span class="menu-icon">▣</span>Turmas</div>
+        </div>
+        <div class="menu-section">
+          <div class="menu-label">PLANEJAMENTO</div>
+          <div class="menu-item" data-href="niveis.html"><span class="menu-icon">⌁</span>Níveis CEFR</div>
+          <div class="menu-item" data-href="temas.html"><span class="menu-icon">◎</span>Temas Mensais</div>
+          <div class="menu-item" data-href="atribuicoes.html"><span class="menu-icon">▤</span>Atribuições</div>
+          <div class="menu-item" data-href="aulas.html"><span class="menu-icon">◫</span>Aulas</div>
+        </div>
+        <div class="menu-section">
+          <div class="menu-label">RECURSOS</div>
+          <div class="menu-item" data-href="materiais.html"><span class="menu-icon">↗</span>Materiais</div>
+          <div class="menu-item" data-href="missoes.html"><span class="menu-icon">🏆</span>Missões</div>
+          <div class="menu-item active" data-href="metodo.html"><span class="menu-icon">♡</span>O Método</div>
+        </div>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <div class="avatar">N</div>
+      <div class="footer-text">
+        <strong>Grid Method™ v1.0</strong>
+        <small>Sistema CEFR</small>
+      </div>
+      <span>☼</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="page-title"><span>♡</span> O Método</div>
+      <div class="top-actions">
+        <span class="badge-pill">Flowence Grid Method™</span>
+      </div>
+    </header>
+
+    <section class="content" id="method-root"></section>
+
+    <footer class="footer">Flowence Grid Method™ — Sistema de Progressão CEFR</footer>
+  </main>
+
+</div>
+
+<script src="method-data.js"></script>
+<script src="method-render.js"></script>
+</body>
+</html>
