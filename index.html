@@ -3,91 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Flowence Grid Method</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family: Inter, Arial, sans-serif; }
-    body { background:#f8fafc; color:#0f172a; font-size:14px; }
-    .app { display:flex; min-height:100vh; }
-
-    /* SIDEBAR */
-    .sidebar { width:215px; background:#f1f5f9; border-right:1px solid #dbe3ef; display:flex; flex-direction:column; justify-content:space-between; }
-    .logo { padding:20px 14px 14px; }
-    .logo-title { font-size:16px; font-weight:600; }
-    .logo-title span:first-child { color:#8b5cf6; }
-    .logo-title span:last-child  { color:#14b8a6; }
-    .logo-subtitle { margin-top:4px; color:#64748b; font-size:11px; letter-spacing:.08em; }
-    .menu-section { margin-top:14px; }
-    .menu-label { padding:0 14px; margin-bottom:8px; font-size:11px; color:#7c8daa; font-weight:700; letter-spacing:.08em; }
-    .menu-item { display:flex; align-items:center; gap:10px; height:32px; padding:0 14px; margin:2px 8px; border-radius:6px; color:#0f172a; font-size:13px; cursor:pointer; }
-    .menu-item.active { background:#e4e9f4; color:#4f46e5; font-weight:700; }
-    .menu-icon { width:15px; text-align:center; color:#64748b; }
-    .sidebar-footer { height:52px; border-top:1px solid #dbe3ef; display:flex; align-items:center; padding:8px 12px; gap:10px; }
-    .avatar { width:28px; height:28px; border-radius:50%; background:#111827; color:white; display:grid; place-items:center; font-size:13px; }
-    .footer-text { flex:1; }
-    .footer-text strong { display:block; font-size:11px; }
-    .footer-text small { color:#64748b; font-size:10px; }
-
-    /* MAIN */
-    .main { flex:1; display:flex; flex-direction:column; }
-    .topbar { height:49px; background:#fff; border-bottom:1px solid #dbe3ef; display:flex; align-items:center; justify-content:space-between; padding:0 18px; }
-    .page-title { display:flex; align-items:center; gap:12px; font-size:15px; font-weight:700; }
-    .top-actions { display:flex; align-items:center; gap:18px; font-size:12px; }
-    .role-select { border:1px solid #dbe3ef; border-radius:6px; padding:7px 12px; background:#fff; color:#334155; font-size:12px; }
-    .content { padding:18px; flex:1; }
-
-    /* STAT CARDS */
-    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
-    .stats.second-row { grid-template-columns:repeat(4,1fr); }
-    .stat-card { height:70px; background:white; border:1px solid #dbe3ef; border-radius:10px; box-shadow:0 1px 4px rgba(15,23,42,.12); display:flex; align-items:center; padding:14px; gap:14px; }
-    .stat-icon { width:35px; height:35px; border-radius:6px; display:grid; place-items:center; font-size:18px; }
-    .purple { background:#f3e8ff; color:#9333ea; }
-    .teal   { background:#ccfbf1; color:#0f766e; }
-    .green  { background:#dcfce7; color:#16a34a; }
-    .orange { background:#ffedd5; color:#f97316; }
-    .blue   { background:#dbeafe; color:#2563eb; }
-    .pink   { background:#ffe4e6; color:#e11d48; }
-    .stat-value { font-size:22px; font-weight:800; line-height:1; }
-    .stat-label { margin-top:6px; color:#64748b; font-size:11px; }
-
-    /* PANELS */
-    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .panel { background:white; border:1px solid #dbe3ef; border-radius:10px; box-shadow:0 1px 4px rgba(15,23,42,.12); padding:18px 20px; }
-    .panel.large { height:268px; }
-    .panel.small { height:105px; }
-    .panel-title { font-weight:800; font-size:14px; margin-bottom:22px; }
-    .panel-title span { font-weight:400; color:#64748b; }
-    .level { margin-bottom:13px; }
-    .level-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; font-size:12px; color:#475569; }
-    .level-left { display:flex; align-items:center; gap:8px; }
-    .badge { font-size:10px; padding:3px 7px; border-radius:5px; font-weight:700; }
-    .a1 { background:#ccfbf1; color:#0f766e; }
-    .a2 { background:#dbeafe; color:#0369a1; }
-    .b1 { background:#ede9fe; color:#7c3aed; }
-    .b2 { background:#ffedd5; color:#ea580c; }
-    .c1 { background:#ffe4e6; color:#e11d48; }
-    .progress { height:5px; background:#e9d5ff; border-radius:10px; overflow:hidden; }
-    .progress-fill { height:100%; border-radius:10px; }
-    .progress-fill.green  { background:#16a34a; }
-    .progress-fill.blue   { background:#60a5fa; }
-    .progress-fill.purple { background:#8b5cf6; }
-    .progress-fill.orange { background:#fb923c; }
-    .progress-fill.red    { background:#fb7185; }
-    .topic-list { display:flex; flex-direction:column; gap:10px; }
-    .topic { height:40px; border:1px solid #dbe3ef; border-radius:7px; display:flex; align-items:center; gap:12px; padding:0 12px; font-size:12px; font-weight:600; }
-    .empty { height:45px; display:grid; place-items:center; color:#64748b; font-size:12px; margin-top:12px; }
-    .footer { height:34px; border-top:1px solid #dbe3ef; background:white; display:grid; place-items:center; color:#64748b; font-size:11px; }
-
-    /* Loading shimmer */
-    .shimmer { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.2s infinite; border-radius:4px; color:transparent; min-width:30px; }
-    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-    @media (max-width:900px) {
-      .sidebar { display:none; }
-      .stats, .stats.second-row, .grid { grid-template-columns:1fr; }
-      .panel.large, .panel.small { height:auto; }
-      .top-actions { display:none; }
-    }
-  </style>
+  <title>Flowence Grid Method — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app">
@@ -96,7 +16,7 @@
     <div>
       <div class="logo">
         <div class="logo-title"><span>Flowence</span> <span>Grid</span></div>
-        <div class="logo-subtitle">Method™ Management</div>
+        <div class="logo-subtitle">METHOD™ MANAGEMENT</div>
       </div>
       <nav>
         <div class="menu-section">
@@ -124,7 +44,7 @@
       <div class="avatar">N</div>
       <div class="footer-text">
         <strong>Grid Method™ v1.0</strong>
-        <small>Todos salvos no banco</small>
+        <small>Conectado ao Supabase</small>
       </div>
       <span>☼</span>
     </div>
@@ -135,16 +55,15 @@
       <div class="page-title"><span>▯</span> Dashboard</div>
       <div class="top-actions">
         <select class="role-select"><option>👩‍🏫 Coordenador</option></select>
-        <span>☼</span>
-        <span>✥ Aluno</span>
-        <span>♧ Aula</span>
-        <span>▤ Atribuir</span>
+        <span title="Tema">☼</span>
+        <span title="Novo aluno">✥ Aluno</span>
+        <span title="Nova aula">♧ Aula</span>
+        <span title="Nova atribuição">▤ Atribuir</span>
       </div>
     </header>
 
     <section class="content">
 
-      <!-- Row 1 -->
       <div class="stats">
         <div class="stat-card">
           <div class="stat-icon purple">🎓</div>
@@ -176,7 +95,6 @@
         </div>
       </div>
 
-      <!-- Row 2 -->
       <div class="stats second-row">
         <div class="stat-card">
           <div class="stat-icon blue">🔗</div>
@@ -194,63 +112,59 @@
         </div>
       </div>
 
-      <!-- Panels -->
       <div class="grid">
 
-        <!-- Alunos por Nível -->
         <div class="panel large">
           <div class="panel-title">Alunos por Nível</div>
 
           <div class="level">
             <div class="level-head">
               <div class="level-left"><span class="badge a1">A1</span> Beginner</div>
-              <strong id="level-count-A1">–</strong>
+              <strong id="level-count-A1">—</strong>
             </div>
-            <div class="progress"><div class="progress-fill green" id="level-bar-A1" style="width:0%"></div></div>
+            <div class="progress"><div class="progress-fill green" id="level-bar-A1"></div></div>
           </div>
 
           <div class="level">
             <div class="level-head">
               <div class="level-left"><span class="badge a2">A2</span> Elementary</div>
-              <strong id="level-count-A2">–</strong>
+              <strong id="level-count-A2">—</strong>
             </div>
-            <div class="progress"><div class="progress-fill blue" id="level-bar-A2" style="width:0%"></div></div>
+            <div class="progress"><div class="progress-fill blue" id="level-bar-A2"></div></div>
           </div>
 
           <div class="level">
             <div class="level-head">
               <div class="level-left"><span class="badge b1">B1</span> Intermediate</div>
-              <strong id="level-count-B1">–</strong>
+              <strong id="level-count-B1">—</strong>
             </div>
-            <div class="progress"><div class="progress-fill purple" id="level-bar-B1" style="width:0%"></div></div>
+            <div class="progress"><div class="progress-fill purple" id="level-bar-B1"></div></div>
           </div>
 
           <div class="level">
             <div class="level-head">
               <div class="level-left"><span class="badge b2">B2</span> Upper Intermediate</div>
-              <strong id="level-count-B2">–</strong>
+              <strong id="level-count-B2">—</strong>
             </div>
-            <div class="progress"><div class="progress-fill orange" id="level-bar-B2" style="width:0%"></div></div>
+            <div class="progress"><div class="progress-fill orange" id="level-bar-B2"></div></div>
           </div>
 
           <div class="level">
             <div class="level-head">
               <div class="level-left"><span class="badge c1">C1</span> Advanced</div>
-              <strong id="level-count-C1">–</strong>
+              <strong id="level-count-C1">—</strong>
             </div>
-            <div class="progress"><div class="progress-fill red" id="level-bar-C1" style="width:0%"></div></div>
+            <div class="progress"><div class="progress-fill red" id="level-bar-C1"></div></div>
           </div>
         </div>
 
-        <!-- Temas do Mês -->
         <div class="panel large">
           <div class="panel-title">Temas do Mês Atual <span id="month-label">— Maio</span></div>
           <div class="topic-list" id="theme-list">
-            <!-- preenchido pelo JS -->
+            <div class="empty">Carregando temas…</div>
           </div>
         </div>
 
-        <!-- Missões Recentes -->
         <div class="panel small">
           <div class="panel-title">Missões Recentes</div>
           <div id="missions-list">
@@ -258,7 +172,6 @@
           </div>
         </div>
 
-        <!-- Próximas Aulas -->
         <div class="panel small">
           <div class="panel-title">Próximas Aulas</div>
           <div id="lessons-list">
@@ -274,6 +187,11 @@
 
 </div>
 
+<!-- Supabase SDK (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Configuração (mantenha credenciais aqui) -->
+<script src="supabase-config.js"></script>
+<!-- Lógica do dashboard -->
 <script src="dashboard.js"></script>
 </body>
 </html>
