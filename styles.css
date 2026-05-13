@@ -1726,3 +1726,194 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   MENU MOBILE — Hamburger + Backdrop + Sidebar deslizante
+   ============================================================ */
+
+.hamburger {
+  display: none;
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+}
+.hamburger:hover { background: var(--surface-2); }
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  opacity: 0;
+  transition: opacity var(--t-med);
+}
+.sidebar-backdrop.show {
+  display: block;
+  opacity: 1;
+}
+
+/* TOPBAR ACTIONS desktop */
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+  transition: background var(--t-fast);
+}
+.action-link:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* ============================================================
+   RESPONSIVE — refinamento mobile
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  /* Sidebar vira off-canvas */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform var(--t-med);
+    z-index: 100;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .hamburger { display: inline-flex; }
+}
+
+@media (max-width: 720px) {
+  .content { padding: 14px 12px; }
+
+  /* Topbar mais compacta */
+  .topbar { padding: 0 12px; gap: 8px; height: 52px; }
+  .page-title { font-size: 14px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top-actions { gap: 4px; }
+  .action-label { display: none; }
+  .action-link { padding: 8px 9px; font-size: 14px; }
+
+  /* Cards menores */
+  .stat-card { padding: 12px; gap: 10px; min-height: 64px; }
+  .stat-icon { width: 32px; height: 32px; font-size: 15px; }
+  .stat-value { font-size: 19px; }
+  .stat-label { font-size: 10.5px; margin-top: 4px; }
+
+  /* Panels */
+  .panel { padding: 14px; }
+  .panel-title { font-size: 13px; margin-bottom: 12px; }
+
+  /* Tabela de alunos → CARTÕES */
+  .st-head { display: none; }
+  .st-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    background: var(--surface);
+  }
+  .st-row > div:not(:first-child) {
+    padding-left: 44px;
+    font-size: 12px;
+  }
+  .st-row > div:not(:first-child)::before {
+    color: var(--text-3);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+  .st-row > div:nth-child(2)::before { content: 'Nível: '; }
+  .st-row > div:nth-child(3)::before { content: 'Turma: '; }
+  .st-row > div:nth-child(4)::before { content: 'Contato: '; }
+  .st-row > div:nth-child(5)::before { content: 'Status: '; }
+  .st-actions { justify-content: flex-start; padding-left: 44px !important; }
+  .st-actions::before { display: none; }
+
+  /* Toolbar empilhada */
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .filter-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+  /* Modal full-screen no mobile */
+  .modal-overlay { padding: 0; }
+  .modal {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  /* Header do aluno empilhado */
+  .student-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 18px;
+  }
+  .student-quick {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  .student-quick .qstat { flex: 1; padding: 10px 8px; min-width: 0; }
+
+  /* Quick stats da lista */
+  .quick-stats { gap: 6px; }
+  .qstat { padding: 10px 12px; flex: 1; }
+  .qstat-value { font-size: 18px; }
+
+  /* Method hero menor */
+  .method-hero { padding: 20px 18px; }
+  .method-hero-title { font-size: 22px; }
+  .method-hero-sub { font-size: 13px; }
+
+  /* Tabela do método empilha */
+  .lesson-table-head { display: none; }
+  .lesson-table-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 10px 12px;
+  }
+  .lesson-table-row > div { padding-left: 0; }
+  .lesson-stage { font-size: 13px; }
+  .lesson-time { font-size: 11.5px; color: var(--indigo); font-weight: 600; }
+  .lesson-goal { font-size: 12px; color: var(--text-3); }
+
+  /* Level header */
+  .level-header { padding: 16px; }
+  .level-h1 { font-size: 20px; }
+  .badge-lg { font-size: 14px !important; padding: 6px 10px !important; }
+
+  /* Themes 2 colunas */
+  .themes-grid { grid-template-columns: 1fr 1fr; }
+  .qty-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Footer menor */
+  .footer { font-size: 10px; padding: 0 12px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .stats, .stats.second-row { grid-template-columns: 1fr 1fr; }
+  .quick-stats { flex-direction: row; }
+  .filter-group { grid-template-columns: 1fr; }
+  .themes-grid, .qty-grid { grid-template-columns: 1fr; }
+  .topbar .top-actions { display: flex; }
+}
