@@ -12,7 +12,9 @@
 <body>
 <div class="app">
 
-  <aside class="sidebar">
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <aside class="sidebar" id="sidebar">
     <div>
       <div class="logo">
         <div class="logo-title"><span>Flowence</span> <span>Grid</span></div>
@@ -21,22 +23,22 @@
       <nav>
         <div class="menu-section">
           <div class="menu-label">PRINCIPAL</div>
-          <div class="menu-item active"><span class="menu-icon">▦</span>Dashboard</div>
-          <div class="menu-item"><span class="menu-icon">✉</span>Alunos</div>
-          <div class="menu-item"><span class="menu-icon">▣</span>Turmas</div>
+          <div class="menu-item active" data-href="index.html"><span class="menu-icon">▦</span>Dashboard</div>
+          <div class="menu-item" data-href="alunos.html"><span class="menu-icon">✉</span>Alunos</div>
+          <div class="menu-item" data-href="turmas.html"><span class="menu-icon">▣</span>Turmas</div>
         </div>
         <div class="menu-section">
           <div class="menu-label">PLANEJAMENTO</div>
-          <div class="menu-item"><span class="menu-icon">⌁</span>Níveis CEFR</div>
-          <div class="menu-item"><span class="menu-icon">◎</span>Temas Mensais</div>
-          <div class="menu-item"><span class="menu-icon">▤</span>Atribuições</div>
-          <div class="menu-item"><span class="menu-icon">◫</span>Aulas</div>
+          <div class="menu-item" data-href="niveis.html"><span class="menu-icon">⌁</span>Níveis CEFR</div>
+          <div class="menu-item" data-href="temas.html"><span class="menu-icon">◎</span>Temas Mensais</div>
+          <div class="menu-item" data-href="atribuicoes.html"><span class="menu-icon">▤</span>Atribuições</div>
+          <div class="menu-item" data-href="aulas.html"><span class="menu-icon">◫</span>Aulas</div>
         </div>
         <div class="menu-section">
           <div class="menu-label">RECURSOS</div>
-          <div class="menu-item"><span class="menu-icon">↗</span>Materiais</div>
-          <div class="menu-item"><span class="menu-icon">🏆</span>Missões</div>
-          <div class="menu-item"><span class="menu-icon">♡</span>O Método</div>
+          <div class="menu-item" data-href="materiais.html"><span class="menu-icon">↗</span>Materiais</div>
+          <div class="menu-item" data-href="missoes.html"><span class="menu-icon">🏆</span>Missões</div>
+          <div class="menu-item" data-href="metodo.html"><span class="menu-icon">♡</span>O Método</div>
         </div>
       </nav>
     </div>
@@ -46,19 +48,17 @@
         <strong>Grid Method™ v1.0</strong>
         <small>Conectado ao Supabase</small>
       </div>
-      <span>☼</span>
     </div>
   </aside>
 
   <main class="main">
     <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
       <div class="page-title"><span>▯</span> Dashboard</div>
       <div class="top-actions">
-        <select class="role-select"><option>👩‍🏫 Coordenador</option></select>
-        <span title="Tema">☼</span>
-        <span title="Novo aluno">✥ Aluno</span>
-        <span title="Nova aula">♧ Aula</span>
-        <span title="Nova atribuição">▤ Atribuir</span>
+        <a class="action-link" href="alunos.html" title="Alunos">✥ <span class="action-label">Aluno</span></a>
+        <a class="action-link" href="aulas.html" title="Aulas">♧ <span class="action-label">Aula</span></a>
+        <a class="action-link" href="atribuicoes.html" title="Atribuir">▤ <span class="action-label">Atribuir</span></a>
       </div>
     </header>
 
@@ -113,47 +113,26 @@
       </div>
 
       <div class="grid">
-
         <div class="panel large">
           <div class="panel-title">Alunos por Nível</div>
-
           <div class="level">
-            <div class="level-head">
-              <div class="level-left"><span class="badge a1">A1</span> Beginner</div>
-              <strong id="level-count-A1">—</strong>
-            </div>
+            <div class="level-head"><div class="level-left"><span class="badge a1">A1</span> Beginner</div><strong id="level-count-A1">—</strong></div>
             <div class="progress"><div class="progress-fill green" id="level-bar-A1"></div></div>
           </div>
-
           <div class="level">
-            <div class="level-head">
-              <div class="level-left"><span class="badge a2">A2</span> Elementary</div>
-              <strong id="level-count-A2">—</strong>
-            </div>
+            <div class="level-head"><div class="level-left"><span class="badge a2">A2</span> Elementary</div><strong id="level-count-A2">—</strong></div>
             <div class="progress"><div class="progress-fill blue" id="level-bar-A2"></div></div>
           </div>
-
           <div class="level">
-            <div class="level-head">
-              <div class="level-left"><span class="badge b1">B1</span> Intermediate</div>
-              <strong id="level-count-B1">—</strong>
-            </div>
+            <div class="level-head"><div class="level-left"><span class="badge b1">B1</span> Intermediate</div><strong id="level-count-B1">—</strong></div>
             <div class="progress"><div class="progress-fill purple" id="level-bar-B1"></div></div>
           </div>
-
           <div class="level">
-            <div class="level-head">
-              <div class="level-left"><span class="badge b2">B2</span> Upper Intermediate</div>
-              <strong id="level-count-B2">—</strong>
-            </div>
+            <div class="level-head"><div class="level-left"><span class="badge b2">B2</span> Upper Intermediate</div><strong id="level-count-B2">—</strong></div>
             <div class="progress"><div class="progress-fill orange" id="level-bar-B2"></div></div>
           </div>
-
           <div class="level">
-            <div class="level-head">
-              <div class="level-left"><span class="badge c1">C1</span> Advanced</div>
-              <strong id="level-count-C1">—</strong>
-            </div>
+            <div class="level-head"><div class="level-left"><span class="badge c1">C1</span> Advanced</div><strong id="level-count-C1">—</strong></div>
             <div class="progress"><div class="progress-fill red" id="level-bar-C1"></div></div>
           </div>
         </div>
@@ -167,18 +146,13 @@
 
         <div class="panel small">
           <div class="panel-title">Missões Recentes</div>
-          <div id="missions-list">
-            <div class="empty">Carregando…</div>
-          </div>
+          <div id="missions-list"><div class="empty">Carregando…</div></div>
         </div>
 
         <div class="panel small">
           <div class="panel-title">Próximas Aulas</div>
-          <div id="lessons-list">
-            <div class="empty">Carregando…</div>
-          </div>
+          <div id="lessons-list"><div class="empty">Carregando…</div></div>
         </div>
-
       </div>
     </section>
 
@@ -187,11 +161,8 @@
 
 </div>
 
-<!-- Supabase SDK (CDN) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- Configuração (mantenha credenciais aqui) -->
 <script src="supabase-config.js"></script>
-<!-- Lógica do dashboard -->
 <script src="dashboard.js"></script>
 </body>
 </html>
