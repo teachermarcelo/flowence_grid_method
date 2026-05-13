@@ -346,10 +346,13 @@
       'Dashboard':   'index.html',
       'Alunos':      'alunos.html',
       'Turmas':      'turmas.html',
+      'Níveis CEFR': 'niveis.html',
+      'Temas Mensais': 'temas.html',
       'Atribuições': 'atribuicoes.html',
       'Aulas':       'aulas.html',
       'Materiais':   'materiais.html',
       'Missões':     'missoes.html',
+      'O Método':    'metodo.html',
     };
     $$('.menu-item').forEach(item => {
       const label = item.textContent.trim();
