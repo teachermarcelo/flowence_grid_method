@@ -342,6 +342,7 @@
 
   // ---------- 9. NAVEGAÇÃO DA SIDEBAR ----------
   function setupNav() {
+    // Mapa de fallback (caso o item não tenha data-href)
     const map = {
       'Dashboard':   'index.html',
       'Alunos':      'alunos.html',
@@ -355,12 +356,25 @@
       'O Método':    'metodo.html',
     };
     $$('.menu-item').forEach(item => {
-      const label = item.textContent.trim();
-      if (map[label]) {
-        item.style.cursor = 'pointer';
-        item.addEventListener('click', () => { window.location.href = map[label]; });
-      }
+      const href = item.dataset.href || map[item.textContent.trim()];
+      if (!href) return;
+      item.style.cursor = 'pointer';
+      item.addEventListener('click', () => { window.location.href = href; });
     });
+
+    // ---------- MENU MOBILE ----------
+    const hamburger = document.getElementById('hamburger');
+    const sidebar   = document.getElementById('sidebar');
+    const backdrop  = document.getElementById('sidebar-backdrop');
+
+    if (hamburger && sidebar && backdrop) {
+      const toggle = () => {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('show');
+      };
+      hamburger.addEventListener('click', toggle);
+      backdrop.addEventListener('click', toggle);
+    }
   }
 
   // ---------- 10. REFRESH MANUAL ----------
