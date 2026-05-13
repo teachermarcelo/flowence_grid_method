@@ -66,17 +66,22 @@
   };
   window.toast = toast;
 
+  // Aceita variações de status: 'active', 'Active', 'ativo', 'Ativo', 'ATIVO'…
+  const STATUS_ACTIVE   = ['active', 'Active', 'ACTIVE', 'ativo', 'Ativo', 'ATIVO'];
+  const STATUS_COMPLETE = ['completed', 'Completed', 'completo', 'Completo', 'concluida', 'concluída', 'Concluída'];
+  const STATUS_PENDING  = ['pending', 'Pending', 'pendente', 'Pendente'];
+
   // ---------- 3. STATS CARDS ----------
   async function loadStats() {
     const tasks = [
       // Linha 1
-      ['stat-students', () => countRows('flowence_student', q => q.eq('status', 'active'))],
-      ['stat-classes',  () => countRows('flowence_class',   q => q.eq('status', 'active'))],
+      ['stat-students', () => countRows('flowence_student', q => q.in('status', STATUS_ACTIVE))],
+      ['stat-classes',  () => countRows('flowence_class',   q => q.in('status', STATUS_ACTIVE))],
       ['stat-lessons',  () => countRows('flowence_lesson')],
-      ['stat-missions', () => countRows('flowence_mission', q => q.eq('status', 'completed'))],
+      ['stat-missions', () => countRows('flowence_mission', q => q.in('status', STATUS_COMPLETE))],
       // Linha 2
       ['stat-materials', () => countRows('flowence_material')],
-      ['stat-pending',   () => countRows('flowence_mission', q => q.eq('status', 'pending'))],
+      ['stat-pending',   () => countRows('flowence_mission', q => q.in('status', STATUS_PENDING))],
     ];
 
     await Promise.all(tasks.map(async ([id, fn]) => {
@@ -93,11 +98,11 @@
     const levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
     try {
-      // Busca apenas a coluna level dos alunos ativos
+      // Busca apenas a coluna level dos alunos ativos (aceita qualquer variação de status)
       const { data, error } = await sb
         .from('flowence_student')
         .select('level')
-        .eq('status', 'active');
+        .in('status', STATUS_ACTIVE);
 
       if (error) throw error;
 
@@ -142,17 +147,36 @@
                    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const now = new Date();
     const currentMonth = now.getMonth() + 1; // 1-12
-    if (monthLabel) monthLabel.textContent = `— ${meses[currentMonth - 1]}`;
 
     list.innerHTML = '<div class="empty">Carregando temas…</div>';
 
     try {
-      const { data, error } = await sb
+      // 1ª tentativa: mês atual
+      let { data, error } = await sb
         .from('flowence_assignment')
-        .select('theme, level')
+        .select('theme, level, month')
         .eq('month', currentMonth);
 
       if (error) throw error;
+
+      let displayMonth = currentMonth;
+
+      // Se nada no mês atual, pega o mês mais recente que tem atribuições
+      if (!data || data.length === 0) {
+        const { data: all, error: err2 } = await sb
+          .from('flowence_assignment')
+          .select('theme, level, month')
+          .order('month', { ascending: false });
+
+        if (err2) throw err2;
+
+        if (all && all.length > 0) {
+          displayMonth = all[0].month;
+          data = all.filter(r => r.month === displayMonth);
+        }
+      }
+
+      if (monthLabel) monthLabel.textContent = `— ${meses[displayMonth - 1]}`;
 
       // Agrupa temas únicos com contagem por nível
       const grouped = {};
