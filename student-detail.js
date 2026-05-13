@@ -25,12 +25,23 @@
       'Materiais':'materiais.html','Missões':'missoes.html','O Método':'metodo.html'
     };
     $$('.menu-item').forEach(el => {
-      const label = el.textContent.trim();
-      if (map[label]) {
-        el.style.cursor = 'pointer';
-        el.addEventListener('click', () => { window.location.href = map[label]; });
-      }
+      const href = el.dataset.href || map[el.textContent.trim()];
+      if (!href) return;
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => { window.location.href = href; });
     });
+
+    const hamburger = document.getElementById('hamburger');
+    const sidebar   = document.getElementById('sidebar');
+    const backdrop  = document.getElementById('sidebar-backdrop');
+    if (hamburger && sidebar && backdrop) {
+      const toggle = () => {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('show');
+      };
+      hamburger.addEventListener('click', toggle);
+      backdrop.addEventListener('click', toggle);
+    }
   }
 
   function formatDate(d) {
