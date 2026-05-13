@@ -19,6 +19,18 @@
       el.style.cursor = 'pointer';
       el.addEventListener('click', () => { window.location.href = el.dataset.href; });
     });
+
+    const hamburger = document.getElementById('hamburger');
+    const sidebar   = document.getElementById('sidebar');
+    const backdrop  = document.getElementById('sidebar-backdrop');
+    if (hamburger && sidebar && backdrop) {
+      const toggle = () => {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('show');
+      };
+      hamburger.addEventListener('click', toggle);
+      backdrop.addEventListener('click', toggle);
+    }
   }
 
   // ============================================================
