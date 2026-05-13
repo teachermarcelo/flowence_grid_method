@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temas Mensais — Flowence Grid Method™</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="logo">
+        <div class="logo-title"><span>Flowence</span> <span>Grid</span></div>
+        <div class="logo-subtitle">METHOD™ MANAGEMENT</div>
+      </div>
+      <nav>
+        <div class="menu-section">
+          <div class="menu-label">PRINCIPAL</div>
+          <div class="menu-item" data-href="index.html"><span class="menu-icon">▦</span>Dashboard</div>
+          <div class="menu-item " data-href="alunos.html"><span class="menu-icon">✉</span>Alunos</div>
+          <div class="menu-item " data-href="turmas.html"><span class="menu-icon">▣</span>Turmas</div>
+        </div>
+        <div class="menu-section">
+          <div class="menu-label">PLANEJAMENTO</div>
+          <div class="menu-item" data-href="niveis.html"><span class="menu-icon">⌁</span>Níveis CEFR</div>
+          <div class="menu-item active" data-href="temas.html"><span class="menu-icon">◎</span>Temas Mensais</div>
+          <div class="menu-item " data-href="atribuicoes.html"><span class="menu-icon">▤</span>Atribuições</div>
+          <div class="menu-item " data-href="aulas.html"><span class="menu-icon">◫</span>Aulas</div>
+        </div>
+        <div class="menu-section">
+          <div class="menu-label">RECURSOS</div>
+          <div class="menu-item " data-href="materiais.html"><span class="menu-icon">↗</span>Materiais</div>
+          <div class="menu-item " data-href="missoes.html"><span class="menu-icon">🏆</span>Missões</div>
+          <div class="menu-item" data-href="metodo.html"><span class="menu-icon">♡</span>O Método</div>
+        </div>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <div class="avatar">N</div>
+      <div class="footer-text">
+        <strong>Grid Method™ v1.0</strong>
+        <small>Em construção</small>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+      <div class="page-title"><span>◎</span> Temas Mensais</div>
+    </header>
+
+    <section class="content">
+
+      <div class="placeholder-card">
+        <div class="placeholder-icon">◎</div>
+        <h1 class="placeholder-title">Temas Mensais</h1>
+        <p class="placeholder-text">Esta seção está em construção. <br>Visão geral dos temas mensais do método, agrupados por nível CEFR.</p>
+        <div class="placeholder-actions">
+          <a class="btn btn-primary" href="index.html">← Voltar ao Dashboard</a>
+        </div>
+        <div class="placeholder-soon">
+          <strong>Em breve:</strong>
+          <ul class="bullet-list">
+            <li>Grade visual de 60 temas (5 níveis × 12 meses)</li><li>Filtrar por nível ou mês</li><li>Ver quantos alunos têm cada tema atribuído</li><li>Atribuição em lote</li>
+          </ul>
+        </div>
+      </div>
+
+    </section>
+
+    <footer class="footer">Flowence Grid Method™</footer>
+  </main>
+
+</div>
+
+<script>
+(function() {
+  document.querySelectorAll('.menu-item[data-href]').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => { window.location.href = el.dataset.href; });
+  });
+  const h = document.getElementById('hamburger');
+  const s = document.getElementById('sidebar');
+  const b = document.getElementById('sidebar-backdrop');
+  if (h && s && b) {
+    const t = () => { s.classList.toggle('open'); b.classList.toggle('show'); };
+    h.addEventListener('click', t);
+    b.addEventListener('click', t);
+  }
+})();
+</script>
+</body>
+</html>
