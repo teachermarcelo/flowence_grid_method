@@ -3,331 +3,347 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turmas - Gestão Escolar</title>
-    <!-- Assume same external CSS as alunos.html -->
+    <title>Turmas - Flowence Grid</title>
+    <!-- Assume CSS from alunos.html is linked or global -->
 </head>
 <body>
-    <!-- Sidebar idêntica -->
-    <nav id="sidebar" class="sidebar">
-        <ul>
-            <li><a href="dashboard.html"><span>🏠</span> Dashboard</a></li>
-            <li><a href="alunos.html"><span>👨‍🎓</span> Alunos</a></li>
-            <li><a href="turmas.html" class="active"><span>📚</span> Turmas</a></li>
-            <li><a href="professores.html"><span>👨‍🏫</span> Professores</a></li>
-            <li><a href="relatorios.html"><span>📊</span> Relatórios</a></li>
-        </ul>
-    </nav>
+    <!-- SIDEBAR IDÊNTICO -->
+    <div class="sidebar">
+        <div class="logo">
+            <div>Flowence Grid</div>
+            <div>METHOD™ MANAGEMENT</div>
+        </div>
+        <nav>
+            <div class="menu-section">
+                <div class="section-title">PRINCIPAL</div>
+                <a href="#" data-href="dashboard.html" class="menu-item">Dashboard</a>
+                <a href="#" data-href="alunos.html" class="menu-item">Alunos</a>
+                <a href="#" data-href="turmas.html" class="menu-item active">Turmas</a>
+            </div>
+            <div class="menu-section">
+                <div class="section-title">PLANEJAMENTO</div>
+                <a href="#" data-href="planejamento.html" class="menu-item">Planejamento</a>
+                <a href="#" data-href="relatorios.html" class="menu-item">Relatórios</a>
+            </div>
+            <div class="menu-section">
+                <div class="section-title">RECURSOS</div>
+                <a href="#" data-href="usuarios.html" class="menu-item">Usuários</a>
+                <a href="#" data-href="configuracoes.html" class="menu-item">Configurações</a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <img class="avatar" src="https://via.placeholder.com/40x40/4a90e2/ffffff?text=U" alt="Usuário">
+            <div class="footer-text">Usuário Admin</div>
+            <span>☼</span>
+        </div>
+    </div>
 
-    <!-- Topbar com hamburger e + Nova Turma -->
-    <header class="topbar">
-        <button class="hamburger" id="hamburger">
+    <!-- TOPBAR IDÊNTICO -->
+    <div class="topbar">
+        <button class="hamburger">
             <span></span>
             <span></span>
             <span></span>
         </button>
-        <div class="logo">Gestão Escolar</div>
-        <button class="btn btn-primary" id="new-turma">+ Nova Turma</button>
-    </header>
+        <div class="page-title">
+            <span>▣</span> Turmas
+        </div>
+        <div class="top-actions">
+            <!-- sem botão de ação por enquanto -->
+        </div>
+    </div>
 
-    <!-- Main content -->
-    <main class="main">
-        <!-- Toolbar com busca e filtros -->
+    <!-- CONTENT -->
+    <div class="content">
         <div class="toolbar">
             <div class="search-box">
-                <input type="text" id="search" placeholder="Buscar por nome ou professor...">
+                <input type="search" id="search-input" placeholder="Buscar por nome ou professor...">
             </div>
             <div class="filter-group">
                 <select id="filter-nivel">
-                    <option value="">Todos os níveis</option>
-                    <option value="basico">Básico</option>
-                    <option value="intermediario">Intermediário</option>
-                    <option value="avancado">Avançado</option>
+                    <option value="">Todos Níveis</option>
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2">B2</option>
+                    <option value="C1">C1</option>
                 </select>
                 <select id="filter-status">
-                    <option value="">Todos os status</option>
-                    <option value="ativo">Ativo</option>
-                    <option value="inativo">Inativo</option>
+                    <option value="">Todos Status</option>
+                    <option value="Ativa">Ativa</option>
+                    <option value="Inativa">Inativa</option>
                 </select>
             </div>
+            <button id="new-turma-btn" class="btn btn-primary">+ Nova Turma</button>
         </div>
-
-        <!-- Quick-stats -->
         <div class="quick-stats">
-            <div class="stat-card">
-                <h3 id="total-turmas">0</h3>
-                <p>Total Turmas</p>
+            <div class="qstat">
+                <div>Total</div>
+                <span class="qstat-num">0</span>
             </div>
-            <div class="stat-card">
-                <h3 id="turmas-ativas">0</h3>
-                <p>Turmas Ativas</p>
+            <div class="qstat">
+                <div>Ativas</div>
+                <span class="qstat-num">0</span>
             </div>
-            <div class="stat-card">
-                <h3 id="total-alunos">0</h3>
-                <p>Total Alunos</p>
+            <div class="qstat">
+                <div>Total Alunos</div>
+                <span class="qstat-num">0</span>
             </div>
         </div>
-
-        <!-- Panel com tabela dinâmica -->
         <div class="panel">
-            <table id="turmas-table">
+            <table class="students-table">
                 <thead>
                     <tr>
-                        <th>Nome Turma</th>
+                        <th>Nome</th>
                         <th>Professor</th>
                         <th>Nível</th>
                         <th>Horário</th>
+                        <th>Data Início</th>
                         <th>Status</th>
-                        <th>Quantidade de Alunos</th>
+                        <th>Alunos</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
-    </main>
+    </div>
 
-    <!-- Modal para criar/editar turma -->
-    <div class="modal-overlay" id="modal-overlay">
+    <!-- MODAL IDÊNTICO adapted -->
+    <div class="modal-overlay">
         <div class="modal">
-            <h2 id="modal-title">Nova Turma</h2>
-            <form id="turma-form">
-                <div class="form-group">
-                    <label for="nome">Nome</label>
-                    <input type="text" id="nome" required>
-                </div>
-                <div class="form-group">
-                    <label for="professor">Professor</label>
-                    <input type="text" id="professor" required>
-                </div>
-                <div class="form-group">
-                    <label for="nivel">Nível</label>
-                    <select id="nivel" required>
-                        <option value="basico">Básico</option>
-                        <option value="intermediario">Intermediário</option>
-                        <option value="avancado">Avançado</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="horario">Horário</label>
-                    <input type="text" id="horario" required>
-                </div>
-                <div class="form-group">
-                    <label for="data-inicio">Data Início</label>
-                    <input type="date" id="data-inicio" required>
-                </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status">
-                        <option value="ativo">Ativo</option>
-                        <option value="inativo">Inativo</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="observacoes">Observações</label>
-                    <textarea id="observacoes"></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" id="cancelar">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                </div>
-            </form>
+            <div class="modal-head">
+                <div class="modal-title">Nova Turma</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="turma-form">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label>Nome</label>
+                            <input type="text" name="nome" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Professor</label>
+                            <input type="text" name="professor">
+                        </div>
+                        <div class="form-field">
+                            <label>Nível</label>
+                            <select name="nivel" required>
+                                <option value="A1">A1</option>
+                                <option value="A2">A2</option>
+                                <option value="B1">B1</option>
+                                <option value="B2">B2</option>
+                                <option value="C1">C1</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Horário</label>
+                            <input type="text" name="horario" placeholder="ex: Seg 19h-21h">
+                        </div>
+                        <div class="form-field">
+                            <label>Data Início</label>
+                            <input type="date" name="data_inicio">
+                        </div>
+                        <div class="form-field">
+                            <label>Status</label>
+                            <select name="status">
+                                <option value="Ativa">Ativa</option>
+                                <option value="Inativa">Inativa</option>
+                            </select>
+                        </div>
+                        <div class="form-field full">
+                            <label>Observações</label>
+                            <textarea name="observacoes" rows="4"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-foot">
+                <button type="button" class="btn btn-ghost">Cancelar</button>
+                <button type="submit" form="turma-form" class="btn btn-primary">Salvar</button>
+            </div>
         </div>
     </div>
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- FOOTER igual -->
+    <footer>
+        <p>&copy; 2024 Flowence Grid. Todos os direitos reservados. METHOD™ MANAGEMENT</p>
+    </footer>
+
+    <!-- Assume supabase-config.js sets window.sb -->
+    <!-- Script inline -->
     <script>
-        // Config Supabase (substitua pelas suas credenciais, igual ao students.js)
-        const supabaseUrl = 'https://rvgcniaowzmsudzliozf.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2Z2NuaWFvd3ptc3Vkemxpb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjQxNzQsImV4cCI6MjA5MTQwMDE3NH0.uwwKFLuK-XyPoXPrB6_CseRTiD9d-iyMQSPWrFw-l-I';
-        const { createClient } = supabase;
-        const supabaseClient = createClient(supabaseUrl, supabaseKey);
-
-        let turmas = [];
+        // Globals
+        let currentFilters = {};
         let currentEditId = null;
+        const sb = window.sb;
+        const sidebar = document.querySelector('.sidebar');
+        const modalOverlay = document.querySelector('.modal-overlay');
+        const form = document.getElementById('turma-form');
+        const titleEl = document.querySelector('.modal-title');
+        const tbody = document.querySelector('.students-table tbody');
+        const qstats = document.querySelectorAll('.qstat-num');
 
-        // Hamburger toggle sidebar
-        document.getElementById('hamburger').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('open');
-        });
-
-        // Nova turma
-        document.getElementById('new-turma').addEventListener('click', () => openModal());
-
-        // Filtros e busca
-        const searchInput = document.getElementById('search');
-        const filterNivel = document.getElementById('filter-nivel');
-        const filterStatus = document.getElementById('filter-status');
-
-        searchInput.addEventListener('input', applyFilters);
-        filterNivel.addEventListener('change', applyFilters);
-        filterStatus.addEventListener('change', applyFilters);
-
-        // Modal functions
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modalTitle = document.getElementById('modal-title');
-        const turmaForm = document.getElementById('turma-form');
-        const cancelarBtn = document.getElementById('cancelar');
-
-        function openModal(turma = null) {
-            if (turma) {
-                currentEditId = turma.id;
-                document.getElementById('nome').value = turma.nome || '';
-                document.getElementById('professor').value = turma.professor || '';
-                document.getElementById('nivel').value = turma.nivel || '';
-                document.getElementById('horario').value = turma.horario || '';
-                document.getElementById('data-inicio').value = turma.data_inicio ? turma.data_inicio.split('T')[0] : '';
-                document.getElementById('status').value = turma.status || 'ativo';
-                document.getElementById('observacoes').value = turma.observacoes || '';
-                modalTitle.textContent = 'Editar Turma';
-            } else {
-                currentEditId = null;
-                turmaForm.reset();
-                modalTitle.textContent = 'Nova Turma';
-                document.getElementById('status').value = 'ativo';
-            }
-            modalOverlay.classList.add('active');
+        // Functions
+        async function updateStats() {
+            const [totalRes, ativaRes, alunosRes] = await Promise.all([
+                sb.from('turmas').select('*', { count: 'exact', head: true }),
+                sb.from('turmas').select('*', { count: 'exact', head: true }).eq('status', 'Ativa'),
+                sb.from('alunos').select('*', { count: 'exact', head: true })
+            ]);
+            qstats[0].textContent = totalRes.count || 0;
+            qstats[1].textContent = ativaRes.count || 0;
+            qstats[2].textContent = alunosRes.count || 0;
         }
 
-        function closeModal() {
-            modalOverlay.classList.remove('active');
-            currentEditId = null;
-        }
-
-        cancelarBtn.addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) closeModal();
-        });
-
-        // Submit form
-        turmaForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = {
-                nome: document.getElementById('nome').value,
-                professor: document.getElementById('professor').value,
-                nivel: document.getElementById('nivel').value,
-                horario: document.getElementById('horario').value,
-                data_inicio: document.getElementById('data-inicio').value,
-                status: document.getElementById('status').value,
-                observacoes: document.getElementById('observacoes').value
-            };
-
-            let error;
-            if (currentEditId) {
-                ({ error } = await supabaseClient.from('turmas').update(data).eq('id', currentEditId));
-            } else {
-                ({ error } = await supabaseClient.from('turmas').insert([data]));
+        async function loadTurmas(filters) {
+            let query = sb.from('turmas').select('*').order('nome', { ascending: true });
+            if (filters.search) {
+                query = query.or(`nome.ilike.%${filters.search}%,professor.ilike.%${filters.search}%`);
             }
-            if (error) {
-                console.error('Erro:', error);
-                return;
+            if (filters.nivel && filters.nivel !== '') {
+                query.eq('nivel', filters.nivel);
             }
-            closeModal();
-            loadTurmas();
-        });
-
-        // Filtrar turmas
-        function getFilteredTurmas() {
-            let filtered = turmas;
-            const search = searchInput.value.toLowerCase();
-            if (search) {
-                filtered = filtered.filter(t =>
-                    t.nome.toLowerCase().includes(search) ||
-                    t.professor.toLowerCase().includes(search)
-                );
+            if (filters.status && filters.status !== '') {
+                query.eq('status', filters.status);
             }
-            const nivel = filterNivel.value;
-            if (nivel) filtered = filtered.filter(t => t.nivel === nivel);
-            const status = filterStatus.value;
-            if (status) filtered = filtered.filter(t => t.status === status);
-            return filtered;
-        }
+            const { data: turmas } = await query;
 
-        function applyFilters() {
-            const filtered = getFilteredTurmas();
-            renderTurmas(filtered);
-        }
-
-        // Render tabela
-        function renderTurmas(filteredTurmas) {
-            const tbody = document.querySelector('#turmas-table tbody');
-            tbody.innerHTML = '';
-            filteredTurmas.forEach(turma => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${turma.nome}</td>
-                    <td>${turma.professor}</td>
-                    <td>${turma.nivel}</td>
-                    <td>${turma.horario}</td>
-                    <td><span class="badge status-${turma.status}">${turma.status}</span></td>
-                    <td>${turma.quantidade_alunos || 0}</td>
-                    <td>
-                        <button class="btn btn-small" onclick="verAlunos('${turma.id}')">Ver Alunos</button>
-                        <button class="btn btn-small btn-edit" onclick="editarTurma('${turma.id}')">Editar</button>
-                        <button class="btn btn-small btn-delete" onclick="excluirTurma('${turma.id}')">Excluir</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // Update stats
-        function updateStats() {
-            document.getElementById('total-turmas').textContent = turmas.length;
-            const ativas = turmas.filter(t => t.status === 'ativo').length;
-            document.getElementById('turmas-ativas').textContent = ativas;
-            const totalAlunos = turmas.reduce((sum, t) => sum + (t.quantidade_alunos || 0), 0);
-            document.getElementById('total-alunos').textContent = totalAlunos;
-        }
-
-        // Load turmas com contagem dinâmica de alunos
-        async function loadTurmas() {
-            const { data: turmasData, error: turmasError } = await supabaseClient.from('turmas').select('*');
-            if (turmasError) {
-                console.error('Erro ao carregar turmas:', turmasError);
-                return;
-            }
-
-            const { data: alunosData, error: alunosError } = await supabaseClient.from('alunos').select('turma_id');
-            if (alunosError) {
-                console.error('Erro ao carregar alunos:', alunosError);
-            }
-
-            const counts = {};
-            if (alunosData) {
-                alunosData.forEach(aluno => {
-                    counts[aluno.turma_id] = (counts[aluno.turma_id] || 0) + 1;
+            if (turmas?.length) {
+                const turmaIds = turmas.map(t => t.id);
+                const { data: countRes } = await sb.from('alunos')
+                    .select('turma_id, count(*)')
+                    .in('turma_id', turmaIds)
+                    .groupBy('turma_id');
+                const countsMap = {};
+                countRes?.forEach(r => {
+                    countsMap[r.turma_id] = parseInt(r.count);
+                });
+                turmas.forEach(t => {
+                    t.alunos_count = countsMap[t.id] || 0;
                 });
             }
 
-            turmas = turmasData.map(turma => ({
-                ...turma,
-                quantidade_alunos: counts[turma.id] || 0
-            }));
-
-            updateStats();
-            applyFilters();
+            renderTable(turmas || []);
         }
 
-        // Ações globais
-        window.excluirTurma = async (id) => {
-            if (confirm('Tem certeza que deseja excluir esta turma?')) {
-                const { error } = await supabaseClient.from('turmas').delete().eq('id', id);
-                if (!error) loadTurmas();
+        function renderTable(turmas) {
+            tbody.innerHTML = turmas.map(t => `
+                <tr>
+                    <td>${t.nome || ''}</td>
+                    <td>${t.professor || ''}</td>
+                    <td>${t.nivel || ''}</td>
+                    <td>${t.horario || ''}</td>
+                    <td>${t.data_inicio ? new Date(t.data_inicio).toLocaleDateString('pt-BR') : ''}</td>
+                    <td>${t.status || ''}</td>
+                    <td>${t.alunos_count || 0}</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm" data-action="edit" data-id="${t.id}">✏️</button>
+                        <button class="btn btn-ghost btn-sm" data-action="delete" data-id="${t.id}">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function openModal(id = null) {
+            currentEditId = id;
+            form.reset();
+            titleEl.textContent = id ? 'Editar Turma' : 'Nova Turma';
+            if (id) {
+                const { data } = await sb.from('turmas').select('*').eq('id', id).single();
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        const el = form.querySelector(`[name="${key}"]`);
+                        if (el) el.value = data[key] || '';
+                    });
+                }
             }
-        };
+            modalOverlay.classList.add('show');
+        }
 
-        window.editarTurma = (id) => {
-            const turma = turmas.find(t => t.id === id);
-            if (turma) openModal(turma);
-        };
+        async function saveTurma(e) {
+            e?.preventDefault();
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            data.data_inicio = data.data_inicio || null;
+            let error;
+            if (currentEditId) {
+                ({ error } = await sb.from('turmas').update(data).eq('id', currentEditId));
+            } else {
+                ({ error } = await sb.from('turmas').insert(data));
+            }
+            if (!error) {
+                modalOverlay.classList.remove('show');
+                currentEditId = null;
+                loadTurmas(currentFilters);
+                updateStats();
+            } else {
+                alert('Erro ao salvar: ' + error.message);
+            }
+        }
 
-        window.verAlunos = (id) => {
-            window.location.href = `alunos.html?turma_id=${id}`;
-        };
+        async function deleteTurma(id) {
+            if (!confirm('Confirma a exclusão da turma?')) return;
+            const { error } = await sb.from('turmas').delete().eq('id', id);
+            if (!error) {
+                loadTurmas(currentFilters);
+                updateStats();
+            } else {
+                alert('Erro ao excluir');
+            }
+        }
 
-        // Inicializar
-        loadTurmas();
+        function updateFilters() {
+            currentFilters.search = document.getElementById('search-input').value;
+            currentFilters.nivel = document.getElementById('filter-nivel').value;
+            currentFilters.status = document.getElementById('filter-status').value;
+            loadTurmas(currentFilters);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStats();
+            loadTurmas({});
+
+            // Hamburger
+            document.querySelector('.hamburger').onclick = () => sidebar.classList.toggle('open');
+
+            // New
+            document.getElementById('new-turma-btn').onclick = () => openModal();
+
+            // Filters
+            document.getElementById('search-input').oninput = () => {
+                clearTimeout(window.searchTimeout);
+                window.searchTimeout = setTimeout(updateFilters, 300);
+            };
+            document.getElementById('filter-nivel').onchange = updateFilters;
+            document.getElementById('filter-status').onchange = updateFilters;
+
+            // Form submit
+            form.onsubmit = saveTurma;
+
+            // Modal close
+            document.querySelector('.modal-close').onclick = () => modalOverlay.classList.remove('show');
+            document.querySelector('.btn-ghost').onclick = () => modalOverlay.classList.remove('show');
+            modalOverlay.onclick = (e) => {
+                if (e.target === modalOverlay) modalOverlay.classList.remove('show');
+            };
+
+            // Table actions & menu
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('[data-action]')) {
+                    const id = e.target.dataset.id;
+                    const action = e.target.dataset.action;
+                    if (action === 'edit') openModal(id);
+                    if (action === 'delete') deleteTurma(id);
+                }
+                if (e.target.matches('.menu-item[data-href]')) {
+                    window.location.href = e.target.dataset.href;
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
     </script>
 </body>
 </html>
