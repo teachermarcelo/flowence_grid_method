@@ -4,37 +4,30 @@
 // Tabelas usadas: flowence_student, flowence_class, flowence_lesson,
 //                 flowence_mission, flowence_material, flowence_assignment
 // ============================================================
-
 (() => {
   'use strict';
-
   // ---------- 1. CLIENTE SUPABASE ----------
   if (!window.SUPABASE_CONFIG || !window.supabase) {
     console.error('[Flowence] supabase-config.js ou SDK do Supabase não carregado.');
     return;
   }
-
   const sb = window.supabase.createClient(
     window.SUPABASE_CONFIG.url,
     window.SUPABASE_CONFIG.anonKey
   );
-
   // Disponibiliza para outras páginas (alunos.html, turmas.html, etc.)
   window.sb = sb;
 
   // ---------- 2. UTILITÁRIOS ----------
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
-
   const fmtNumber = (n) => (n ?? 0).toLocaleString('pt-BR');
-
   const setStat = (id, value) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.textContent = fmtNumber(value);
     el.classList.remove('shimmer');
   };
-
   const setStatError = (id) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -66,24 +59,21 @@
   };
   window.toast = toast;
 
-  // Aceita variações de status: 'active', 'Active', 'ativo', 'Ativo', 'ATIVO'…
+  // Aceita variações de status
   const STATUS_ACTIVE   = ['active', 'Active', 'ACTIVE', 'ativo', 'Ativo', 'ATIVO'];
   const STATUS_COMPLETE = ['completed', 'Completed', 'completo', 'Completo', 'concluida', 'concluída', 'Concluída'];
-  const STATUS_PENDING  = ['pending', 'Pending', 'pendente', 'Pendente'];
+  const STATUS_PENDING  = ['pending', 'Pending', 'Pending', 'pendente', 'Pendente'];
 
   // ---------- 3. STATS CARDS ----------
   async function loadStats() {
     const tasks = [
-      // Linha 1
       ['stat-students', () => countRows('flowence_student', q => q.in('status', STATUS_ACTIVE))],
       ['stat-classes',  () => countRows('flowence_class',   q => q.in('status', STATUS_ACTIVE))],
       ['stat-lessons',  () => countRows('flowence_lesson')],
       ['stat-missions', () => countRows('flowence_mission', q => q.in('status', STATUS_COMPLETE))],
-      // Linha 2
       ['stat-materials', () => countRows('flowence_material')],
       ['stat-pending',   () => countRows('flowence_mission', q => q.in('status', STATUS_PENDING))],
     ];
-
     await Promise.all(tasks.map(async ([id, fn]) => {
       try { setStat(id, await fn()); }
       catch (err) {
@@ -96,17 +86,13 @@
   // ---------- 4. ALUNOS POR NÍVEL ----------
   async function loadLevels() {
     const levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
-
     try {
-      // Busca apenas a coluna level dos alunos ativos (aceita qualquer variação de status)
       const { data, error } = await sb
         .from('flowence_student')
         .select('level')
         .in('status', STATUS_ACTIVE);
-
       if (error) throw error;
 
-      // Conta por nível
       const counts = levels.reduce((acc, lv) => (acc[lv] = 0, acc), {});
       let total = 0;
       (data || []).forEach(row => {
@@ -114,17 +100,13 @@
         if (counts[lv] !== undefined) { counts[lv]++; total++; }
       });
 
-      // Atualiza UI
       levels.forEach(lv => {
         const count = counts[lv];
         const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-
         const countEl = document.getElementById(`level-count-${lv}`);
         const barEl   = document.getElementById(`level-bar-${lv}`);
-
         if (countEl) countEl.textContent = `${count} ${count === 1 ? 'aluno' : 'alunos'}`;
         if (barEl) {
-          // anima a largura
           requestAnimationFrame(() => { barEl.style.width = `${pct}%`; });
         }
       });
@@ -146,30 +128,24 @@
     const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
                    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const now = new Date();
-    const currentMonth = now.getMonth() + 1; // 1-12
+    const currentMonth = now.getMonth() + 1;
 
     list.innerHTML = '<div class="empty">Carregando temas…</div>';
 
     try {
-      // 1ª tentativa: mês atual
       let { data, error } = await sb
         .from('flowence_assignment')
         .select('theme, level, month')
         .eq('month', currentMonth);
-
       if (error) throw error;
 
       let displayMonth = currentMonth;
-
-      // Se nada no mês atual, pega o mês mais recente que tem atribuições
       if (!data || data.length === 0) {
         const { data: all, error: err2 } = await sb
           .from('flowence_assignment')
           .select('theme, level, month')
           .order('month', { ascending: false });
-
         if (err2) throw err2;
-
         if (all && all.length > 0) {
           displayMonth = all[0].month;
           data = all.filter(r => r.month === displayMonth);
@@ -178,7 +154,6 @@
 
       if (monthLabel) monthLabel.textContent = `— ${meses[displayMonth - 1]}`;
 
-      // Agrupa temas únicos com contagem por nível
       const grouped = {};
       (data || []).forEach(row => {
         const theme = (row.theme || '').trim();
@@ -198,16 +173,17 @@
       }
 
       list.innerHTML = themes.map(([name, info]) => {
-        const levels = [...info.levels].sort().join(' · ') || '—';
+        const levelsStr = [...info.levels].sort().join(' · ') || '—';
         return `
           <div class="topic">
             <span class="topic-icon">◎</span>
             <div class="topic-body">
               <div class="topic-title">${escapeHtml(name)}</div>
-              <div class="topic-meta">${levels} · ${info.count} ${info.count === 1 ? 'atribuição' : 'atribuições'}</div>
+              <div class="topic-meta">${levelsStr} · ${info.count} ${info.count === 1 ? 'atribuição' : 'atribuições'}</div>
             </div>
           </div>`;
       }).join('');
+
     } catch (err) {
       console.error('[themes]', err);
       list.innerHTML = '<div class="empty empty-error">Erro ao carregar temas</div>';
@@ -225,7 +201,6 @@
         .select('id, description, status, level, due_date, completed_at, created_at, student_id')
         .order('created_at', { ascending: false })
         .limit(3);
-
       if (error) throw error;
 
       if (!data || data.length === 0) {
@@ -233,7 +208,6 @@
         return;
       }
 
-      // Tenta resolver nome do aluno em batch
       const studentIds = [...new Set(data.map(m => m.student_id).filter(Boolean))];
       let studentMap = {};
       if (studentIds.length) {
@@ -253,7 +227,6 @@
                            : (m.status || '—');
         const student = m.student_id ? (studentMap[m.student_id] || '—') : '—';
         const desc = m.description || 'Sem descrição';
-
         return `
           <div class="mission-row">
             <span class="mission-status ${statusClass}">${statusLabel}</span>
@@ -263,6 +236,7 @@
             </div>
           </div>`;
       }).join('');
+
     } catch (err) {
       console.error('[missions]', err);
       list.innerHTML = '<div class="empty empty-error">Erro ao carregar missões</div>';
@@ -275,15 +249,13 @@
     if (!list) return;
 
     try {
-      const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-      // date é text na sua tabela — comparação lexicográfica funciona se formato for ISO
+      const today = new Date().toISOString().slice(0, 10);
       const { data, error } = await sb
         .from('flowence_lesson')
         .select('id, date, title, theme, level, class_id')
         .gte('date', today)
         .order('date', { ascending: true })
         .limit(3);
-
       if (error) throw error;
 
       if (!data || data.length === 0) {
@@ -291,7 +263,6 @@
         return;
       }
 
-      // Resolve nome da turma
       const classIds = [...new Set(data.map(l => l.class_id).filter(Boolean))];
       let classMap = {};
       if (classIds.length) {
@@ -314,6 +285,7 @@
             </div>
           </div>`;
       }).join('');
+
     } catch (err) {
       console.error('[lessons]', err);
       list.innerHTML = '<div class="empty empty-error">Erro ao carregar aulas</div>';
@@ -322,7 +294,7 @@
 
   // ---------- 8. HELPERS ----------
   function escapeHtml(s) {
-    return String(s ?? '').replace(/[&<>"']/g, ch => ({
+    return String(s ?? '').replace(/[&<>\"']/g, ch => ({
       '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
     }[ch]));
   }
@@ -334,7 +306,6 @@
 
   function formatDateBR(d) {
     if (!d) return '—';
-    // aceita YYYY-MM-DD ou ISO
     const [y, m, day] = String(d).slice(0, 10).split('-');
     if (!y || !m || !day) return d;
     return `${day}/${m}`;
@@ -342,7 +313,6 @@
 
   // ---------- 9. NAVEGAÇÃO DA SIDEBAR ----------
   function setupNav() {
-    // Mapa de fallback (caso o item não tenha data-href)
     const map = {
       'Dashboard':   'index.html',
       'Alunos':      'alunos.html',
@@ -355,6 +325,7 @@
       'Missões':     'missoes.html',
       'O Método':    'metodo.html',
     };
+
     $$('.menu-item').forEach(item => {
       const href = item.dataset.href || map[item.textContent.trim()];
       if (!href) return;
@@ -390,9 +361,7 @@
 
   // ---------- 11. BOOT ----------
   async function loadAll() {
-    // Marca todos os shimmer de novo se for refresh
     $$('.stat-value').forEach(el => el.classList.add('shimmer'));
-
     await Promise.allSettled([
       loadStats(),
       loadLevels(),
@@ -407,4 +376,5 @@
     setupRefresh();
     loadAll();
   });
+
 })();
