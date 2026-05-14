@@ -15,7 +15,7 @@
     window.SUPABASE_CONFIG.url,
     window.SUPABASE_CONFIG.anonKey
   );
-  // Disponibiliza para outras páginas (alunos.html, turmas.html, etc.)
+  // Disponibiliza para outras páginas
   window.sb = sb;
 
   // ---------- 2. UTILITÁRIOS ----------
@@ -36,7 +36,6 @@
     el.classList.add('stat-error');
   };
 
-  // Helper: count(*) usando head:true (não traz linhas, só o total)
   const countRows = async (table, filterFn = null) => {
     let q = sb.from(table).select('*', { count: 'exact', head: true });
     if (filterFn) q = filterFn(q);
@@ -45,7 +44,7 @@
     return count ?? 0;
   };
 
-  // Toast simples (sem dependência externa)
+  // Toast
   const toast = (msg, type = 'info') => {
     const t = document.createElement('div');
     t.className = `toast toast-${type}`;
@@ -59,10 +58,10 @@
   };
   window.toast = toast;
 
-  // Aceita variações de status
+  // Status helpers
   const STATUS_ACTIVE   = ['active', 'Active', 'ACTIVE', 'ativo', 'Ativo', 'ATIVO'];
   const STATUS_COMPLETE = ['completed', 'Completed', 'completo', 'Completo', 'concluida', 'concluída', 'Concluída'];
-  const STATUS_PENDING  = ['pending', 'Pending', 'Pending', 'pendente', 'Pendente'];
+  const STATUS_PENDING  = ['pending', 'Pending', 'pendente', 'Pendente'];
 
   // ---------- 3. STATS CARDS ----------
   async function loadStats() {
@@ -313,6 +312,7 @@
 
   // ---------- 9. NAVEGAÇÃO DA SIDEBAR ----------
   function setupNav() {
+    // Fallback pra data-href
     const map = {
       'Dashboard':   'index.html',
       'Alunos':      'alunos.html',
