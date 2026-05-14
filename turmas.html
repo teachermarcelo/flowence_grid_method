@@ -3,346 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turmas - Flowence Grid</title>
-    <!-- Assume CSS from alunos.html is linked or global -->
+    <title>Turmas</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- SIDEBAR IDÊNTICO -->
-    <div class="sidebar">
+    <!-- Sidebar idêntica ao alunos.html: logo, menu com Turmas active, footer -->
+    <nav class="sidebar" id="sidebar">
         <div class="logo">
-            <div>Flowence Grid</div>
-            <div>METHOD™ MANAGEMENT</div>
+            <!-- Logo da instituição -->
+            <img src="logo.png" alt="Logo da Escola">
         </div>
-        <nav>
-            <div class="menu-section">
-                <div class="section-title">PRINCIPAL</div>
-                <a href="#" data-href="dashboard.html" class="menu-item">Dashboard</a>
-                <a href="#" data-href="alunos.html" class="menu-item">Alunos</a>
-                <a href="#" data-href="turmas.html" class="menu-item active">Turmas</a>
-            </div>
-            <div class="menu-section">
-                <div class="section-title">PLANEJAMENTO</div>
-                <a href="#" data-href="planejamento.html" class="menu-item">Planejamento</a>
-                <a href="#" data-href="relatorios.html" class="menu-item">Relatórios</a>
-            </div>
-            <div class="menu-section">
-                <div class="section-title">RECURSOS</div>
-                <a href="#" data-href="usuarios.html" class="menu-item">Usuários</a>
-                <a href="#" data-href="configuracoes.html" class="menu-item">Configurações</a>
-            </div>
-        </nav>
+        <ul class="menu">
+            <li><a href="home.html">🏠 Home</a></li>
+            <li><a href="alunos.html">👥 Alunos</a></li>
+            <li><a href="turmas.html" class="active">📚 Turmas</a></li>
+            <!-- Outros itens do menu conforme alunos.html -->
+        </ul>
         <div class="sidebar-footer">
-            <img class="avatar" src="https://via.placeholder.com/40x40/4a90e2/ffffff?text=U" alt="Usuário">
-            <div class="footer-text">Usuário Admin</div>
-            <span>☼</span>
+            <!-- Footer da sidebar -->
+            <p>&copy; 2024 Escola. Todos os direitos reservados.</p>
         </div>
-    </div>
+    </nav>
 
-    <!-- TOPBAR IDÊNTICO -->
-    <div class="topbar">
-        <button class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
+    <!-- Topbar: hamburger, título "▣ Turmas", botão "+ Nova Turma" -->
+    <header class="topbar">
+        <button class="hamburger" id="hamburger-btn">
+            ☰
         </button>
-        <div class="page-title">
-            <span>▣</span> Turmas
-        </div>
-        <div class="top-actions">
-            <!-- sem botão de ação por enquanto -->
-        </div>
-    </div>
+        <h1>▣ Turmas</h1>
+        <button class="btn-primary" id="nova-turma-btn">+ Nova Turma</button>
+    </header>
 
-    <!-- CONTENT -->
-    <div class="content">
+    <!-- Conteúdo principal -->
+    <main class="main">
+        <!-- Toolbar: search-box (buscar por nome/professor) + filter-group (nível, status) -->
         <div class="toolbar">
             <div class="search-box">
-                <input type="search" id="search-input" placeholder="Buscar por nome ou professor...">
+                <input type="text" id="search-input" placeholder="Buscar por nome ou professor...">
             </div>
             <div class="filter-group">
-                <select id="filter-nivel">
-                    <option value="">Todos Níveis</option>
-                    <option value="A1">A1</option>
-                    <option value="A2">A2</option>
-                    <option value="B1">B1</option>
-                    <option value="B2">B2</option>
-                    <option value="C1">C1</option>
+                <select id="nivel-filter">
+                    <option value="">Todos os Níveis</option>
+                    <option value="fundamental">Fundamental</option>
+                    <option value="medio">Médio</option>
+                    <option value="superior">Superior</option>
                 </select>
-                <select id="filter-status">
-                    <option value="">Todos Status</option>
-                    <option value="Ativa">Ativa</option>
-                    <option value="Inativa">Inativa</option>
+                <select id="status-filter">
+                    <option value="">Todos os Status</option>
+                    <option value="ativa">Ativa</option>
+                    <option value="inativa">Inativa</option>
                 </select>
             </div>
-            <button id="new-turma-btn" class="btn btn-primary">+ Nova Turma</button>
         </div>
+
+        <!-- Quick-stats: Total Turmas, Turmas Ativas, Total Alunos -->
         <div class="quick-stats">
-            <div class="qstat">
-                <div>Total</div>
-                <span class="qstat-num">0</span>
+            <div class="stat">
+                <span class="stat-number" id="total-turmas">0</span>
+                <span class="stat-label">Total Turmas</span>
             </div>
-            <div class="qstat">
-                <div>Ativas</div>
-                <span class="qstat-num">0</span>
+            <div class="stat">
+                <span class="stat-number" id="turmas-ativas">0</span>
+                <span class="stat-label">Turmas Ativas</span>
             </div>
-            <div class="qstat">
-                <div>Total Alunos</div>
-                <span class="qstat-num">0</span>
+            <div class="stat">
+                <span class="stat-number" id="total-alunos">0</span>
+                <span class="stat-label">Total Alunos</span>
             </div>
         </div>
+
+        <!-- Painel da tabela de turmas -->
         <div class="panel">
-            <table class="students-table">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Professor</th>
-                        <th>Nível</th>
-                        <th>Horário</th>
-                        <th>Data Início</th>
-                        <th>Status</th>
-                        <th>Alunos</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <div class="panel-header">
+                <h2>Lista de Turmas</h2>
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Professor</th>
+                            <th>Nível</th>
+                            <th>Horário</th>
+                            <th>Data Início</th>
+                            <th>Status</th>
+                            <th>Total Alunos</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="turmas-table-body">
+                        <!-- Linhas populadas dinamicamente pelo turmas.js -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <!-- MODAL IDÊNTICO adapted -->
-    <div class="modal-overlay">
+    <!-- Modal para criar/editar turma: campos nome, professor, nível, horário, data_inicio, status, observações -->
+    <div class="modal-overlay" id="modal-overlay">
         <div class="modal">
-            <div class="modal-head">
-                <div class="modal-title">Nova Turma</div>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="turma-form">
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label>Nome</label>
-                            <input type="text" name="nome" required>
-                        </div>
-                        <div class="form-field">
-                            <label>Professor</label>
-                            <input type="text" name="professor">
-                        </div>
-                        <div class="form-field">
-                            <label>Nível</label>
-                            <select name="nivel" required>
-                                <option value="A1">A1</option>
-                                <option value="A2">A2</option>
-                                <option value="B1">B1</option>
-                                <option value="B2">B2</option>
-                                <option value="C1">C1</option>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label>Horário</label>
-                            <input type="text" name="horario" placeholder="ex: Seg 19h-21h">
-                        </div>
-                        <div class="form-field">
-                            <label>Data Início</label>
-                            <input type="date" name="data_inicio">
-                        </div>
-                        <div class="form-field">
-                            <label>Status</label>
-                            <select name="status">
-                                <option value="Ativa">Ativa</option>
-                                <option value="Inativa">Inativa</option>
-                            </select>
-                        </div>
-                        <div class="form-field full">
-                            <label>Observações</label>
-                            <textarea name="observacoes" rows="4"></textarea>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-foot">
-                <button type="button" class="btn btn-ghost">Cancelar</button>
-                <button type="submit" form="turma-form" class="btn btn-primary">Salvar</button>
-            </div>
+            <h2 id="modal-title">Nova Turma</h2>
+            <form class="form-grid" id="turma-form">
+                <input type="hidden" id="turma-id">
+                <div>
+                    <label for="nome">Nome da Turma *</label>
+                    <input type="text" id="nome" required>
+                </div>
+                <div>
+                    <label for="professor">Professor *</label>
+                    <input type="text" id="professor" required>
+                </div>
+                <div>
+                    <label for="nivel">Nível *</label>
+                    <select id="nivel" required>
+                        <option value="">Selecione</option>
+                        <option value="fundamental">Fundamental</option>
+                        <option value="medio">Médio</option>
+                        <option value="superior">Superior</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="horario">Horário *</label>
+                    <input type="text" id="horario" placeholder="Ex: Seg/Sex 14h-16h" required>
+                </div>
+                <div>
+                    <label for="data_inicio">Data Início *</label>
+                    <input type="date" id="data_inicio" required>
+                </div>
+                <div>
+                    <label for="status">Status *</label>
+                    <select id="status" required>
+                        <option value="ativa">Ativa</option>
+                        <option value="inativa">Inativa</option>
+                    </select>
+                </div>
+                <div class="full-width">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancelar-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar Turma</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- FOOTER igual -->
-    <footer>
-        <p>&copy; 2024 Flowence Grid. Todos os direitos reservados. METHOD™ MANAGEMENT</p>
-    </footer>
+    <!-- Scripts: referenciar supabase-config.js e turmas.js (sem credenciais hardcoded) -->
+    <script src="supabase-config.js"></script>
+    <script src="turmas.js"></script>
 
-    <!-- Assume supabase-config.js sets window.sb -->
-    <!-- Script inline -->
+    <!-- Script inline para toggle sidebar (comum em dashboards) -->
     <script>
-        // Globals
-        let currentFilters = {};
-        let currentEditId = null;
-        const sb = window.sb;
-        const sidebar = document.querySelector('.sidebar');
-        const modalOverlay = document.querySelector('.modal-overlay');
-        const form = document.getElementById('turma-form');
-        const titleEl = document.querySelector('.modal-title');
-        const tbody = document.querySelector('.students-table tbody');
-        const qstats = document.querySelectorAll('.qstat-num');
-
-        // Functions
-        async function updateStats() {
-            const [totalRes, ativaRes, alunosRes] = await Promise.all([
-                sb.from('turmas').select('*', { count: 'exact', head: true }),
-                sb.from('turmas').select('*', { count: 'exact', head: true }).eq('status', 'Ativa'),
-                sb.from('alunos').select('*', { count: 'exact', head: true })
-            ]);
-            qstats[0].textContent = totalRes.count || 0;
-            qstats[1].textContent = ativaRes.count || 0;
-            qstats[2].textContent = alunosRes.count || 0;
-        }
-
-        async function loadTurmas(filters) {
-            let query = sb.from('turmas').select('*').order('nome', { ascending: true });
-            if (filters.search) {
-                query = query.or(`nome.ilike.%${filters.search}%,professor.ilike.%${filters.search}%`);
-            }
-            if (filters.nivel && filters.nivel !== '') {
-                query.eq('nivel', filters.nivel);
-            }
-            if (filters.status && filters.status !== '') {
-                query.eq('status', filters.status);
-            }
-            const { data: turmas } = await query;
-
-            if (turmas?.length) {
-                const turmaIds = turmas.map(t => t.id);
-                const { data: countRes } = await sb.from('alunos')
-                    .select('turma_id, count(*)')
-                    .in('turma_id', turmaIds)
-                    .groupBy('turma_id');
-                const countsMap = {};
-                countRes?.forEach(r => {
-                    countsMap[r.turma_id] = parseInt(r.count);
-                });
-                turmas.forEach(t => {
-                    t.alunos_count = countsMap[t.id] || 0;
-                });
-            }
-
-            renderTable(turmas || []);
-        }
-
-        function renderTable(turmas) {
-            tbody.innerHTML = turmas.map(t => `
-                <tr>
-                    <td>${t.nome || ''}</td>
-                    <td>${t.professor || ''}</td>
-                    <td>${t.nivel || ''}</td>
-                    <td>${t.horario || ''}</td>
-                    <td>${t.data_inicio ? new Date(t.data_inicio).toLocaleDateString('pt-BR') : ''}</td>
-                    <td>${t.status || ''}</td>
-                    <td>${t.alunos_count || 0}</td>
-                    <td>
-                        <button class="btn btn-ghost btn-sm" data-action="edit" data-id="${t.id}">✏️</button>
-                        <button class="btn btn-ghost btn-sm" data-action="delete" data-id="${t.id}">🗑️</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        async function openModal(id = null) {
-            currentEditId = id;
-            form.reset();
-            titleEl.textContent = id ? 'Editar Turma' : 'Nova Turma';
-            if (id) {
-                const { data } = await sb.from('turmas').select('*').eq('id', id).single();
-                if (data) {
-                    Object.keys(data).forEach(key => {
-                        const el = form.querySelector(`[name="${key}"]`);
-                        if (el) el.value = data[key] || '';
-                    });
-                }
-            }
-            modalOverlay.classList.add('show');
-        }
-
-        async function saveTurma(e) {
-            e?.preventDefault();
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-            data.data_inicio = data.data_inicio || null;
-            let error;
-            if (currentEditId) {
-                ({ error } = await sb.from('turmas').update(data).eq('id', currentEditId));
-            } else {
-                ({ error } = await sb.from('turmas').insert(data));
-            }
-            if (!error) {
-                modalOverlay.classList.remove('show');
-                currentEditId = null;
-                loadTurmas(currentFilters);
-                updateStats();
-            } else {
-                alert('Erro ao salvar: ' + error.message);
-            }
-        }
-
-        async function deleteTurma(id) {
-            if (!confirm('Confirma a exclusão da turma?')) return;
-            const { error } = await sb.from('turmas').delete().eq('id', id);
-            if (!error) {
-                loadTurmas(currentFilters);
-                updateStats();
-            } else {
-                alert('Erro ao excluir');
-            }
-        }
-
-        function updateFilters() {
-            currentFilters.search = document.getElementById('search-input').value;
-            currentFilters.nivel = document.getElementById('filter-nivel').value;
-            currentFilters.status = document.getElementById('filter-status').value;
-            loadTurmas(currentFilters);
-        }
-
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            updateStats();
-            loadTurmas({});
-
-            // Hamburger
-            document.querySelector('.hamburger').onclick = () => sidebar.classList.toggle('open');
-
-            // New
-            document.getElementById('new-turma-btn').onclick = () => openModal();
-
-            // Filters
-            document.getElementById('search-input').oninput = () => {
-                clearTimeout(window.searchTimeout);
-                window.searchTimeout = setTimeout(updateFilters, 300);
-            };
-            document.getElementById('filter-nivel').onchange = updateFilters;
-            document.getElementById('filter-status').onchange = updateFilters;
-
-            // Form submit
-            form.onsubmit = saveTurma;
-
-            // Modal close
-            document.querySelector('.modal-close').onclick = () => modalOverlay.classList.remove('show');
-            document.querySelector('.btn-ghost').onclick = () => modalOverlay.classList.remove('show');
-            modalOverlay.onclick = (e) => {
-                if (e.target === modalOverlay) modalOverlay.classList.remove('show');
-            };
-
-            // Table actions & menu
-            document.addEventListener('click', (e) => {
-                if (e.target.matches('[data-action]')) {
-                    const id = e.target.dataset.id;
-                    const action = e.target.dataset.action;
-                    if (action === 'edit') openModal(id);
-                    if (action === 'delete') deleteTurma(id);
-                }
-                if (e.target.matches('.menu-item[data-href]')) {
-                    window.location.href = e.target.dataset.href;
-                    sidebar.classList.remove('open');
-                }
-            });
+        document.getElementById('hamburger-btn').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
         });
     </script>
 </body>
