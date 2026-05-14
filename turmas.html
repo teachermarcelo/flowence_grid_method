@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>▣ Turmas</title>
-    <!-- Estilos CSS externos assumidos como no alunos.html -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="turmas-extra.css">
 </head>
 <body>
     <div class="app">
@@ -19,107 +20,97 @@
         <main class="main-content">
             <header class="topbar">
                 <div>
-                    <button id="new-turma-btn" class="btn btn-primary">+ Nova Turma</button>
+                    <button id="btn-new-turma" class="btn btn-primary">+ Nova Turma</button>
                 </div>
             </header>
             <div class="page-header">
                 <h1>▣ Turmas</h1>
             </div>
             <div class="toolbar">
-                <input type="text" id="search-turmas" class="search-box" placeholder="Buscar por nome ou professor...">
+                <input type="text" id="search-input" class="search-box" placeholder="Buscar por nome ou professor...">
                 <div class="filter-group">
-                    <select id="filter-nivel">
+                    <select id="filter-level">
                         <option value="">Todos os Níveis</option>
-                        <option value="Iniciante">Iniciante</option>
-                        <option value="Intermediário">Intermediário</option>
-                        <option value="Avançado">Avançado</option>
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="C1">C1</option>
                     </select>
                     <select id="filter-status">
                         <option value="">Todos os Status</option>
-                        <option value="Ativo">Ativo</option>
-                        <option value="Inativo">Inativo</option>
+                        <option value="ativo">Ativo</option>
+                        <option value="inativo">Inativo</option>
                     </select>
                 </div>
             </div>
             <div class="quick-stats">
-                <div class="panel">
-                    <h3>Total Turmas</h3>
-                    <span id="total-turmas">0</span>
+                <div class="qstat" id="qs-total">
+                    <div class="qstat-label">Total Turmas</div>
+                    <div class="qstat-value">0</div>
                 </div>
-                <div class="panel">
-                    <h3>Turmas Ativas</h3>
-                    <span id="turmas-ativas">0</span>
+                <div class="qstat" id="qs-active">
+                    <div class="qstat-label">Turmas Ativas</div>
+                    <div class="qstat-value">0</div>
                 </div>
-                <div class="panel">
-                    <h3>Total Alunos</h3>
-                    <span id="total-alunos">0</span>
+                <div class="qstat" id="qs-shown">
+                    <div class="qstat-label">Mostradas</div>
+                    <div class="qstat-value">0</div>
                 </div>
             </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Professor</th>
-                        <th>Nível</th>
-                        <th>Horário</th>
-                        <th>Data Início</th>
-                        <th>Status</th>
-                        <th>Total Alunos</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="turmas-table-body">
-                    <!-- Linhas populadas pelo JS -->
-                </tbody>
-            </table>
+            <div id="turmas-table" class="table-container">
+                <!-- Linhas populadas pelo JS -->
+            </div>
             <!-- Modal -->
-            <div class="modal-overlay" id="turma-modal">
+            <div class="modal-overlay" id="modal-overlay">
                 <div class="modal">
                     <div class="modal-header">
-                        <h2 id="modal-title">Nova Turma</h2>
-                        <button class="close-btn" id="close-modal">&times;</button>
+                        <h2 class="modal-title">Nova Turma</h2>
+                        <button class="close-btn" id="modal-close">&times;</button>
                     </div>
                     <form id="turma-form" class="form-grid">
-                        <input type="hidden" id="turma-id">
-                        <div>
-                            <label for="nome">Nome:</label>
-                            <input type="text" id="nome" required>
+                        <input type="hidden" id="f-id">
+                        <div class="form-group">
+                            <label for="f-nome">Nome:</label>
+                            <input type="text" id="f-nome" required>
                         </div>
-                        <div>
-                            <label for="professor">Professor:</label>
-                            <input type="text" id="professor" required>
+                        <div class="form-group">
+                            <label for="f-professor">Professor:</label>
+                            <input type="text" id="f-professor" required>
                         </div>
-                        <div>
-                            <label for="nivel">Nível:</label>
-                            <select id="nivel" required>
+                        <div class="form-group">
+                            <label for="f-nivel">Nível:</label>
+                            <select id="f-nivel" required>
                                 <option value="">Selecione o nível</option>
-                                <option value="Iniciante">Iniciante</option>
-                                <option value="Intermediário">Intermediário</option>
-                                <option value="Avançado">Avançado</option>
+                                <option value="A1">A1</option>
+                                <option value="A2">A2</option>
+                                <option value="B1">B1</option>
+                                <option value="B2">B2</option>
+                                <option value="C1">C1</option>
                             </select>
                         </div>
-                        <div>
-                            <label for="horario">Horário:</label>
-                            <input type="text" id="horario" required>
+                        <div class="form-group">
+                            <label for="f-horario">Horário:</label>
+                            <input type="text" id="f-horario" placeholder="Ex: 14:00-15:30">
                         </div>
-                        <div>
-                            <label for="data_inicio">Data Início:</label>
-                            <input type="date" id="data_inicio" required>
+                        <div class="form-group">
+                            <label for="f-data_inicio">Data Início:</label>
+                            <input type="date" id="f-data_inicio">
                         </div>
-                        <div>
-                            <label for="status">Status:</label>
-                            <select id="status" required>
-                                <option value="Ativo">Ativo</option>
-                                <option value="Inativo">Inativo</option>
+                        <div class="form-group">
+                            <label for="f-status">Status:</label>
+                            <select id="f-status" required>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
                             </select>
                         </div>
-                        <div>
-                            <label for="observacoes">Observações:</label>
-                            <textarea id="observacoes" rows="4"></textarea>
+                        <div class="form-group">
+                            <label for="f-observacoes">Observações:</label>
+                            <textarea id="f-observacoes" rows="4"></textarea>
                         </div>
                         <div class="form-actions">
-                            <button type="button" id="cancel-btn">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Salvar</button>
+                            <button type="button" id="btn-cancel" class="btn btn-secondary">Cancelar</button>
+                            <button type="button" id="btn-save" class="btn btn-primary">Salvar</button>
                         </div>
                     </form>
                 </div>
