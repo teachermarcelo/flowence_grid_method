@@ -1,25 +1,30 @@
-(function() {
-  'use strict';
+'use strict';
 
-  // Verificação de Supabase
-  if (!window.SUPABASE_CONFIG) {
-    document.addEventListener('DOMContentLoaded', () => {
-      showToast('Configuração do Supabase não encontrada.', 'error');
-    });
+(function() {
+  // ============================================================
+  // Flowence Grid — turmas.js
+  // Gerencia CRUD de turmas com Supabase
+  // ============================================================
+
+  // ---------- 1. VALIDAÇÃO DE SUPABASE ----------
+  if (!window.SUPABASE_CONFIG || !window.supabase) {
+    console.error('[Turmas] supabase-config.js não carregado');
+    document.body.innerHTML = '<div style="padding:20px; color:red;">Erro: Supabase não configurado</div>';
     return;
   }
 
-  // Inicialização do cliente Supabase
-  const { createClient } = supabase;
-  const supabaseClient = createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anon_key);
+  const supabaseClient = window.supabase.createClient(
+    window.SUPABASE_CONFIG.url,
+    window.SUPABASE_CONFIG.anonKey
+  );
 
-  // Funções auxiliares
-  const $ = document.querySelector.bind(document);
-  const $$ = document.querySelectorAll.bind(document);
+  // ---------- 2. UTILITÁRIOS ----------
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
 
   function esc(str) {
     const div = document.createElement('div');
-    div.textContent = str;
+    div.textContent = str || '';
     return div.innerHTML;
   }
 
@@ -28,50 +33,45 @@
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
     document.body.appendChild(toast);
-    setTimeout(() => toast.classList.add('toast-show'), 100);
+    requestAnimationFrame(() => toast.classList.add('toast-show'));
     setTimeout(() => {
       toast.classList.remove('toast-show');
       setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 3500);
   }
 
-  // Estado em memória
-  let turmas = [];
-  let alunos = [];
-
-  // Funções de utilidade
   function normalizeStatus(status) {
     const lower = (status || '').toLowerCase().trim();
-    if (lower === 'ativo' || lower === 'active') return 'ativo';
-    return 'inativo';
+    if (lower === 'ativo' || lower === 'active') return 'ativa';
+    return 'inativa';
   }
 
   function formatDate(dateStr) {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr;
-    return date.toLocaleDateString('pt-BR');
+    if (!dateStr) return '—';
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      return date.toLocaleDateString('pt-BR');
+    } catch {
+      return dateStr;
+    }
   }
 
   function levelBadge(nivel) {
     if (!nivel) return '';
     const colors = {
-      'A1': 'a1',
-      'A2': 'a2',
-      'B1': 'b1',
-      'B2': 'b2',
-      'C1': 'c1'
+      'A1': 'a1', 'A2': 'a2', 'B1': 'b1', 'B2': 'b2', 'C1': 'c1'
     };
     const colorClass = colors[nivel.toUpperCase()] || '';
-    return `<span class="badge ${colorClass}">${nivel}</span>`;
+    return `<span class="badge ${colorClass}">${esc(nivel)}</span>`;
   }
 
   function statusPill(status) {
     const norm = normalizeStatus(status);
-    const isActive = norm === 'ativo';
+    const isActive = norm === 'ativa';
     const pillClass = `pill ${isActive ? 'pill-green' : 'pill-gray'}`;
-    const text = isActive ? 'Ativo' : 'Inativo';
-    return `<span class="${pillClass}">${text}</span>`;
+    const text = isActive ? 'Ativa' : 'Inativa';
+    return `<span class="${pillClass}">● ${esc(text)}</span>`;
   }
 
   function debounce(fn, ms) {
@@ -82,90 +82,87 @@
     };
   }
 
-  // setupNav()
-  function setupNav() {
-    const toggle = $('.sidebar-toggle');
-    if (toggle) {
-      toggle.addEventListener('click', () => {
-        document.body.classList.toggle('sidebar-collapsed');
-      });
-    }
-  }
+  // ---------- 3. ESTADO EM MEMÓRIA ----------
+  let turmas = [];
+  let alunos = [];
 
-  // loadAll()
+  // ---------- 4. CARREGAR DADOS ----------
   async function loadAll() {
     try {
-      showToast('Carregando...', 'info');
+      showToast('Carregando turmas...', 'info');
+
+      // Carregar turmas
       const { data: classData, error: classError } = await supabaseClient
         .from('flowence_class')
         .select('*')
         .order('nome', { ascending: true });
+
       if (classError) throw classError;
       turmas = classData || [];
 
+      // Carregar alunos para contar
       const { data: studentData, error: studentError } = await supabaseClient
         .from('flowence_student')
         .select('id, class_id');
+
       if (studentError) throw studentError;
       alunos = studentData || [];
 
       renderQuickStats();
       renderTable();
+      showToast('Turmas carregadas', 'success');
     } catch (error) {
-      console.error('Erro ao carregar:', error);
+      console.error('[loadAll]', error);
       showToast(`Erro ao carregar: ${error.message}`, 'error');
-      renderTableError('Falha ao carregar turmas.');
+      const container = $('#data-container');
+      if (container) {
+        container.innerHTML = `<div class="empty" style="grid-column:1/-1;">Erro ao carregar turmas. Verifique a conexão.</div>`;
+      }
     }
   }
 
-  // getFiltered()
+  // ---------- 5. FILTRAR ----------
   function getFiltered() {
     const search = ($('#search-input')?.value || '').toLowerCase().trim();
-    const levelFilter = ($('#filter-level')?.value || '');
-    const statusFilter = ($('#filter-status')?.value || '');
+    const levelFilter = ($('#filter-level')?.value || '').toLowerCase().trim();
+    const statusFilter = ($('#filter-status')?.value || '').toLowerCase().trim();
+
     return turmas.filter(turma => {
-      const matchesSearch = !search ||
+      const matchSearch = !search ||
         (turma.nome || '').toLowerCase().includes(search) ||
         (turma.professor || '').toLowerCase().includes(search);
-      const matchesLevel = !levelFilter || turma.nivel === levelFilter;
-      const matchesStatus = !statusFilter || normalizeStatus(turma.status) === statusFilter;
-      return matchesSearch && matchesLevel && matchesStatus;
+      const matchLevel = !levelFilter || (turma.nivel || '').toLowerCase() === levelFilter;
+      const matchStatus = !statusFilter || normalizeStatus(turma.status) === statusFilter;
+      return matchSearch && matchLevel && matchStatus;
     });
   }
 
-  // renderQuickStats()
+  // ---------- 6. RENDERIZAR STATS ----------
   function renderQuickStats() {
     const filtered = getFiltered();
     const total = turmas.length;
-    const activeCount = turmas.filter(t => normalizeStatus(t.status) === 'ativo').length;
+    const active = turmas.filter(t => normalizeStatus(t.status) === 'ativa').length;
     const shown = filtered.length;
 
-    const qsTotal = $('#qs-total-value');
-    if (qsTotal) qsTotal.textContent = total.toLocaleString();
+    const qsTotal = $('#qs-total');
+    if (qsTotal) qsTotal.textContent = total;
 
-    const qsActive = $('#qs-active-value');
-    if (qsActive) qsActive.textContent = activeCount.toLocaleString();
+    const qsActive = $('#qs-active');
+    if (qsActive) qsActive.textContent = active;
 
-    const qsShown = $('#qs-shown-value');
-    if (qsShown) qsShown.textContent = shown.toLocaleString();
+    const qsShown = $('#qs-shown');
+    if (qsShown) qsShown.textContent = shown;
   }
 
-  // Aux renderTableError
-  function renderTableError(msg) {
-    const container = $('#turmas-table');
-    if (container) {
-      container.innerHTML = `<div class="empty empty-error">${esc(msg)}</div>`;
-    }
-  }
-
-  // renderTable()
+  // ---------- 7. RENDERIZAR TABELA ----------
   function renderTable() {
-    const container = $('#turmas-table');
+    const container = $('#data-container');
     if (!container) return;
 
     const filtered = getFiltered();
+
     if (filtered.length === 0) {
-      container.innerHTML = '<div class="empty">Nenhuma turma encontrada</div>';
+      container.innerHTML = '<div class="empty" style="grid-column:1/-1; text-align:center; padding:40px 20px;">📚 Nenhuma turma encontrada</div>';
       return;
     }
 
@@ -179,134 +176,140 @@
       const dataInicio = formatDate(turma.data_inicio);
       const levelB = levelBadge(turma.nivel);
       const statusP = statusPill(turma.status);
-      
+
       html += `
-        <div class="st-row">
-          <div class="st-turma">
-            <div class="st-avatar">${avatar}</div>
-            <div class="st-nome">${nomeEsc}</div>
+        <div class="table-row">
+          <div class="table-cell-turma">
+            <div class="avatar">${avatar}</div>
+            <div class="turma-info">
+              <div class="turma-nome">${nomeEsc}</div>
+              <div class="turma-meta">${professorEsc}</div>
+            </div>
           </div>
-          <div class="st-professor">${professorEsc}</div>
-          <div class="st-nivel">${levelB}</div>
-          <div class="st-horario">${horarioEsc}</div>
-          <div class="st-data">${dataInicio}</div>
-          <div class="st-status">${statusP}</div>
-          <div class="st-alunos">${count}</div>
-          <div class="st-actions">
-            <button class="btn-icon btn-view" data-id="${turma.id}" title="Ver">👁️</button>
+          <div class="table-cell">${professorEsc}</div>
+          <div class="table-cell">${levelB}</div>
+          <div class="table-cell">${horarioEsc}</div>
+          <div class="table-cell">${dataInicio}</div>
+          <div class="table-cell">${statusP}</div>
+          <div class="table-cell table-cell-center">${count}</div>
+          <div class="table-cell table-cell-actions">
             <button class="btn-icon btn-edit" data-id="${turma.id}" title="Editar">✏️</button>
             <button class="btn-icon btn-del" data-id="${turma.id}" title="Deletar">🗑️</button>
           </div>
         </div>
       `;
     });
+
     container.innerHTML = html;
   }
 
-  // openModal(id = null, readonly = false)
-  function openModal(id = null, readonly = false) {
+  // ---------- 8. ABRIR MODAL ----------
+  function openModal(id = null) {
     const modal = $('#modal-overlay');
-    if (!modal) return;
+    const title = $('.modal-title');
+    const btnSave = $('#btn-save');
 
-    const titleEl = $('.modal-title');
-    if (!titleEl) return;
+    if (!modal || !title) return;
 
-    const fieldIds = ['f-id', 'f-nome', 'f-professor', 'f-nivel', 'f-horario', 'f-data_inicio', 'f-status', 'f-observacoes'];
-    const fields = fieldIds.map(fid => $(`#${fid}`)).filter(Boolean);
+    // Limpar form
+    $('#f-id').value = '';
+    $('#f-nome').value = '';
+    $('#f-professor').value = '';
+    $('#f-nivel').value = 'A1';
+    $('#f-horario').value = '';
+    $('#f-data_inicio').value = '';
+    $('#f-status').value = 'ativa';
+    $('#f-observacoes').value = '';
 
+    // Se editando
     if (id) {
       const turma = turmas.find(t => t.id === id);
       if (!turma) {
-        showToast('Turma não encontrada.', 'error');
+        showToast('Turma não encontrada', 'error');
         return;
       }
-      fields[0].value = turma.id;
-      fields[1].value = turma.nome || '';
-      fields[2].value = turma.professor || '';
-      fields[3].value = turma.nivel || '';
-      fields[4].value = turma.horario || '';
-      fields[5].value = turma.data_inicio || '';
-      fields[6].value = normalizeStatus(turma.status);
-      fields[7].value = turma.observacoes || '';
-      titleEl.textContent = readonly ? 'Visualizar Turma' : 'Editar Turma';
+      $('#f-id').value = turma.id;
+      $('#f-nome').value = turma.nome || '';
+      $('#f-professor').value = turma.professor || '';
+      $('#f-nivel').value = turma.nivel || 'A1';
+      $('#f-horario').value = turma.horario || '';
+      $('#f-data_inicio').value = turma.data_inicio || '';
+      $('#f-status').value = normalizeStatus(turma.status);
+      $('#f-observacoes').value = turma.observacoes || '';
+      title.textContent = 'Editar Turma';
     } else {
-      fields.forEach(f => f.value = '');
-      fields[6].value = 'ativo'; // default
-      titleEl.textContent = 'Nova Turma';
-    }
-
-    fields.slice(1).forEach(f => f.disabled = readonly);
-
-    const btnSave = $('#btn-save');
-    const btnCancel = $('#btn-cancel');
-    if (readonly) {
-      if (btnSave) btnSave.style.display = 'none';
-      if (btnCancel) btnCancel.textContent = 'Fechar';
-    } else {
-      if (btnSave) btnSave.style.display = '';
-      if (btnCancel) btnCancel.textContent = 'Cancelar';
+      title.textContent = 'Nova Turma';
     }
 
     modal.classList.add('show');
   }
 
-  // closeModal()
+  // ---------- 9. FECHAR MODAL ----------
   function closeModal() {
     const modal = $('#modal-overlay');
     if (modal) modal.classList.remove('show');
   }
 
-  // saveTurma(e)
-  async function saveTurma(e) {
-    if (e) e.preventDefault();
+  // ---------- 10. SALVAR TURMA ----------
+  async function saveTurma() {
+    const nome = ($('#f-nome').value || '').trim();
+    const professor = ($('#f-professor').value || '').trim();
+    const nivel = $('#f-nivel').value || '';
+    const horario = ($('#f-horario').value || '').trim();
+    const data_inicio = $('#f-data_inicio').value || null;
+    const status = $('#f-status').value || 'ativa';
+    const observacoes = ($('#f-observacoes').value || '').trim();
 
-    const nomeField = $('#f-nome');
-    const nome = nomeField ? nomeField.value.trim() : '';
+    // Validação
     if (!nome) {
-      showToast('O nome da turma é obrigatório.', 'error');
-      nomeField?.focus();
+      showToast('Nome da turma é obrigatório', 'error');
+      $('#f-nome').focus();
+      return;
+    }
+    if (!professor) {
+      showToast('Professor é obrigatório', 'error');
+      $('#f-professor').focus();
+      return;
+    }
+    if (!nivel) {
+      showToast('Nível é obrigatório', 'error');
       return;
     }
 
-    const data = {
-      nome,
-      professor: ($('#f-professor')?.value || '').trim(),
-      nivel: $('#f-nivel')?.value || '',
-      horario: ($('#f-horario')?.value || '').trim(),
-      data_inicio: $('#f-data_inicio')?.value || null,
-      status: $('#f-status')?.value || 'ativo',
-      observacoes: ($('#f-observacoes')?.value || '').trim()
-    };
+    const id = $('#f-id').value;
+    const data = { nome, professor, nivel, horario, data_inicio, status, observacoes };
 
     try {
-      const id = $('#f-id')?.value;
       if (id) {
         const { error } = await supabaseClient
           .from('flowence_class')
           .update(data)
           .eq('id', id);
         if (error) throw error;
-        showToast('Turma atualizada com sucesso!', 'success');
+        showToast('Turma atualizada com sucesso', 'success');
       } else {
         const { error } = await supabaseClient
           .from('flowence_class')
           .insert([data]);
         if (error) throw error;
-        showToast('Turma criada com sucesso!', 'success');
+        showToast('Turma criada com sucesso', 'success');
       }
       closeModal();
       loadAll();
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+      console.error('[saveTurma]', error);
       showToast(`Erro ao salvar: ${error.message}`, 'error');
     }
   }
 
-  // deleteTurma(id)
+  // ---------- 11. DELETAR TURMA ----------
   async function deleteTurma(id) {
     const turma = turmas.find(t => t.id === id);
     if (!turma) return;
-    if (!confirm(`Deseja realmente deletar a turma "${esc(turma.nome)}"?`)) return;
+
+    if (!confirm(`Tem certeza que deseja deletar a turma "${turma.nome}"?`)) {
+      return;
+    }
 
     try {
       const { error } = await supabaseClient
@@ -314,37 +317,57 @@
         .delete()
         .eq('id', id);
       if (error) throw error;
-      showToast('Turma deletada com sucesso!', 'success');
+      showToast('Turma deletada com sucesso', 'success');
       loadAll();
     } catch (error) {
+      console.error('[deleteTurma]', error);
       showToast(`Erro ao deletar: ${error.message}`, 'error');
     }
   }
 
-  // setupEvents()
+  // ---------- 12. SETUP EVENTOS ----------
   function setupEvents() {
-    const modal = $('#modal-overlay');
-    const btnNew = $('#btn-new-turma');
+    // Botão novo
+    const btnNew = $('#btn-new');
+    if (btnNew) {
+      btnNew.addEventListener('click', () => openModal());
+    }
+
+    // Botão salvar
     const btnSave = $('#btn-save');
+    if (btnSave) {
+      btnSave.addEventListener('click', (e) => {
+        e.preventDefault();
+        saveTurma();
+      });
+    }
+
+    // Botão cancelar
     const btnCancel = $('#btn-cancel');
+    if (btnCancel) {
+      btnCancel.addEventListener('click', () => closeModal());
+    }
+
+    // Botão fechar modal
     const modalClose = $('#modal-close');
+    if (modalClose) {
+      modalClose.addEventListener('click', () => closeModal());
+    }
 
-    if (btnNew) btnNew.addEventListener('click', () => openModal());
-    if (btnSave) btnSave.addEventListener('click', saveTurma);
-    if (btnCancel) btnCancel.addEventListener('click', closeModal);
-    if (modalClose) modalClose.addEventListener('click', closeModal);
+    // Fechar modal com ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
 
+    // Fechar modal clicando no overlay
+    const modal = $('#modal-overlay');
     if (modal) {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
       });
     }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
-    });
-
-    // Filtros
+    // Busca com debounce
     const searchInput = $('#search-input');
     if (searchInput) {
       searchInput.addEventListener('input', debounce(() => {
@@ -353,6 +376,7 @@
       }, 300));
     }
 
+    // Filtro de nível
     const filterLevel = $('#filter-level');
     if (filterLevel) {
       filterLevel.addEventListener('change', () => {
@@ -361,6 +385,7 @@
       });
     }
 
+    // Filtro de status
     const filterStatus = $('#filter-status');
     if (filterStatus) {
       filterStatus.addEventListener('change', () => {
@@ -369,34 +394,24 @@
       });
     }
 
-    // Ações da tabela (delegation)
+    // Ações da tabela (event delegation)
     document.addEventListener('click', (e) => {
-      const viewBtn = e.target.closest('.btn-view');
-      if (viewBtn) {
-        const id = viewBtn.dataset.id;
-        openModal(id, true);
-        return;
-      }
-
       const editBtn = e.target.closest('.btn-edit');
       if (editBtn) {
-        const id = editBtn.dataset.id;
-        openModal(id, false);
+        openModal(editBtn.dataset.id);
         return;
       }
 
       const delBtn = e.target.closest('.btn-del');
       if (delBtn) {
-        const id = delBtn.dataset.id;
-        deleteTurma(id);
+        deleteTurma(delBtn.dataset.id);
         return;
       }
     });
   }
 
-  // DOMContentLoaded
+  // ---------- 13. INIT ----------
   document.addEventListener('DOMContentLoaded', () => {
-    setupNav();
     setupEvents();
     loadAll();
   });
