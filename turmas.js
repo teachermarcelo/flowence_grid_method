@@ -82,7 +82,7 @@
     };
   }
 
-  // 6. setupNav()
+  // setupNav()
   function setupNav() {
     const toggle = $('.sidebar-toggle');
     if (toggle) {
@@ -92,7 +92,7 @@
     }
   }
 
-  // 7. loadAll()
+  // loadAll()
   async function loadAll() {
     try {
       showToast('Carregando...', 'info');
@@ -118,7 +118,7 @@
     }
   }
 
-  // 8. getFiltered()
+  // getFiltered()
   function getFiltered() {
     const search = ($('#search-input')?.value || '').toLowerCase().trim();
     const levelFilter = ($('#filter-level')?.value || '');
@@ -133,7 +133,7 @@
     });
   }
 
-  // 9. renderQuickStats()
+  // renderQuickStats()
   function renderQuickStats() {
     const filtered = getFiltered();
     const total = turmas.length;
@@ -158,7 +158,7 @@
     }
   }
 
-  // 10. renderTable()
+  // renderTable()
   function renderTable() {
     const container = $('#turmas-table');
     if (!container) return;
@@ -169,7 +169,7 @@
       return;
     }
 
-    let html = '';
+    let html = '<div class="st-table">';
     filtered.forEach(turma => {
       const count = alunos.filter(s => s.class_id === turma.id).length;
       const avatar = (turma.nome || '').charAt(0).toUpperCase();
@@ -197,12 +197,13 @@
         </div>
       `;
     });
+    html += '</div>';
     container.innerHTML = html;
   }
 
-  // 11. openModal(id = null, readonly = false)
+  // openModal(id = null, readonly = false)
   function openModal(id = null, readonly = false) {
-    const modal = $('.modal-overlay');
+    const modal = $('#modal-overlay');
     if (!modal) return;
 
     const titleEl = $('.modal-title');
@@ -247,13 +248,13 @@
     modal.classList.add('show');
   }
 
-  // 12. closeModal()
+  // closeModal()
   function closeModal() {
-    const modal = $('.modal-overlay');
+    const modal = $('#modal-overlay');
     if (modal) modal.classList.remove('show');
   }
 
-  // 13. saveTurma(e)
+  // saveTurma(e)
   async function saveTurma(e) {
     if (e) e.preventDefault();
 
@@ -299,11 +300,11 @@
     }
   }
 
-  // 14. deleteTurma(id)
+  // deleteTurma(id)
   async function deleteTurma(id) {
     const turma = turmas.find(t => t.id === id);
     if (!turma) return;
-    if (!confirm(`Deseja realmente deletar a turma \"${esc(turma.nome)}\" ?`)) return;
+    if (!confirm(`Deseja realmente deletar a turma "${esc(turma.nome)}"?`)) return;
 
     try {
       const { error } = await supabaseClient
@@ -318,9 +319,9 @@
     }
   }
 
-  // 15. setupEvents()
+  // setupEvents()
   function setupEvents() {
-    const modal = $('.modal-overlay');
+    const modal = $('#modal-overlay');
     const btnNew = $('#btn-new-turma');
     const btnSave = $('#btn-save');
     const btnCancel = $('#btn-cancel');
@@ -391,7 +392,7 @@
     });
   }
 
-  // 16. DOMContentLoaded
+  // DOMContentLoaded
   document.addEventListener('DOMContentLoaded', () => {
     setupNav();
     setupEvents();
