@@ -1,22 +1,52 @@
 'use strict';
 
 (function() {
-  // ============================================================
-  // Flowence Grid — turmas.js
-  // Gerencia CRUD de turmas com Supabase
-  // ============================================================
+  'use strict';
 
-  // ---------- 1. VALIDAÇÃO DE SUPABASE ----------
-  if (!window.SUPABASE_CONFIG || !window.supabase) {
-    console.error('[Turmas] supabase-config.js não carregado');
-    document.body.innerHTML = '<div style="padding:20px; color:red;">Erro: Supabase não configurado</div>';
-    return;
+  // ---------- 1. AGUARDAR SUPABASE (do dashboard.js) ----------
+  // O dashboard.js já carrega e configura window.sb
+  // Aguardamos um pouco pra ter certeza
+  
+  let supabaseClient = null;
+  let tentativas = 0;
+  
+  function verificarSupabase() {
+    if (window.sb) {
+      supabaseClient = window.sb;
+      console.log('[Turmas] Supabase conectado via window.sb');
+      init();
+      return true;
+    }
+    
+    // Se não está pronto, aguarda
+    if (tentativas < 50) { // 5 segundos no máximo
+      tentativas++;
+      setTimeout(verificarSupabase, 100);
+      return false;
+    }
+    
+    // Se passaram 5 segundos, tenta criar direto
+    if (!supabaseClient && window.SUPABASE_CONFIG && window.supabase) {
+      try {
+        supabaseClient = window.supabase.createClient(
+          window.SUPABASE_CONFIG.url,
+          window.SUPABASE_CONFIG.anonKey
+        );
+        console.log('[Turmas] Supabase criado localmente');
+        init();
+        return true;
+      } catch (err) {
+        console.error('[Turmas] Erro ao criar Supabase:', err);
+        mostrarErro('Erro ao conectar ao Supabase');
+        return false;
+      }
+    }
+    
+    // Nada funcionou
+    console.error('[Turmas] Supabase não está disponível');
+    mostrarErro('Supabase não configurado. Verifique supabase-config.js');
+    return false;
   }
-
-  const supabaseClient = window.supabase.createClient(
-    window.SUPABASE_CONFIG.url,
-    window.SUPABASE_CONFIG.anonKey
-  );
 
   // ---------- 2. UTILITÁRIOS ----------
   const $ = (sel) => document.querySelector(sel);
@@ -40,9 +70,16 @@
     }, 3500);
   }
 
+  function mostrarErro(msg) {
+    const container = $('#data-container');
+    if (container) {
+      container.innerHTML = `<div class="empty" style="grid-column:1/-1; color:red;">${esc(msg)}</div>`;
+    }
+  }
+
   function normalizeStatus(status) {
     const lower = (status || '').toLowerCase().trim();
-    if (lower === 'ativo' || lower === 'active') return 'ativa';
+    if (lower === 'ativo' || lower === 'active' || lower === 'ativa') return 'ativa';
     return 'inativa';
   }
 
@@ -99,6 +136,7 @@
 
       if (classError) throw classError;
       turmas = classData || [];
+      console.log('[Turmas] Carregadas:', turmas.length);
 
       // Carregar alunos para contar
       const { data: studentData, error: studentError } = await supabaseClient
@@ -110,14 +148,15 @@
 
       renderQuickStats();
       renderTable();
-      showToast('Turmas carregadas', 'success');
+      if (turmas.length > 0) {
+        showToast(`${turmas.length} turma(s) carregada(s)`, 'success');
+      } else {
+        showToast('Nenhuma turma encontrada', 'info');
+      }
     } catch (error) {
       console.error('[loadAll]', error);
       showToast(`Erro ao carregar: ${error.message}`, 'error');
-      const container = $('#data-container');
-      if (container) {
-        container.innerHTML = `<div class="empty" style="grid-column:1/-1;">Erro ao carregar turmas. Verifique a conexão.</div>`;
-      }
+      mostrarErro(`Erro ao carregar turmas: ${error.message}`);
     }
   }
 
@@ -271,10 +310,6 @@
       $('#f-professor').focus();
       return;
     }
-    if (!nivel) {
-      showToast('Nível é obrigatório', 'error');
-      return;
-    }
 
     const id = $('#f-id').value;
     const data = { nome, professor, nivel, horario, data_inicio, status, observacoes };
@@ -286,19 +321,19 @@
           .update(data)
           .eq('id', id);
         if (error) throw error;
-        showToast('Turma atualizada com sucesso', 'success');
+        showToast('Turma atualizada', 'success');
       } else {
         const { error } = await supabaseClient
           .from('flowence_class')
           .insert([data]);
         if (error) throw error;
-        showToast('Turma criada com sucesso', 'success');
+        showToast('Turma criada', 'success');
       }
       closeModal();
       loadAll();
     } catch (error) {
       console.error('[saveTurma]', error);
-      showToast(`Erro ao salvar: ${error.message}`, 'error');
+      showToast(`Erro: ${error.message}`, 'error');
     }
   }
 
@@ -307,9 +342,7 @@
     const turma = turmas.find(t => t.id === id);
     if (!turma) return;
 
-    if (!confirm(`Tem certeza que deseja deletar a turma "${turma.nome}"?`)) {
-      return;
-    }
+    if (!confirm(`Deletar turma "${turma.nome}"?`)) return;
 
     try {
       const { error } = await supabaseClient
@@ -317,49 +350,32 @@
         .delete()
         .eq('id', id);
       if (error) throw error;
-      showToast('Turma deletada com sucesso', 'success');
+      showToast('Turma deletada', 'success');
       loadAll();
     } catch (error) {
       console.error('[deleteTurma]', error);
-      showToast(`Erro ao deletar: ${error.message}`, 'error');
+      showToast(`Erro: ${error.message}`, 'error');
     }
   }
 
   // ---------- 12. SETUP EVENTOS ----------
   function setupEvents() {
-    // Botão novo
     const btnNew = $('#btn-new');
-    if (btnNew) {
-      btnNew.addEventListener('click', () => openModal());
-    }
+    if (btnNew) btnNew.addEventListener('click', () => openModal());
 
-    // Botão salvar
     const btnSave = $('#btn-save');
-    if (btnSave) {
-      btnSave.addEventListener('click', (e) => {
-        e.preventDefault();
-        saveTurma();
-      });
-    }
+    if (btnSave) btnSave.addEventListener('click', () => saveTurma());
 
-    // Botão cancelar
     const btnCancel = $('#btn-cancel');
-    if (btnCancel) {
-      btnCancel.addEventListener('click', () => closeModal());
-    }
+    if (btnCancel) btnCancel.addEventListener('click', () => closeModal());
 
-    // Botão fechar modal
     const modalClose = $('#modal-close');
-    if (modalClose) {
-      modalClose.addEventListener('click', () => closeModal());
-    }
+    if (modalClose) modalClose.addEventListener('click', () => closeModal());
 
-    // Fechar modal com ESC
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeModal();
     });
 
-    // Fechar modal clicando no overlay
     const modal = $('#modal-overlay');
     if (modal) {
       modal.addEventListener('click', (e) => {
@@ -367,7 +383,6 @@
       });
     }
 
-    // Busca com debounce
     const searchInput = $('#search-input');
     if (searchInput) {
       searchInput.addEventListener('input', debounce(() => {
@@ -376,7 +391,6 @@
       }, 300));
     }
 
-    // Filtro de nível
     const filterLevel = $('#filter-level');
     if (filterLevel) {
       filterLevel.addEventListener('change', () => {
@@ -385,7 +399,6 @@
       });
     }
 
-    // Filtro de status
     const filterStatus = $('#filter-status');
     if (filterStatus) {
       filterStatus.addEventListener('change', () => {
@@ -394,7 +407,6 @@
       });
     }
 
-    // Ações da tabela (event delegation)
     document.addEventListener('click', (e) => {
       const editBtn = e.target.closest('.btn-edit');
       if (editBtn) {
@@ -411,9 +423,24 @@
   }
 
   // ---------- 13. INIT ----------
-  document.addEventListener('DOMContentLoaded', () => {
+  function init() {
+    console.log('[Turmas] Inicializando...');
     setupEvents();
     loadAll();
+  }
+
+  // ---------- 14. BOOT ----------
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('[Turmas] DOM loaded, verificando Supabase...');
+    
+    // Se Supabase já está pronto
+    if (window.sb) {
+      supabaseClient = window.sb;
+      init();
+    } else {
+      // Aguarda carregar
+      verificarSupabase();
+    }
   });
 
 })();
