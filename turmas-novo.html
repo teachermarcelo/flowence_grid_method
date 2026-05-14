@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>▣ Turmas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a href="alunos.html">Alunos</a></li>
+                    <li class="active"><a href="turmas.html">Turmas</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <div class="page-title">
+                    <span>▣</span> Turmas
+                </div>
+                <button id="btn-new-turma" class="btn btn-primary">+ Nova Turma</button>
+            </header>
+
+            <div class="content">
+                <!-- TOOLBAR: Search + Filtros -->
+                <div class="toolbar">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" placeholder="Buscar por nome ou professor...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="filter-level">
+                            <option value="">Todos os Níveis</option>
+                            <option value="A1">A1</option>
+                            <option value="A2">A2</option>
+                            <option value="B1">B1</option>
+                            <option value="B2">B2</option>
+                            <option value="C1">C1</option>
+                        </select>
+                        <select id="filter-status">
+                            <option value="">Todos os Status</option>
+                            <option value="ativo">Ativo</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- QUICK STATS -->
+                <div class="quick-stats">
+                    <div class="qstat">
+                        <div class="qstat-value" id="qs-total-value">0</div>
+                        <div class="qstat-label">Total</div>
+                    </div>
+                    <div class="qstat">
+                        <div class="qstat-value" id="qs-active-value">0</div>
+                        <div class="qstat-label">Ativas</div>
+                    </div>
+                    <div class="qstat">
+                        <div class="qstat-value" id="qs-shown-value">0</div>
+                        <div class="qstat-label">Mostradas</div>
+                    </div>
+                </div>
+
+                <!-- TABELA DE TURMAS -->
+                <div class="st-wrapper">
+                    <div class="st-head">
+                        <div>TURMA</div>
+                        <div>PROFESSOR</div>
+                        <div>NÍVEL</div>
+                        <div>HORÁRIO</div>
+                        <div>DATA INÍCIO</div>
+                        <div>STATUS</div>
+                        <div>ALUNOS</div>
+                        <div>AÇÕES</div>
+                    </div>
+                    <div id="turmas-table">
+                        <!-- Renderizado pelo JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Nova Turma</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <form id="turma-form" class="modal-body">
+                <input type="hidden" id="f-id">
+                
+                <div class="form-group">
+                    <label for="f-nome">Nome da Turma *</label>
+                    <input type="text" id="f-nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="f-professor">Professor *</label>
+                    <input type="text" id="f-professor" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="f-nivel">Nível *</label>
+                        <select id="f-nivel" required>
+                            <option value="">Selecione</option>
+                            <option value="A1">A1</option>
+                            <option value="A2">A2</option>
+                            <option value="B1">B1</option>
+                            <option value="B2">B2</option>
+                            <option value="C1">C1</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="f-horario">Horário</label>
+                        <input type="text" id="f-horario" placeholder="Ex: 14:00-15:30">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="f-data_inicio">Data Início</label>
+                        <input type="date" id="f-data_inicio">
+                    </div>
+                    <div class="form-group">
+                        <label for="f-status">Status *</label>
+                        <select id="f-status" required>
+                            <option value="ativo">Ativo</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="f-observacoes">Observações</label>
+                    <textarea id="f-observacoes" rows="3"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btn-cancel" class="btn btn-ghost">Cancelar</button>
+                    <button type="button" id="btn-save" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="turmas.js"></script>
+</body>
+</html>
