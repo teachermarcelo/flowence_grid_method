@@ -3,10 +3,19 @@
 (function() {
   'use strict';
 
-  // ---------- 1. AGUARDAR SUPABASE (do dashboard.js) ----------
-  // O dashboard.js já carrega e configura window.sb
-  // Aguardamos um pouco pra ter certeza
-  
+  // ---------- CONFIGURAÇÃO DE COLUNAS (CORRETAS!) ----------
+  const COLUMNS = {
+    id:          'id',           // ✅ text
+    nome:        'name',         // ✅ text
+    professor:   'teacher',      // ✅ text
+    nivel:       'level',        // ✅ text
+    horario:     'schedule',     // ✅ text
+    data_inicio: 'start_date',   // ✅ text
+    status:      'status',       // ✅ text
+    observacoes: 'notes',        // ✅ text
+  };
+
+  // ---------- 1. AGUARDAR SUPABASE ----------
   let supabaseClient = null;
   let tentativas = 0;
   
@@ -18,14 +27,12 @@
       return true;
     }
     
-    // Se não está pronto, aguarda
-    if (tentativas < 50) { // 5 segundos no máximo
+    if (tentativas < 50) {
       tentativas++;
       setTimeout(verificarSupabase, 100);
       return false;
     }
     
-    // Se passaram 5 segundos, tenta criar direto
     if (!supabaseClient && window.SUPABASE_CONFIG && window.supabase) {
       try {
         supabaseClient = window.supabase.createClient(
@@ -42,7 +49,6 @@
       }
     }
     
-    // Nada funcionou
     console.error('[Turmas] Supabase não está disponível');
     mostrarErro('Supabase não configurado. Verifique supabase-config.js');
     return false;
@@ -119,11 +125,25 @@
     };
   }
 
-  // ---------- 3. ESTADO EM MEMÓRIA ----------
+  // ---------- 3. NORMALIZAR DADOS DO SUPABASE ----------
+  function normalizeRow(row) {
+    return {
+      id:          row[COLUMNS.id],
+      nome:        row[COLUMNS.nome],
+      professor:   row[COLUMNS.professor],
+      nivel:       row[COLUMNS.nivel],
+      horario:     row[COLUMNS.horario],
+      data_inicio: row[COLUMNS.data_inicio],
+      status:      row[COLUMNS.status],
+      observacoes: row[COLUMNS.observacoes],
+    };
+  }
+
+  // ---------- 4. ESTADO EM MEMÓRIA ----------
   let turmas = [];
   let alunos = [];
 
-  // ---------- 4. CARREGAR DADOS ----------
+  // ---------- 5. CARREGAR DADOS ----------
   async function loadAll() {
     try {
       showToast('Carregando turmas...', 'info');
@@ -132,10 +152,15 @@
       const { data: classData, error: classError } = await supabaseClient
         .from('flowence_class')
         .select('*')
-        .order('nome', { ascending: true });
+        .order(COLUMNS.nome, { ascending: true });
 
-      if (classError) throw classError;
-      turmas = classData || [];
+      if (classError) {
+        console.error('[loadAll] Erro ao carregar turmas:', classError);
+        throw classError;
+      }
+
+      // Normalizar dados
+      turmas = (classData || []).map(normalizeRow);
       console.log('[Turmas] Carregadas:', turmas.length);
 
       // Carregar alunos para contar
@@ -143,7 +168,9 @@
         .from('flowence_student')
         .select('id, class_id');
 
-      if (studentError) throw studentError;
+      if (studentError) {
+        console.warn('[loadAll] Aviso ao carregar alunos:', studentError);
+      }
       alunos = studentData || [];
 
       renderQuickStats();
@@ -156,11 +183,11 @@
     } catch (error) {
       console.error('[loadAll]', error);
       showToast(`Erro ao carregar: ${error.message}`, 'error');
-      mostrarErro(`Erro ao carregar turmas: ${error.message}`);
+      mostrarErro(`Erro: ${esc(error.message)}`);
     }
   }
 
-  // ---------- 5. FILTRAR ----------
+  // ---------- 6. FILTRAR ----------
   function getFiltered() {
     const search = ($('#search-input')?.value || '').toLowerCase().trim();
     const levelFilter = ($('#filter-level')?.value || '').toLowerCase().trim();
@@ -176,7 +203,7 @@
     });
   }
 
-  // ---------- 6. RENDERIZAR STATS ----------
+  // ---------- 7. RENDERIZAR STATS ----------
   function renderQuickStats() {
     const filtered = getFiltered();
     const total = turmas.length;
@@ -193,7 +220,7 @@
     if (qsShown) qsShown.textContent = shown;
   }
 
-  // ---------- 7. RENDERIZAR TABELA ----------
+  // ---------- 8. RENDERIZAR TABELA ----------
   function renderTable() {
     const container = $('#data-container');
     if (!container) return;
@@ -242,11 +269,10 @@
     container.innerHTML = html;
   }
 
-  // ---------- 8. ABRIR MODAL ----------
+  // ---------- 9. ABRIR MODAL ----------
   function openModal(id = null) {
     const modal = $('#modal-overlay');
     const title = $('.modal-title');
-    const btnSave = $('#btn-save');
 
     if (!modal || !title) return;
 
@@ -283,13 +309,13 @@
     modal.classList.add('show');
   }
 
-  // ---------- 9. FECHAR MODAL ----------
+  // ---------- 10. FECHAR MODAL ----------
   function closeModal() {
     const modal = $('#modal-overlay');
     if (modal) modal.classList.remove('show');
   }
 
-  // ---------- 10. SALVAR TURMA ----------
+  // ---------- 11. SALVAR TURMA ----------
   async function saveTurma() {
     const nome = ($('#f-nome').value || '').trim();
     const professor = ($('#f-professor').value || '').trim();
@@ -312,7 +338,17 @@
     }
 
     const id = $('#f-id').value;
-    const data = { nome, professor, nivel, horario, data_inicio, status, observacoes };
+    
+    // Mapeado para as colunas corretas do BD
+    const data = {
+      [COLUMNS.nome]: nome,
+      [COLUMNS.professor]: professor,
+      [COLUMNS.nivel]: nivel,
+      [COLUMNS.horario]: horario,
+      [COLUMNS.data_inicio]: data_inicio,
+      [COLUMNS.status]: status,
+      [COLUMNS.observacoes]: observacoes,
+    };
 
     try {
       if (id) {
@@ -337,7 +373,7 @@
     }
   }
 
-  // ---------- 11. DELETAR TURMA ----------
+  // ---------- 12. DELETAR TURMA ----------
   async function deleteTurma(id) {
     const turma = turmas.find(t => t.id === id);
     if (!turma) return;
@@ -358,7 +394,7 @@
     }
   }
 
-  // ---------- 12. SETUP EVENTOS ----------
+  // ---------- 13. SETUP EVENTOS ----------
   function setupEvents() {
     const btnNew = $('#btn-new');
     if (btnNew) btnNew.addEventListener('click', () => openModal());
@@ -422,23 +458,22 @@
     });
   }
 
-  // ---------- 13. INIT ----------
+  // ---------- 14. INIT ----------
   function init() {
     console.log('[Turmas] Inicializando...');
+    console.log('[Turmas] Colunas mapeadas:', COLUMNS);
     setupEvents();
     loadAll();
   }
 
-  // ---------- 14. BOOT ----------
+  // ---------- 15. BOOT ----------
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('[Turmas] DOM loaded, verificando Supabase...');
+    console.log('[Turmas] DOM loaded');
     
-    // Se Supabase já está pronto
     if (window.sb) {
       supabaseClient = window.sb;
       init();
     } else {
-      // Aguarda carregar
       verificarSupabase();
     }
   });
