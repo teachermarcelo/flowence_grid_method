@@ -3,553 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turmas - Flowence</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --primary: #8B5CF6;
-            --primary-dark: #7C3AED;
-            --primary-light: #A855F7;
-            --bg: #F8FAFC;
-            --surface: #FFFFFF;
-            --text: #0F172A;
-            --text-muted: #64748B;
-            --border: #E2E8F0;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-        }
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 16rem;
-            background: var(--surface);
-            box-shadow: var(--shadow-lg);
-            z-index: 50;
-            transform: translateX(0);
-            transition: transform 0.3s ease-in-out;
-        }
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-        }
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        header {
-            position: fixed;
-            top: 0;
-            left: 16rem;
-            right: 0;
-            height: 4rem;
-            background: var(--surface);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 1.5rem;
-            z-index: 40;
-        }
-        @media (max-width: 768px) {
-            header {
-                left: 0;
-            }
-        }
-        .hamburger {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-muted);
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            transition: background 0.2s;
-        }
-        .hamburger:hover {
-            background: var(--border);
-        }
-        h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: var(--text);
-        }
-        main {
-            margin-left: 16rem;
-            margin-top: 4rem;
-            padding: 2rem;
-        }
-        @media (max-width: 768px) {
-            main {
-                margin-left: 0;
-            }
-        }
-        .filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-        .filters input,
-        .filters select {
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            transition: all 0.2s;
-            min-width: 200px;
-        }
-        .filters input:focus,
-        .filters select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgb(139 92 246 / 0.1);
-        }
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: var(--shadow);
-        }
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-lg);
-        }
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-        }
-        .card {
-            background: var(--surface);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-            border: 1px solid var(--border);
-        }
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-        }
-        .card h3 {
-            margin: 0 0 1rem;
-            font-size: 1.25rem;
-            color: var(--text);
-        }
-        .card p {
-            margin: 0.5rem 0;
-            color: var(--text-muted);
-        }
-        .card-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        .action-btn {
-            background: #F1F5F9;
-            border: none;
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            transition: all 0.2s;
-        }
-        .action-btn:hover {
-            background: var(--primary-light);
-            color: white;
-            transform: scale(1.1);
-        }
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        .modal.open {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background: var(--surface);
-            padding: 2rem;
-            border-radius: 1.25rem;
-            max-width: 28rem;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-xl);
-            transform: translateY(-20px) scale(0.95);
-            animation: slideIn 0.3s ease-out forwards;
-        }
-        @keyframes slideIn {
-            to {
-                transform: translateY(0) scale(1);
-            }
-        }
-        .modal form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .modal input,
-        .modal select {
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 1rem;
-        }
-        .modal input:focus,
-        .modal select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgb(139 92 246 / 0.1);
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 1.5rem;
-        }
-        .btn-secondary {
-            background: #F1F5F9;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-        }
-        .btn-secondary:hover {
-            background: #E2E8F0;
-        }
-        #listaAlunos {
-            max-height: 300px;
-            overflow-y: auto;
-            margin: 1rem 0;
-        }
-        #listaAlunos li {
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-        #listaAlunos li:last-child {
-            border-bottom: none;
-        }
-        .empty {
-            text-align: center;
-            color: var(--text-muted);
-            font-style: italic;
-            padding: 2rem;
-        }
-    </style>
+    <title>Turmas - Gestão Escolar</title>
+    <!-- Assume same external CSS as alunos.html -->
 </head>
 <body>
-    <aside class="sidebar" id="sidebar">
-        <div class="logo">🌊 Flowence</div>
-    </aside>
-    <header>
-        <button class="hamburger" id="hamburger">☰</button>
-        <h1>Gerenciar Turmas</h1>
+    <!-- Sidebar idêntica -->
+    <nav id="sidebar" class="sidebar">
+        <ul>
+            <li><a href="dashboard.html"><span>🏠</span> Dashboard</a></li>
+            <li><a href="alunos.html"><span>👨‍🎓</span> Alunos</a></li>
+            <li><a href="turmas.html" class="active"><span>📚</span> Turmas</a></li>
+            <li><a href="professores.html"><span>👨‍🏫</span> Professores</a></li>
+            <li><a href="relatorios.html"><span>📊</span> Relatórios</a></li>
+        </ul>
+    </nav>
+
+    <!-- Topbar com hamburger e + Nova Turma -->
+    <header class="topbar">
+        <button class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="logo">Gestão Escolar</div>
+        <button class="btn btn-primary" id="new-turma">+ Nova Turma</button>
     </header>
-    <main>
-        <div class="filters">
-            <input type="text" id="search" placeholder="Buscar por nome da turma...">
-            <select id="nivelFilter">
-                <option value="Todos">Todos os Níveis</option>
-                <option value="Fundamental I">Fundamental I</option>
-                <option value="Fundamental II">Fundamental II</option>
-                <option value="Médio">Médio</option>
-                <option value="Superior">Superior</option>
-            </select>
+
+    <!-- Main content -->
+    <main class="main">
+        <!-- Toolbar com busca e filtros -->
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Buscar por nome ou professor...">
+            </div>
+            <div class="filter-group">
+                <select id="filter-nivel">
+                    <option value="">Todos os níveis</option>
+                    <option value="basico">Básico</option>
+                    <option value="intermediario">Intermediário</option>
+                    <option value="avancado">Avançado</option>
+                </select>
+                <select id="filter-status">
+                    <option value="">Todos os status</option>
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                </select>
+            </div>
         </div>
-        <button class="btn-primary" id="novaTurma">+ Nova Turma</button>
-        <div class="cards" id="cardsContainer">
-            <!-- Cards serão renderizados aqui -->
+
+        <!-- Quick-stats -->
+        <div class="quick-stats">
+            <div class="stat-card">
+                <h3 id="total-turmas">0</h3>
+                <p>Total Turmas</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="turmas-ativas">0</h3>
+                <p>Turmas Ativas</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-alunos">0</h3>
+                <p>Total Alunos</p>
+            </div>
+        </div>
+
+        <!-- Panel com tabela dinâmica -->
+        <div class="panel">
+            <table id="turmas-table">
+                <thead>
+                    <tr>
+                        <th>Nome Turma</th>
+                        <th>Professor</th>
+                        <th>Nível</th>
+                        <th>Horário</th>
+                        <th>Status</th>
+                        <th>Quantidade de Alunos</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </main>
 
-    <!-- Modal Criar/Editar Turma -->
-    <div class="modal" id="modalTurma">
-        <div class="modal-content">
-            <h2 id="modalTitle">Nova Turma</h2>
-            <form id="formTurma">
-                <input id="nome" placeholder="Nome da turma" required>
-                <input id="professor" placeholder="Nome do professor" required>
-                <select id="nivelSelect" required>
-                    <option value="">Selecione o nível</option>
-                    <option value="Fundamental I">Fundamental I</option>
-                    <option value="Fundamental II">Fundamental II</option>
-                    <option value="Médio">Médio</option>
-                    <option value="Superior">Superior</option>
-                </select>
-                <input id="horario" placeholder="Horário (ex: Seg-Sex 14h-16h)" required>
-                <div class="modal-buttons">
-                    <button type="button" class="btn-secondary" id="cancelBtn">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar Turma</button>
+    <!-- Modal para criar/editar turma -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <h2 id="modal-title">Nova Turma</h2>
+            <form id="turma-form">
+                <div class="form-group">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="professor">Professor</label>
+                    <input type="text" id="professor" required>
+                </div>
+                <div class="form-group">
+                    <label for="nivel">Nível</label>
+                    <select id="nivel" required>
+                        <option value="basico">Básico</option>
+                        <option value="intermediario">Intermediário</option>
+                        <option value="avancado">Avançado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="horario">Horário</label>
+                    <input type="text" id="horario" required>
+                </div>
+                <div class="form-group">
+                    <label for="data-inicio">Data Início</label>
+                    <input type="date" id="data-inicio" required>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status">
+                        <option value="ativo">Ativo</option>
+                        <option value="inativo">Inativo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelar">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Ver Alunos -->
-    <div class="modal" id="modalAlunos">
-        <div class="modal-content">
-            <h2 id="alunosTitle">Alunos da Turma</h2>
-            <ul id="listaAlunos"></ul>
-            <div class="modal-buttons">
-                <button class="btn-primary" id="fecharAlunos">Fechar</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Substitua pelas suas credenciais reais do Supabase
-            const supabaseUrl = 'https://rvgcniaowzmsudzliozf.supabase.co';
-            const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2Z2NuaWFvd3ptc3Vkemxpb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjQxNzQsImV4cCI6MjA5MTQwMDE3NH0.uwwKFLuK-XyPoXPrB6_CseRTiD9d-iyMQSPWrFw-l-I';
-            const { createClient } = supabase;
-            const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        // Config Supabase (substitua pelas suas credenciais, igual ao students.js)
+        const supabaseUrl = 'https://your-project.supabase.co';
+        const supabaseKey = 'your-anon-key';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-            const hamburger = document.getElementById('hamburger');
-            const sidebar = document.getElementById('sidebar');
-            const novaTurma = document.getElementById('novaTurma');
-            const search = document.getElementById('search');
-            const nivelFilter = document.getElementById('nivelFilter');
-            const cardsContainer = document.getElementById('cardsContainer');
-            const modalTurma = document.getElementById('modalTurma');
-            const formTurma = document.getElementById('formTurma');
-            const cancelBtn = document.getElementById('cancelBtn');
-            const modalAlunos = document.getElementById('modalAlunos');
-            const fecharAlunos = document.getElementById('fecharAlunos');
-            const listaAlunos = document.getElementById('listaAlunos');
+        let turmas = [];
+        let currentEditId = null;
 
-            let editingId = null;
-            let allTurmas = [];
-            let alunosByTurma = {};
-            let displayTurmas = [];
-
-            hamburger.addEventListener('click', () => sidebar.classList.toggle('open'));
-            novaTurma.addEventListener('click', () => openModalTurma(null));
-            search.addEventListener('input', debounce(filterTurmas, 300));
-            nivelFilter.addEventListener('change', filterTurmas);
-            cancelBtn.addEventListener('click', closeModalTurma);
-            fecharAlunos.addEventListener('click', () => modalAlunos.classList.remove('open'));
-            modalTurma.addEventListener('click', (e) => { if (e.target === modalTurma) closeModalTurma(); });
-            modalAlunos.addEventListener('click', (e) => { if (e.target === modalAlunos) modalAlunos.classList.remove('open'); });
-            formTurma.addEventListener('submit', handleSubmit);
-
-            await loadData();
-
-            async function loadData() {
-                try {
-                    const { data: turmasData, error: turmasError } = await supabase
-                        .from('turmas')
-                        .select('*')
-                        .order('nome', { ascending: true });
-                    if (turmasError) throw turmasError;
-
-                    allTurmas = turmasData || [];
-
-                    const { data: alunosData, error: alunosError } = await supabase
-                        .from('alunos')
-                        .select('id, nome, turma_id')
-                        .order('nome');
-                    if (alunosError) throw alunosError;
-
-                    alunosByTurma = {};
-                    alunosData?.forEach((aluno) => {
-                        if (!alunosByTurma[aluno.turma_id]) {
-                            alunosByTurma[aluno.turma_id] = [];
-                        }
-                        alunosByTurma[aluno.turma_id].push(aluno.nome);
-                    });
-
-                    allTurmas.forEach((turma) => {
-                        turma.alunos_count = alunosByTurma[turma.id]?.length || 0;
-                    });
-
-                    displayTurmas = [...allTurmas];
-                    renderCards();
-                } catch (error) {
-                    console.error('Erro ao carregar dados:', error);
-                    cardsContainer.innerHTML = '<div class="empty">Erro ao carregar turmas. Verifique as credenciais do Supabase e as tabelas.</div>';
-                }
-            }
-
-            function debounce(fn, delay) {
-                let timeout;
-                return (...args) => {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => fn(...args), delay);
-                };
-            }
-
-            function filterTurmas() {
-                const searchTerm = search.value.toLowerCase();
-                const selectedNivel = nivelFilter.value;
-                displayTurmas = allTurmas.filter((turma) =>
-                    turma.nome.toLowerCase().includes(searchTerm) &&
-                    (selectedNivel === 'Todos' || turma.nivel === selectedNivel)
-                );
-                renderCards();
-            }
-
-            function renderCards() {
-                if (displayTurmas.length === 0) {
-                    cardsContainer.innerHTML = '<div class="empty">Nenhuma turma encontrada.</div>';
-                    return;
-                }
-                cardsContainer.innerHTML = displayTurmas.map((turma) => `
-                    <div class="card">
-                        <h3>${escapeHtml(turma.nome)}</h3>
-                        <p><strong>Professor:</strong> ${escapeHtml(turma.professor)}</p>
-                        <p><strong>Nível:</strong> ${escapeHtml(turma.nivel)}</p>
-                        <p><strong>Horário:</strong> ${escapeHtml(turma.horario)}</p>
-                        <p><strong>Alunos:</strong> ${turma.alunos_count}</p>
-                        <div class="card-actions">
-                            <button class="action-btn" title="Ver alunos" data-id="${turma.id}">👁️</button>
-                            <button class="action-btn" title="Editar" data-id="${turma.id}" style="background:#10B981;color:white;">✏️</button>
-                            <button class="action-btn" title="Deletar" data-id="${turma.id}" style="background:#EF4444;color:white;">🗑️</button>
-                        </div>
-                    </div>
-                `).join('');
-
-                // Adicionar event listeners
-                cardsContainer.querySelectorAll('[title="Ver alunos"]').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const turmaId = parseInt(e.target.dataset.id);
-                        viewAlunos(turmaId);
-                    });
-                });
-                cardsContainer.querySelectorAll('[title="Editar"]').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const turmaId = parseInt(e.target.dataset.id);
-                        const turma = allTurmas.find(t => t.id === turmaId);
-                        openModalTurma(turma);
-                    });
-                });
-                cardsContainer.querySelectorAll('[title="Deletar"]').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        if (confirm('Tem certeza que deseja deletar esta turma?')) {
-                            await deleteTurma(parseInt(e.target.dataset.id));
-                        }
-                    });
-                });
-            }
-
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            function openModalTurma(turma) {
-                editingId = turma ? turma.id : null;
-                document.getElementById('modalTitle').textContent = turma ? 'Editar Turma' : 'Nova Turma';
-                document.getElementById('nome').value = turma?.nome || '';
-                document.getElementById('professor').value = turma?.professor || '';
-                document.getElementById('nivelSelect').value = turma?.nivel || '';
-                document.getElementById('horario').value = turma?.horario || '';
-                modalTurma.classList.add('open');
-            }
-
-            function closeModalTurma() {
-                modalTurma.classList.remove('open');
-                formTurma.reset();
-                editingId = null;
-            }
-
-            async function handleSubmit(e) {
-                e.preventDefault();
-                const nome = document.getElementById('nome').value.trim();
-                const professor = document.getElementById('professor').value.trim();
-                const nivel = document.getElementById('nivelSelect').value;
-                const horario = document.getElementById('horario').value.trim();
-                if (!nome || !professor || !nivel || !horario) {
-                    alert('Por favor, preencha todos os campos.');
-                    return;
-                }
-                const turmaData = { nome, professor, nivel, horario };
-                try {
-                    let error;
-                    if (editingId) {
-                        const { error: updateError } = await supabase
-                            .from('turmas')
-                            .update(turmaData)
-                            .eq('id', editingId);
-                        error = updateError;
-                    } else {
-                        const { error: insertError } = await supabase.from('turmas').insert(turmaData);
-                        error = insertError;
-                    }
-                    if (error) throw error;
-                    closeModalTurma();
-                    await loadData();
-                } catch (err) {
-                    console.error('Erro ao salvar:', err);
-                    alert('Erro ao salvar turma: ' + err.message);
-                }
-            }
-
-            async function deleteTurma(id) {
-                try {
-                    const { error } = await supabase.from('turmas').delete().eq('id', id);
-                    if (error) throw error;
-                    await loadData();
-                } catch (err) {
-                    console.error('Erro ao deletar:', err);
-                    alert('Erro ao deletar turma.');
-                }
-            }
-
-            function viewAlunos(turmaId) {
-                const alunos = alunosByTurma[turmaId] || [];
-                const turma = allTurmas.find(t => t.id === turmaId);
-                document.getElementById('alunosTitle').textContent = `Alunos da turma: ${turma ? escapeHtml(turma.nome) : 'Desconhecida'}`;
-                listaAlunos.innerHTML = alunos.length > 0
-                    ? alunos.map(nome => `<li>${escapeHtml(nome)}</li>`).join('')
-                    : '<li>Nenhum aluno matriculado.</li>';
-                modalAlunos.classList.add('open');
-            }
+        // Hamburger toggle sidebar
+        document.getElementById('hamburger').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('open');
         });
+
+        // Nova turma
+        document.getElementById('new-turma').addEventListener('click', () => openModal());
+
+        // Filtros e busca
+        const searchInput = document.getElementById('search');
+        const filterNivel = document.getElementById('filter-nivel');
+        const filterStatus = document.getElementById('filter-status');
+
+        searchInput.addEventListener('input', applyFilters);
+        filterNivel.addEventListener('change', applyFilters);
+        filterStatus.addEventListener('change', applyFilters);
+
+        // Modal functions
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const turmaForm = document.getElementById('turma-form');
+        const cancelarBtn = document.getElementById('cancelar');
+
+        function openModal(turma = null) {
+            if (turma) {
+                currentEditId = turma.id;
+                document.getElementById('nome').value = turma.nome || '';
+                document.getElementById('professor').value = turma.professor || '';
+                document.getElementById('nivel').value = turma.nivel || '';
+                document.getElementById('horario').value = turma.horario || '';
+                document.getElementById('data-inicio').value = turma.data_inicio ? turma.data_inicio.split('T')[0] : '';
+                document.getElementById('status').value = turma.status || 'ativo';
+                document.getElementById('observacoes').value = turma.observacoes || '';
+                modalTitle.textContent = 'Editar Turma';
+            } else {
+                currentEditId = null;
+                turmaForm.reset();
+                modalTitle.textContent = 'Nova Turma';
+                document.getElementById('status').value = 'ativo';
+            }
+            modalOverlay.classList.add('active');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            currentEditId = null;
+        }
+
+        cancelarBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        // Submit form
+        turmaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                nome: document.getElementById('nome').value,
+                professor: document.getElementById('professor').value,
+                nivel: document.getElementById('nivel').value,
+                horario: document.getElementById('horario').value,
+                data_inicio: document.getElementById('data-inicio').value,
+                status: document.getElementById('status').value,
+                observacoes: document.getElementById('observacoes').value
+            };
+
+            let error;
+            if (currentEditId) {
+                ({ error } = await supabaseClient.from('turmas').update(data).eq('id', currentEditId));
+            } else {
+                ({ error } = await supabaseClient.from('turmas').insert([data]));
+            }
+            if (error) {
+                console.error('Erro:', error);
+                return;
+            }
+            closeModal();
+            loadTurmas();
+        });
+
+        // Filtrar turmas
+        function getFilteredTurmas() {
+            let filtered = turmas;
+            const search = searchInput.value.toLowerCase();
+            if (search) {
+                filtered = filtered.filter(t =>
+                    t.nome.toLowerCase().includes(search) ||
+                    t.professor.toLowerCase().includes(search)
+                );
+            }
+            const nivel = filterNivel.value;
+            if (nivel) filtered = filtered.filter(t => t.nivel === nivel);
+            const status = filterStatus.value;
+            if (status) filtered = filtered.filter(t => t.status === status);
+            return filtered;
+        }
+
+        function applyFilters() {
+            const filtered = getFilteredTurmas();
+            renderTurmas(filtered);
+        }
+
+        // Render tabela
+        function renderTurmas(filteredTurmas) {
+            const tbody = document.querySelector('#turmas-table tbody');
+            tbody.innerHTML = '';
+            filteredTurmas.forEach(turma => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${turma.nome}</td>
+                    <td>${turma.professor}</td>
+                    <td>${turma.nivel}</td>
+                    <td>${turma.horario}</td>
+                    <td><span class="badge status-${turma.status}">${turma.status}</span></td>
+                    <td>${turma.quantidade_alunos || 0}</td>
+                    <td>
+                        <button class="btn btn-small" onclick="verAlunos('${turma.id}')">Ver Alunos</button>
+                        <button class="btn btn-small btn-edit" onclick="editarTurma('${turma.id}')">Editar</button>
+                        <button class="btn btn-small btn-delete" onclick="excluirTurma('${turma.id}')">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('total-turmas').textContent = turmas.length;
+            const ativas = turmas.filter(t => t.status === 'ativo').length;
+            document.getElementById('turmas-ativas').textContent = ativas;
+            const totalAlunos = turmas.reduce((sum, t) => sum + (t.quantidade_alunos || 0), 0);
+            document.getElementById('total-alunos').textContent = totalAlunos;
+        }
+
+        // Load turmas com contagem dinâmica de alunos
+        async function loadTurmas() {
+            const { data: turmasData, error: turmasError } = await supabaseClient.from('turmas').select('*');
+            if (turmasError) {
+                console.error('Erro ao carregar turmas:', turmasError);
+                return;
+            }
+
+            const { data: alunosData, error: alunosError } = await supabaseClient.from('alunos').select('turma_id');
+            if (alunosError) {
+                console.error('Erro ao carregar alunos:', alunosError);
+            }
+
+            const counts = {};
+            if (alunosData) {
+                alunosData.forEach(aluno => {
+                    counts[aluno.turma_id] = (counts[aluno.turma_id] || 0) + 1;
+                });
+            }
+
+            turmas = turmasData.map(turma => ({
+                ...turma,
+                quantidade_alunos: counts[turma.id] || 0
+            }));
+
+            updateStats();
+            applyFilters();
+        }
+
+        // Ações globais
+        window.excluirTurma = async (id) => {
+            if (confirm('Tem certeza que deseja excluir esta turma?')) {
+                const { error } = await supabaseClient.from('turmas').delete().eq('id', id);
+                if (!error) loadTurmas();
+            }
+        };
+
+        window.editarTurma = (id) => {
+            const turma = turmas.find(t => t.id === id);
+            if (turma) openModal(turma);
+        };
+
+        window.verAlunos = (id) => {
+            window.location.href = `alunos.html?turma_id=${id}`;
+        };
+
+        // Inicializar
+        loadTurmas();
     </script>
 </body>
 </html>
