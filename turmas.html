@@ -1,163 +1,101 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turmas</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Turmas — Flowence Grid Method™</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Sidebar idêntica ao alunos.html: logo, menu com Turmas active, footer -->
-    <nav class="sidebar" id="sidebar">
-        <div class="logo">
-            <!-- Logo da instituição -->
-            <img src="logo.png" alt="Logo da Escola">
-        </div>
-        <ul class="menu">
-            <li><a href="home.html">🏠 Home</a></li>
-            <li><a href="alunos.html">👥 Alunos</a></li>
-            <li><a href="turmas.html" class="active">📚 Turmas</a></li>
-            <!-- Outros itens do menu conforme alunos.html -->
-        </ul>
-        <div class="sidebar-footer">
-            <!-- Footer da sidebar -->
-            <p>&copy; 2024 Escola. Todos os direitos reservados.</p>
-        </div>
-    </nav>
+<div class="app">
 
-    <!-- Topbar: hamburger, título "▣ Turmas", botão "+ Nova Turma" -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="logo">
+        <div class="logo-title"><span>Flowence</span> <span>Grid</span></div>
+        <div class="logo-subtitle">METHOD™ MANAGEMENT</div>
+      </div>
+      <nav>
+        <div class="menu-section">
+          <div class="menu-label">PRINCIPAL</div>
+          <div class="menu-item" data-href="index.html"><span class="menu-icon">▦</span>Dashboard</div>
+          <div class="menu-item " data-href="alunos.html"><span class="menu-icon">✉</span>Alunos</div>
+          <div class="menu-item active" data-href="turmas.html"><span class="menu-icon">▣</span>Turmas</div>
+        </div>
+        <div class="menu-section">
+          <div class="menu-label">PLANEJAMENTO</div>
+          <div class="menu-item" data-href="niveis.html"><span class="menu-icon">⌁</span>Níveis CEFR</div>
+          <div class="menu-item " data-href="temas.html"><span class="menu-icon">◎</span>Temas Mensais</div>
+          <div class="menu-item " data-href="atribuicoes.html"><span class="menu-icon">▤</span>Atribuições</div>
+          <div class="menu-item " data-href="aulas.html"><span class="menu-icon">◫</span>Aulas</div>
+        </div>
+        <div class="menu-section">
+          <div class="menu-label">RECURSOS</div>
+          <div class="menu-item " data-href="materiais.html"><span class="menu-icon">↗</span>Materiais</div>
+          <div class="menu-item " data-href="missoes.html"><span class="menu-icon">🏆</span>Missões</div>
+          <div class="menu-item" data-href="metodo.html"><span class="menu-icon">♡</span>O Método</div>
+        </div>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <div class="avatar">N</div>
+      <div class="footer-text">
+        <strong>Grid Method™ v1.0</strong>
+        <small>Em construção</small>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
     <header class="topbar">
-        <button class="hamburger" id="hamburger-btn">
-            ☰
-        </button>
-        <h1>▣ Turmas</h1>
-        <button class="btn-primary" id="nova-turma-btn">+ Nova Turma</button>
+      <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+      <div class="page-title"><span>▣</span> Turmas</div>
     </header>
 
-    <!-- Conteúdo principal -->
-    <main class="main">
-        <!-- Toolbar: search-box (buscar por nome/professor) + filter-group (nível, status) -->
-        <div class="toolbar">
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Buscar por nome ou professor...">
-            </div>
-            <div class="filter-group">
-                <select id="nivel-filter">
-                    <option value="">Todos os Níveis</option>
-                    <option value="fundamental">Fundamental</option>
-                    <option value="medio">Médio</option>
-                    <option value="superior">Superior</option>
-                </select>
-                <select id="status-filter">
-                    <option value="">Todos os Status</option>
-                    <option value="ativa">Ativa</option>
-                    <option value="inativa">Inativa</option>
-                </select>
-            </div>
+    <section class="content">
+
+      <div class="placeholder-card">
+        <div class="placeholder-icon">▣</div>
+        <h1 class="placeholder-title">Turmas</h1>
+        <p class="placeholder-text">Esta seção está em construção. <br>Aqui você gerencia as turmas: cria, edita, remove e vê os alunos de cada uma.</p>
+        <div class="placeholder-actions">
+          <a class="btn btn-primary" href="index.html">← Voltar ao Dashboard</a>
         </div>
-
-        <!-- Quick-stats: Total Turmas, Turmas Ativas, Total Alunos -->
-        <div class="quick-stats">
-            <div class="stat">
-                <span class="stat-number" id="total-turmas">0</span>
-                <span class="stat-label">Total Turmas</span>
-            </div>
-            <div class="stat">
-                <span class="stat-number" id="turmas-ativas">0</span>
-                <span class="stat-label">Turmas Ativas</span>
-            </div>
-            <div class="stat">
-                <span class="stat-number" id="total-alunos">0</span>
-                <span class="stat-label">Total Alunos</span>
-            </div>
+        <div class="placeholder-soon">
+          <strong>Em breve:</strong>
+          <ul class="bullet-list">
+            <li>Listar turmas ativas e arquivadas</li><li>Criar/editar turma (nome, nível, horário, professor)</li><li>Adicionar alunos à turma</li><li>Ver aulas dadas e próximas aulas</li>
+          </ul>
         </div>
+      </div>
 
-        <!-- Painel da tabela de turmas -->
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Lista de Turmas</h2>
-            </div>
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Professor</th>
-                            <th>Nível</th>
-                            <th>Horário</th>
-                            <th>Data Início</th>
-                            <th>Status</th>
-                            <th>Total Alunos</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="turmas-table-body">
-                        <!-- Linhas populadas dinamicamente pelo turmas.js -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
+    </section>
 
-    <!-- Modal para criar/editar turma: campos nome, professor, nível, horário, data_inicio, status, observações -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal">
-            <h2 id="modal-title">Nova Turma</h2>
-            <form class="form-grid" id="turma-form">
-                <input type="hidden" id="turma-id">
-                <div>
-                    <label for="nome">Nome da Turma *</label>
-                    <input type="text" id="nome" required>
-                </div>
-                <div>
-                    <label for="professor">Professor *</label>
-                    <input type="text" id="professor" required>
-                </div>
-                <div>
-                    <label for="nivel">Nível *</label>
-                    <select id="nivel" required>
-                        <option value="">Selecione</option>
-                        <option value="fundamental">Fundamental</option>
-                        <option value="medio">Médio</option>
-                        <option value="superior">Superior</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="horario">Horário *</label>
-                    <input type="text" id="horario" placeholder="Ex: Seg/Sex 14h-16h" required>
-                </div>
-                <div>
-                    <label for="data_inicio">Data Início *</label>
-                    <input type="date" id="data_inicio" required>
-                </div>
-                <div>
-                    <label for="status">Status *</label>
-                    <select id="status" required>
-                        <option value="ativa">Ativa</option>
-                        <option value="inativa">Inativa</option>
-                    </select>
-                </div>
-                <div class="full-width">
-                    <label for="observacoes">Observações</label>
-                    <textarea id="observacoes" rows="4"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="button" id="cancelar-btn">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar Turma</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <footer class="footer">Flowence Grid Method™</footer>
+  </main>
 
-    <!-- Scripts: referenciar supabase-config.js e turmas.js (sem credenciais hardcoded) -->
-    <script src="supabase-config.js"></script>
-    <script src="turmas.js"></script>
+</div>
 
-    <!-- Script inline para toggle sidebar (comum em dashboards) -->
-    <script>
-        document.getElementById('hamburger-btn').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
-    </script>
+<script>
+(function() {
+  document.querySelectorAll('.menu-item[data-href]').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => { window.location.href = el.dataset.href; });
+  });
+  const h = document.getElementById('hamburger');
+  const s = document.getElementById('sidebar');
+  const b = document.getElementById('sidebar-backdrop');
+  if (h && s && b) {
+    const t = () => { s.classList.toggle('open'); b.classList.toggle('show'); };
+    h.addEventListener('click', t);
+    b.addEventListener('click', t);
+  }
+})();
+</script>
 </body>
 </html>
