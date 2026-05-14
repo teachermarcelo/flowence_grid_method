@@ -1,262 +1,401 @@
 (function() {
   'use strict';
 
-  // Elementos DOM
-  const DOM = {
-    searchInput: document.getElementById('search-turmas'),
-    filterNivel: document.getElementById('filter-nivel'),
-    filterStatus: document.getElementById('filter-status'),
-    table: document.getElementById('turmas-table'),
-    tableBody: document.querySelector('#turmas-table tbody'),
-    btnCriar: document.getElementById('btn-criar-turma'),
-    modal: document.getElementById('modal-turma'),
-    modalTitle: document.getElementById('modal-title'),
-    formTurma: document.getElementById('form-turma'),
-    btnCancelar: document.getElementById('btn-cancelar'),
-    totalTurmas: document.getElementById('total-turmas'),
-    turmasAtivas: document.getElementById('turmas-ativas'),
-    totalAlunos: document.getElementById('total-alunos'),
-    loading: document.querySelector('.loading')
-  };
-
-  // Dados globais
-  let sb;
-  let turmas = [];
-  let alunosCount = {};
-  let editingId = null;
-
-  // Função auxiliar para escapar HTML
-  function escapeHtml(text) {
-    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-    return text.replace(/[&<>\"']/g, m => map[m]);
+  // Verificação de Supabase
+  if (!window.SUPABASE_CONFIG) {
+    document.addEventListener('DOMContentLoaded', () => {
+      showToast('Configuração do Supabase não encontrada.', 'error');
+    });
+    return;
   }
 
-  // Função para formatar data
-  function formatDate(isoString) {
-    return new Date(isoString).toLocaleDateString('pt-BR');
+  // Inicialização do cliente Supabase
+  const { createClient } = supabase;
+  const supabaseClient = createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anon_key);
+
+  // Funções auxiliares
+  const $ = document.querySelector.bind(document);
+  const $$ = document.querySelectorAll.bind(document);
+
+  function esc(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   }
 
-  // Função debounce para buscas
-  function debounce(fn, delay) {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn(...args), delay);
-    };
-  }
-
-  // Toast simples
-  function createToast(message, type = 'success') {
+  function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
+    setTimeout(() => toast.classList.add('toast-show'), 100);
+    setTimeout(() => {
+      toast.classList.remove('toast-show');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
   }
 
-  // Mostra/esconde loading/shimmer
-  function showLoading(show) {
-    if (DOM.loading) {
-      DOM.loading.style.display = show ? 'block' : 'none';
+  // Estado em memória
+  let turmas = [];
+  let alunos = [];
+
+  // Funções de utilidade
+  function normalizeStatus(status) {
+    const lower = (status || '').toLowerCase().trim();
+    if (lower === 'ativo' || lower === 'active') return 'ativo';
+    return 'inativo';
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString('pt-BR');
+  }
+
+  function levelBadge(nivel) {
+    if (!nivel) return '';
+    const colors = {
+      'A1': 'a1',
+      'A2': 'a2',
+      'B1': 'b1',
+      'B2': 'b2',
+      'C1': 'c1'
+    };
+    const colorClass = colors[nivel.toUpperCase()] || '';
+    return `<span class="badge ${colorClass}">${nivel}</span>`;
+  }
+
+  function statusPill(status) {
+    const norm = normalizeStatus(status);
+    const isActive = norm === 'ativo';
+    const pillClass = `pill ${isActive ? 'pill-green' : 'pill-gray'}`;
+    const text = isActive ? 'Ativo' : 'Inativo';
+    return `<span class="${pillClass}">${text}</span>`;
+  }
+
+  function debounce(fn, ms) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), ms);
+    };
+  }
+
+  // 6. setupNav()
+  function setupNav() {
+    const toggle = $('.sidebar-toggle');
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        document.body.classList.toggle('sidebar-collapsed');
+      });
     }
-    DOM.table.classList.toggle('loading', show);
   }
 
-  // Carrega contagem de alunos por turma
-  async function loadAlunosCount() {
-    const { data, error } = await sb.from('alunos').select('turma_id');
-    if (error) {
-      console.error('Erro ao carregar alunos:', error);
+  // 7. loadAll()
+  async function loadAll() {
+    try {
+      showToast('Carregando...', 'info');
+      const { data: classData, error: classError } = await supabaseClient
+        .from('flowence_class')
+        .select('*')
+        .order('nome', { ascending: true });
+      if (classError) throw classError;
+      turmas = classData || [];
+
+      const { data: studentData, error: studentError } = await supabaseClient
+        .from('flowence_student')
+        .select('id, class_id');
+      if (studentError) throw studentError;
+      alunos = studentData || [];
+
+      renderQuickStats();
+      renderTable();
+    } catch (error) {
+      console.error('Erro ao carregar:', error);
+      showToast(`Erro ao carregar: ${error.message}`, 'error');
+      renderTableError('Falha ao carregar turmas.');
+    }
+  }
+
+  // 8. getFiltered()
+  function getFiltered() {
+    const search = ($('#search-input')?.value || '').toLowerCase().trim();
+    const levelFilter = ($('#filter-level')?.value || '');
+    const statusFilter = ($('#filter-status')?.value || '');
+    return turmas.filter(turma => {
+      const matchesSearch = !search ||
+        (turma.nome || '').toLowerCase().includes(search) ||
+        (turma.professor || '').toLowerCase().includes(search);
+      const matchesLevel = !levelFilter || turma.nivel === levelFilter;
+      const matchesStatus = !statusFilter || normalizeStatus(turma.status) === statusFilter;
+      return matchesSearch && matchesLevel && matchesStatus;
+    });
+  }
+
+  // 9. renderQuickStats()
+  function renderQuickStats() {
+    const filtered = getFiltered();
+    const total = turmas.length;
+    const activeCount = turmas.filter(t => normalizeStatus(t.status) === 'ativo').length;
+    const shown = filtered.length;
+
+    const qsTotal = $('#qs-total .qstat-value');
+    if (qsTotal) qsTotal.textContent = total.toLocaleString();
+
+    const qsActive = $('#qs-active .qstat-value');
+    if (qsActive) qsActive.textContent = activeCount.toLocaleString();
+
+    const qsShown = $('#qs-shown .qstat-value');
+    if (qsShown) qsShown.textContent = shown.toLocaleString();
+  }
+
+  // Aux renderTableError
+  function renderTableError(msg) {
+    const container = $('#turmas-table');
+    if (container) {
+      container.innerHTML = `<div class="empty empty-error">${esc(msg)}</div>`;
+    }
+  }
+
+  // 10. renderTable()
+  function renderTable() {
+    const container = $('#turmas-table');
+    if (!container) return;
+
+    const filtered = getFiltered();
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="empty">Nenhuma turma encontrada</div>';
       return;
     }
-    alunosCount = data.reduce((acc, { turma_id }) => {
-      acc[turma_id] = (acc[turma_id] || 0) + 1;
-      return acc;
-    }, {});
+
+    let html = '';
+    filtered.forEach(turma => {
+      const count = alunos.filter(s => s.class_id === turma.id).length;
+      const avatar = (turma.nome || '').charAt(0).toUpperCase();
+      const nomeEsc = esc(turma.nome || '');
+      const professorEsc = esc(turma.professor || '');
+      const horarioEsc = esc(turma.horario || '');
+      const dataInicio = formatDate(turma.data_inicio);
+      const levelB = levelBadge(turma.nivel);
+      const statusP = statusPill(turma.status);
+      html += `
+        <div class="st-row">
+          <div class="st-avatar">${avatar}</div>
+          <div class="st-name">${nomeEsc}</div>
+          <div class="st-meta">${professorEsc}</div>
+          <div class="st-meta">${levelB}</div>
+          <div class="st-meta">${horarioEsc}</div>
+          <div class="st-meta">${dataInicio}</div>
+          <div class="st-meta">${statusP}</div>
+          <div class="st-meta">${count}</div>
+          <div class="st-actions">
+            <button class="btn-icon btn-view" data-id="${turma.id}" title="Ver">👁</button>
+            <button class="btn-icon btn-edit" data-id="${turma.id}" title="Editar">✏️</button>
+            <button class="btn-icon btn-del" data-id="${turma.id}" title="Deletar">🗑</button>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
   }
 
-  // Carrega lista de turmas
-  async function loadTurmas() {
-    showLoading(true);
-    try {
-      const { data, error } = await sb.from('turmas').select('*').order('data_inicio', { ascending: false });
-      if (error) throw error;
-      turmas = data;
-      await loadAlunosCount();
-      updateQuickStats();
-      render();
-    } catch (error) {
-      createToast('Erro ao carregar turmas: ' + error.message, 'error');
-    } finally {
-      showLoading(false);
-    }
-  }
+  // 11. openModal(id = null, readonly = false)
+  function openModal(id = null, readonly = false) {
+    const modal = $('.modal-overlay');
+    if (!modal) return;
 
-  // Filtra turmas baseado em busca e filtros
-  function filterTurmas() {
-    const term = DOM.searchInput.value.toLowerCase();
-    const nivel = DOM.filterNivel.value;
-    const status = DOM.filterStatus.value;
-    return turmas.filter(turma =>
-      (turma.nome.toLowerCase().includes(term) || turma.professor?.toLowerCase().includes(term)) &&
-      (nivel === '' || turma.nivel === nivel) &&
-      (status === '' || turma.status === status)
-    );
-  }
+    const titleEl = $('.modal-title');
+    if (!titleEl) return;
 
-  // Renderiza tabela
-  function renderTable(filtered) {
-    DOM.tableBody.innerHTML = filtered.length
-      ? filtered.map(t => `
-        <tr>
-          <td>${escapeHtml(t.nome)}</td>
-          <td>${escapeHtml(t.professor)}</td>
-          <td>${t.nivel}</td>
-          <td>${t.horario}</td>
-          <td>${formatDate(t.data_inicio)}</td>
-          <td>${t.status}</td>
-          <td>${alunosCount[t.id] || 0}</td>
-          <td>${escapeHtml(t.observacoes || '')}</td>
-          <td>
-            <button class="btn-edit" data-id="${t.id}">Editar</button>
-            <button class="btn-delete" data-id="${t.id}">Deletar</button>
-          </td>
-        </tr>
-      `).join('')
-      : '<tr><td colspan="9">Nenhuma turma encontrada</td></tr>';
-  }
-
-  // Atualiza quick-stats
-  function updateQuickStats() {
-    const total = turmas.length;
-    const ativas = turmas.filter(t => t.status === 'ativa').length;
-    const totalAlu = Object.values(alunosCount).reduce((acc, v) => acc + (v || 0), 0);
-    if (DOM.totalTurmas) DOM.totalTurmas.textContent = total;
-    if (DOM.turmasAtivas) DOM.turmasAtivas.textContent = ativas;
-    if (DOM.totalAlunos) DOM.totalAlunos.textContent = totalAlu;
-  }
-
-  // Renderiza tudo
-  function render() {
-    const filtered = filterTurmas();
-    renderTable(filtered);
-  }
-
-  // Abre modal criar/editar
-  function openModal(id = null) {
-    editingId = id;
-    DOM.modalTitle.textContent = id ? 'Editar Turma' : 'Nova Turma';
-    const getInput = name => DOM.formTurma.querySelector(`[name="${name}"]`);
+    const fieldIds = ['f-id', 'f-nome', 'f-professor', 'f-nivel', 'f-horario', 'f-data_inicio', 'f-status', 'f-observacoes'];
+    const fields = fieldIds.map(fid => $(`#${fid}`)).filter(Boolean);
 
     if (id) {
       const turma = turmas.find(t => t.id === id);
       if (!turma) {
-        createToast('Turma não encontrada', 'error');
+        showToast('Turma não encontrada.', 'error');
         return;
       }
-      ['nome', 'professor', 'horario', 'observacoes'].forEach(field => {
-        getInput(field).value = turma[field] || '';
-      });
-      getInput('nivel').value = turma.nivel || '';
-      getInput('status').value = turma.status || 'ativa';
-      getInput('data_inicio').value = turma.data_inicio ? new Date(turma.data_inicio).toISOString().slice(0, 10) : '';
+      fields[0].value = turma.id;
+      fields[1].value = turma.nome || '';
+      fields[2].value = turma.professor || '';
+      fields[3].value = turma.nivel || '';
+      fields[4].value = turma.horario || '';
+      fields[5].value = turma.data_inicio || '';
+      fields[6].value = normalizeStatus(turma.status);
+      fields[7].value = turma.observacoes || '';
+      titleEl.textContent = readonly ? 'Visualizar Turma' : 'Editar Turma';
     } else {
-      DOM.formTurma.reset();
-      getInput('status').value = 'ativa';
+      fields.forEach(f => f.value = '');
+      fields[6].value = 'ativo'; // default
+      titleEl.textContent = 'Nova Turma';
     }
-    DOM.modal.classList.add('active');
+
+    fields.slice(1).forEach(f => f.disabled = readonly);
+
+    const btnSave = $('#btn-save');
+    const btnCancel = $('#btn-cancel');
+    if (readonly) {
+      if (btnSave) btnSave.style.display = 'none';
+      if (btnCancel) btnCancel.textContent = 'Fechar';
+    } else {
+      if (btnSave) btnSave.style.display = '';
+      if (btnCancel) btnCancel.textContent = 'Cancelar';
+    }
+
+    modal.classList.add('show');
   }
 
-  // Fecha modal
+  // 12. closeModal()
   function closeModal() {
-    DOM.modal.classList.remove('active');
-    editingId = null;
-    DOM.formTurma.reset();
+    const modal = $('.modal-overlay');
+    if (modal) modal.classList.remove('show');
   }
 
-  // Deleta turma com confirmação
-  async function deleteTurma(id) {
-    const turma = turmas.find(t => t.id === id);
-    if (!window.confirm(`Confirma a exclusão da turma '${turma?.nome || id}'?`)) return;
-    try {
-      const { error } = await sb.from('turmas').delete().eq('id', id);
-      if (error) throw error;
-      createToast('Turma deletada com sucesso!');
-      loadTurmas();
-    } catch (error) {
-      createToast('Erro ao deletar: ' + error.message, 'error');
-    }
-  }
+  // 13. saveTurma(e)
+  async function saveTurma(e) {
+    if (e) e.preventDefault();
 
-  // Manipula submit do form
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-    Object.keys(data).forEach(k => data[k] = (data[k] || '').trim());
-
-    const required = ['nome', 'professor', 'nivel', 'horario', 'data_inicio'];
-    for (let field of required) {
-      if (!data[field]) {
-        createToast(`Campo ${field.replace('_', ' ')} é obrigatório!`, 'error');
-        return;
-      }
-    }
-
-    try {
-      if (editingId) {
-        const { error } = await sb.from('turmas').update(data).eq('id', editingId);
-        if (error) throw error;
-        createToast('Turma atualizada!');
-      } else {
-        const { error } = await sb.from('turmas').insert([data]);
-        if (error) throw error;
-        createToast('Turma criada!');
-      }
-      closeModal();
-      loadTurmas();
-    } catch (error) {
-      createToast('Erro ao salvar: ' + error.message, 'error');
-    }
-  }
-
-  // Manipula cliques na tabela
-  function handleTableClick(e) {
-    if (e.target.matches('.btn-edit')) {
-      openModal(parseInt(e.target.dataset.id));
-    } else if (e.target.matches('.btn-delete')) {
-      deleteTurma(parseInt(e.target.dataset.id));
-    }
-  }
-
-  // Inicialização
-  async function init() {
-    sb = window.sb;
-    if (!sb) {
-      createToast('Supabase não carregado!', 'error');
+    const nomeField = $('#f-nome');
+    const nome = nomeField ? nomeField.value.trim() : '';
+    if (!nome) {
+      showToast('O nome da turma é obrigatório.', 'error');
+      nomeField?.focus();
       return;
     }
 
-    // Listeners
-    if (DOM.searchInput) DOM.searchInput.addEventListener('input', debounce(render, 300));
-    if (DOM.filterNivel) DOM.filterNivel.addEventListener('change', render);
-    if (DOM.filterStatus) DOM.filterStatus.addEventListener('change', render);
-    if (DOM.btnCriar) DOM.btnCriar.addEventListener('click', () => openModal());
-    if (DOM.btnCancelar) DOM.btnCancelar.addEventListener('click', closeModal);
-    if (DOM.modal) DOM.modal.addEventListener('click', e => {
-      if (e.target === DOM.modal) closeModal();
+    const data = {
+      nome,
+      professor: ($('#f-professor')?.value || '').trim(),
+      nivel: $('#f-nivel')?.value || '',
+      horario: ($('#f-horario')?.value || '').trim(),
+      data_inicio: $('#f-data_inicio')?.value || null,
+      status: $('#f-status')?.value || 'ativo',
+      observacoes: ($('#f-observacoes')?.value || '').trim()
+    };
+
+    try {
+      const id = $('#f-id')?.value;
+      if (id) {
+        const { error } = await supabaseClient
+          .from('flowence_class')
+          .update(data)
+          .eq('id', id);
+        if (error) throw error;
+        showToast('Turma atualizada com sucesso!', 'success');
+      } else {
+        const { error } = await supabaseClient
+          .from('flowence_class')
+          .insert([data]);
+        if (error) throw error;
+        showToast('Turma criada com sucesso!', 'success');
+      }
+      closeModal();
+      loadAll();
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+      showToast(`Erro ao salvar: ${error.message}`, 'error');
+    }
+  }
+
+  // 14. deleteTurma(id)
+  async function deleteTurma(id) {
+    const turma = turmas.find(t => t.id === id);
+    if (!turma) return;
+    if (!confirm(`Deseja realmente deletar a turma \"${esc(turma.nome)}\" ?`)) return;
+
+    try {
+      const { error } = await supabaseClient
+        .from('flowence_class')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      showToast('Turma deletada com sucesso!', 'success');
+      loadAll();
+    } catch (error) {
+      showToast(`Erro ao deletar: ${error.message}`, 'error');
+    }
+  }
+
+  // 15. setupEvents()
+  function setupEvents() {
+    const modal = $('.modal-overlay');
+    const btnNew = $('#btn-new-turma');
+    const btnSave = $('#btn-save');
+    const btnCancel = $('#btn-cancel');
+    const modalClose = $('#modal-close');
+
+    if (btnNew) btnNew.addEventListener('click', () => openModal());
+    if (btnSave) btnSave.addEventListener('click', saveTurma);
+    if (btnCancel) btnCancel.addEventListener('click', closeModal);
+    if (modalClose) modalClose.addEventListener('click', closeModal);
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
     });
-    if (DOM.formTurma) DOM.formTurma.addEventListener('submit', handleSubmit);
-    if (DOM.table) DOM.table.addEventListener('click', handleTableClick);
 
-    await loadTurmas();
+    // Filtros
+    const searchInput = $('#search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', debounce(() => {
+        renderQuickStats();
+        renderTable();
+      }, 300));
+    }
+
+    const filterLevel = $('#filter-level');
+    if (filterLevel) {
+      filterLevel.addEventListener('change', () => {
+        renderQuickStats();
+        renderTable();
+      });
+    }
+
+    const filterStatus = $('#filter-status');
+    if (filterStatus) {
+      filterStatus.addEventListener('change', () => {
+        renderQuickStats();
+        renderTable();
+      });
+    }
+
+    // Ações da tabela (delegation)
+    document.addEventListener('click', (e) => {
+      const viewBtn = e.target.closest('.btn-view');
+      if (viewBtn) {
+        const id = viewBtn.dataset.id;
+        openModal(id, true);
+        return;
+      }
+
+      const editBtn = e.target.closest('.btn-edit');
+      if (editBtn) {
+        const id = editBtn.dataset.id;
+        openModal(id, false);
+        return;
+      }
+
+      const delBtn = e.target.closest('.btn-del');
+      if (delBtn) {
+        const id = delBtn.dataset.id;
+        deleteTurma(id);
+        return;
+      }
+    });
   }
 
-  // Inicia quando DOM pronto
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  // 16. DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', () => {
+    setupNav();
+    setupEvents();
+    loadAll();
+  });
 
 })();
