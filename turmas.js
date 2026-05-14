@@ -140,13 +140,13 @@
     const activeCount = turmas.filter(t => normalizeStatus(t.status) === 'ativo').length;
     const shown = filtered.length;
 
-    const qsTotal = $('#qs-total .qstat-value');
+    const qsTotal = $('#qs-total-value');
     if (qsTotal) qsTotal.textContent = total.toLocaleString();
 
-    const qsActive = $('#qs-active .qstat-value');
+    const qsActive = $('#qs-active-value');
     if (qsActive) qsActive.textContent = activeCount.toLocaleString();
 
-    const qsShown = $('#qs-shown .qstat-value');
+    const qsShown = $('#qs-shown-value');
     if (qsShown) qsShown.textContent = shown.toLocaleString();
   }
 
@@ -169,7 +169,7 @@
       return;
     }
 
-    let html = '<div class="st-table">';
+    let html = '';
     filtered.forEach(turma => {
       const count = alunos.filter(s => s.class_id === turma.id).length;
       const avatar = (turma.nome || '').charAt(0).toUpperCase();
@@ -179,25 +179,27 @@
       const dataInicio = formatDate(turma.data_inicio);
       const levelB = levelBadge(turma.nivel);
       const statusP = statusPill(turma.status);
+      
       html += `
         <div class="st-row">
-          <div class="st-avatar">${avatar}</div>
-          <div class="st-name">${nomeEsc}</div>
-          <div class="st-meta">${professorEsc}</div>
-          <div class="st-meta">${levelB}</div>
-          <div class="st-meta">${horarioEsc}</div>
-          <div class="st-meta">${dataInicio}</div>
-          <div class="st-meta">${statusP}</div>
-          <div class="st-meta">${count}</div>
+          <div class="st-turma">
+            <div class="st-avatar">${avatar}</div>
+            <div class="st-nome">${nomeEsc}</div>
+          </div>
+          <div class="st-professor">${professorEsc}</div>
+          <div class="st-nivel">${levelB}</div>
+          <div class="st-horario">${horarioEsc}</div>
+          <div class="st-data">${dataInicio}</div>
+          <div class="st-status">${statusP}</div>
+          <div class="st-alunos">${count}</div>
           <div class="st-actions">
-            <button class="btn-icon btn-view" data-id="${turma.id}" title="Ver">👁</button>
+            <button class="btn-icon btn-view" data-id="${turma.id}" title="Ver">👁️</button>
             <button class="btn-icon btn-edit" data-id="${turma.id}" title="Editar">✏️</button>
-            <button class="btn-icon btn-del" data-id="${turma.id}" title="Deletar">🗑</button>
+            <button class="btn-icon btn-del" data-id="${turma.id}" title="Deletar">🗑️</button>
           </div>
         </div>
       `;
     });
-    html += '</div>';
     container.innerHTML = html;
   }
 
