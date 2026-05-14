@@ -1,380 +1,555 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Turmas - Flowence Grid</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turmas - Flowence</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --primary-dark: #7C3AED;
+            --primary-light: #A855F7;
+            --bg: #F8FAFC;
+            --surface: #FFFFFF;
+            --text: #0F172A;
+            --text-muted: #64748B;
+            --border: #E2E8F0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 16rem;
+            background: var(--surface);
+            box-shadow: var(--shadow-lg);
+            z-index: 50;
+            transform: translateX(0);
+            transition: transform 0.3s ease-in-out;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        header {
+            position: fixed;
+            top: 0;
+            left: 16rem;
+            right: 0;
+            height: 4rem;
+            background: var(--surface);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            z-index: 40;
+        }
+        @media (max-width: 768px) {
+            header {
+                left: 0;
+            }
+        }
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background 0.2s;
+        }
+        .hamburger:hover {
+            background: var(--border);
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--text);
+        }
+        main {
+            margin-left: 16rem;
+            margin-top: 4rem;
+            padding: 2rem;
+        }
+        @media (max-width: 768px) {
+            main {
+                margin-left: 0;
+            }
+        }
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .filters input,
+        .filters select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+            min-width: 200px;
+        }
+        .filters input:focus,
+        .filters select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgb(139 92 246 / 0.1);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+        .card h3 {
+            margin: 0 0 1rem;
+            font-size: 1.25rem;
+            color: var(--text);
+        }
+        .card p {
+            margin: 0.5rem 0;
+            color: var(--text-muted);
+        }
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .action-btn {
+            background: #F1F5F9;
+            border: none;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: scale(1.1);
+        }
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 1.25rem;
+            max-width: 28rem;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-20px) scale(0.95);
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        @keyframes slideIn {
+            to {
+                transform: translateY(0) scale(1);
+            }
+        }
+        .modal form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .modal input,
+        .modal select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        .modal input:focus,
+        .modal select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgb(139 92 246 / 0.1);
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .btn-secondary {
+            background: #F1F5F9;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: #E2E8F0;
+        }
+        #listaAlunos {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+        #listaAlunos li {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        #listaAlunos li:last-child {
+            border-bottom: none;
+        }
+        .empty {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 2rem;
+        }
+    </style>
 </head>
 <body>
-  <div class="app">
-    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
     <aside class="sidebar" id="sidebar">
-      <div>
-        <div class="logo">
-          <div class="logo-title"><span>Flowence</span> <span>Grid</span></div>
-          <div class="logo-subtitle">METHOD™ MANAGEMENT</div>
-        </div>
-        <nav>
-          <div class="menu-section">
-            <div class="menu-label">PRINCIPAL</div>
-            <div class="menu-item" data-href="index.html"><span class="menu-icon">▦</span>Dashboard</div>
-            <div class="menu-item" data-href="alunos.html"><span class="menu-icon">✉</span>Alunos</div>
-            <div class="menu-item active" data-href="turmas.html"><span class="menu-icon">▣</span>Turmas</div>
-          </div>
-          <div class="menu-section">
-            <div class="menu-label">PLANEJAMENTO</div>
-            <div class="menu-item" data-href="niveis.html"><span class="menu-icon">⌁</span>Níveis CEFR</div>
-            <div class="menu-item" data-href="temas.html"><span class="menu-icon">◎</span>Temas Mensais</div>
-            <div class="menu-item" data-href="atribuicoes.html"><span class="menu-icon">▤</span>Atribuições</div>
-            <div class="menu-item" data-href="aulas.html"><span class="menu-icon">◫</span>Aulas</div>
-          </div>
-          <div class="menu-section">
-            <div class="menu-label">RECURSOS</div>
-            <div class="menu-item" data-href="materiais.html"><span class="menu-icon">↗</span>Materiais</div>
-            <div class="menu-item" data-href="missoes.html"><span class="menu-icon">🏆</span>Missões</div>
-            <div class="menu-item" data-href="metodo.html"><span class="menu-icon">♡</span>O Método</div>
-          </div>
-        </nav>
-      </div>
-      <div class="sidebar-footer">
-        <div class="avatar">N</div>
-        <div class="footer-text">
-          <strong>Grid Method™ v1.0</strong>
-          <small>Em construção</small>
-        </div>
-      </div>
+        <div class="logo">🌊 Flowence</div>
     </aside>
-    <main class="main">
-      <header class="topbar">
-        <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
-        <div class="page-title"><span>▣</span> Turmas</div>
-      </header>
-      <section class="content">
-        <div class="turma-filters">
-          <input type="text" class="turma-search" placeholder="Buscar por nome ou professor...">
-          <select class="turma-level-filter">
-            <option value="">Todos os Níveis</option>
-            <option value="A1">A1</option>
-            <option value="A2">A2</option>
-            <option value="B1">B1</option>
-            <option value="B2">B2</option>
-            <option value="C1">C1</option>
-            <option value="C2">C2</option>
-          </select>
-          <button class="btn btn-primary turma-new-btn">+ Nova Turma</button>
+    <header>
+        <button class="hamburger" id="hamburger">☰</button>
+        <h1>Gerenciar Turmas</h1>
+    </header>
+    <main>
+        <div class="filters">
+            <input type="text" id="search" placeholder="Buscar por nome da turma...">
+            <select id="nivelFilter">
+                <option value="Todos">Todos os Níveis</option>
+                <option value="Fundamental I">Fundamental I</option>
+                <option value="Fundamental II">Fundamental II</option>
+                <option value="Médio">Médio</option>
+                <option value="Superior">Superior</option>
+            </select>
         </div>
-        <div id="turma-grid" class="grid">
-          <div class="shimmer turma-shimmer"></div>
-          <div class="shimmer turma-shimmer"></div>
-          <div class="shimmer turma-shimmer"></div>
-          <div class="shimmer turma-shimmer"></div>
-          <div class="shimmer turma-shimmer"></div>
-          <div class="shimmer turma-shimmer"></div>
+        <button class="btn-primary" id="novaTurma">+ Nova Turma</button>
+        <div class="cards" id="cardsContainer">
+            <!-- Cards serão renderizados aqui -->
         </div>
-        <div id="turma-empty" class="empty" style="display: none;">
-          Nenhuma turma encontrada.
-          <button class="btn btn-primary turma-new-btn">Criar primeira turma</button>
-        </div>
-      </section>
-      <footer class="footer">Flowence Grid Method™ — Sistema de Gestão Educacional</footer>
     </main>
-  </div>
 
-  <!-- Modal Criar/Editar Turma -->
-  <div class="turma-modal" id="turma-modal">
-    <div class="turma-modal-backdrop"></div>
-    <div class="turma-modal-content">
-      <h3>Nova Turma</h3>
-      <form id="turma-form">
-        <div class="form-group">
-          <label>Nome da Turma</label>
-          <input type="text" name="name" required>
+    <!-- Modal Criar/Editar Turma -->
+    <div class="modal" id="modalTurma">
+        <div class="modal-content">
+            <h2 id="modalTitle">Nova Turma</h2>
+            <form id="formTurma">
+                <input id="nome" placeholder="Nome da turma" required>
+                <input id="professor" placeholder="Nome do professor" required>
+                <select id="nivelSelect" required>
+                    <option value="">Selecione o nível</option>
+                    <option value="Fundamental I">Fundamental I</option>
+                    <option value="Fundamental II">Fundamental II</option>
+                    <option value="Médio">Médio</option>
+                    <option value="Superior">Superior</option>
+                </select>
+                <input id="horario" placeholder="Horário (ex: Seg-Sex 14h-16h)" required>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-secondary" id="cancelBtn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar Turma</button>
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-          <label>Nível</label>
-          <select name="level" required>
-            <option value="A1">A1</option>
-            <option value="A2">A2</option>
-            <option value="B1">B1</option>
-            <option value="B2">B2</option>
-            <option value="C1">C1</option>
-            <option value="C2">C2</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Professor</label>
-          <input type="text" name="professor">
-        </div>
-        <div class="form-group">
-          <label>Horário</label>
-          <input type="text" name="schedule" placeholder="Ex: Segunda 19h">
-        </div>
-        <div class="form-group">
-          <label>Data de Início</label>
-          <input type="date" name="start_date">
-        </div>
-        <div class="form-group">
-          <label>Status</label>
-          <select name="status">
-            <option value="ativa">Ativa</option>
-            <option value="pausada">Pausada</option>
-            <option value="concluida">Concluída</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Notas</label>
-          <textarea name="notes" rows="3"></textarea>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn" data-close>Cancelar</button>
-          <button type="submit" class="btn btn-primary">Salvar</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- Modal Alunos -->
-  <div class="turma-modal" id="turma-students-modal">
-    <div class="turma-modal-backdrop"></div>
-    <div class="turma-modal-content">
-      <div class="modal-header">
-        <h3 id="turma-students-title">Alunos da Turma</h3>
-        <button class="close-btn" data-close>&times;</button>
-      </div>
-      <div id="turma-students-list" class="grid turma-students-grid"></div>
-    </div>
-  </div>
-
-  <script src="supabase-config.js"></script>
-  <script>
-    (function() {
-      document.querySelectorAll('.menu-item[data-href]').forEach(el => {
-        el.style.cursor = 'pointer';
-        el.addEventListener('click', () => { window.location.href = el.dataset.href; });
-      });
-      const h = document.getElementById('hamburger');
-      const s = document.getElementById('sidebar');
-      const b = document.getElementById('sidebar-backdrop');
-      if (h && s && b) {
-        const t = () => { s.classList.toggle('open'); b.classList.toggle('show'); };
-        h.addEventListener('click', t);
-        b.addEventListener('click', t);
-      }
-    })();
-
-    // Turmas functionality
-    let supabase;
-    let allClasses = [];
-    let allStudents = [];
-    let filteredClasses = [];
-
-    async function initTurmas() {
-      if (!window.supabase) {
-        console.error('Supabase not loaded');
-        return;
-      }
-      supabase = window.supabase;
-
-      // Hide shimmers
-      document.querySelectorAll('.turma-shimmer').forEach(el => el.remove());
-
-      const { data: classesData, error: classesError } = await supabase
-        .from('flowence_class')
-        .select('*')
-        .order('name');
-      if (classesError) {
-        console.error(classesError);
-        return;
-      }
-      allClasses = classesData || [];
-
-      const { data: studentsData, error: studentsError } = await supabase
-        .from('flowence_student')
-        .select('*');
-      if (studentsError) console.error(studentsError);
-      allStudents = studentsData || [];
-
-      filteredClasses = [...allClasses];
-      renderClasses();
-      setupFilters();
-      setupEvents();
-    }
-
-    function renderClasses() {
-      const grid = document.getElementById('turma-grid');
-      const empty = document.getElementById('turma-empty');
-      grid.innerHTML = '';
-      if (filteredClasses.length === 0) {
-        empty.style.display = 'block';
-        return;
-      }
-      empty.style.display = 'none';
-      filteredClasses.forEach(c => {
-        const card = createTurmaCard(c);
-        grid.appendChild(card);
-      });
-    }
-
-    function createTurmaCard(c) {
-      const count = allStudents.filter(s => s.class_id === c.id).length;
-      const div = document.createElement('div');
-      div.className = 'panel turma-card';
-      div.dataset.id = c.id;
-      div.innerHTML = `
-        <div class="panel-title">${c.name}</div>
-        <div class="turma-meta">
-          <div><strong>Nível:</strong> ${c.level}</div>
-          <div><strong>Professor:</strong> ${c.professor || 'N/A'}</div>
-          <div><strong>Horário:</strong> ${c.schedule || 'N/A'}</div>
-          <div><strong>Início:</strong> ${c.start_date ? new Date(c.start_date).toLocaleDateString('pt-BR') : 'N/A'}</div>
-          <div><strong>Alunos:</strong> ${count}</div>
-          <span class="badge">${c.status || 'ativa'}</span>
-        </div>
-        <div class="turma-actions">
-          <button class="btn btn-primary turma-view-students" data-id="${c.id}">Ver Alunos</button>
-          <button class="btn turma-edit" data-id="${c.id}">Editar</button>
-        </div>
-      `;
-      return div;
-    }
-
-    function setupFilters() {
-      const search = document.querySelector('.turma-search');
-      const levelFilter = document.querySelector('.turma-level-filter');
-      const filterFn = () => {
-        const term = search.value.toLowerCase();
-        const level = levelFilter.value;
-        filteredClasses = allClasses.filter(c =>
-          (c.name.toLowerCase().includes(term) || (c.professor || '').toLowerCase().includes(term)) &&
-          (!level || c.level === level)
-        );
-        renderClasses();
-      };
-      search.addEventListener('input', filterFn);
-      levelFilter.addEventListener('change', filterFn);
-    }
-
-    function setupEvents() {
-      // New turma buttons
-      document.querySelectorAll('.turma-new-btn').forEach(btn => {
-        btn.addEventListener('click', () => openTurmaModal('new'));
-      });
-
-      // Event delegation for actions
-      document.addEventListener('click', (e) => {
-        if (e.target.matches('.turma-view-students')) {
-          const id = e.target.dataset.id;
-          const card = e.target.closest('.turma-card');
-          const name = card.querySelector('.panel-title').textContent;
-          openStudentsModal(id, name);
-        } else if (e.target.matches('.turma-edit')) {
-          const id = e.target.dataset.id;
-          const turma = allClasses.find(c => c.id === id);
-          openTurmaModal('edit', turma);
-        }
-      });
-    }
-
-    const turmaModal = document.getElementById('turma-modal');
-    const studentsModal = document.getElementById('turma-students-modal');
-
-    function openTurmaModal(mode, turmaData = null) {
-      turmaModal.dataset.mode = mode;
-      turmaModal.dataset.id = turmaData?.id || '';
-      const title = turmaModal.querySelector('h3');
-      const form = document.getElementById('turma-form');
-      title.textContent = mode === 'new' ? 'Nova Turma' : 'Editar Turma';
-      if (mode === 'edit') {
-        form.elements.name.value = turmaData.name || '';
-        form.elements.level.value = turmaData.level || '';
-        form.elements.professor.value = turmaData.professor || '';
-        form.elements.schedule.value = turmaData.schedule || '';
-        form.elements.start_date.value = turmaData.start_date ? new Date(turmaData.start_date).toISOString().split('T')[0] : '';
-        form.elements.status.value = turmaData.status || 'ativa';
-        form.elements.notes.value = turmaData.notes || '';
-      } else {
-        form.reset();
-      }
-      turmaModal.classList.add('show');
-    }
-
-    function closeModal(modal) {
-      modal.classList.remove('show');
-    }
-
-    // Turma form submit
-    document.getElementById('turma-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const data = Object.fromEntries(formData);
-      const mode = turmaModal.dataset.mode;
-      const id = turmaModal.dataset.id;
-      let error;
-      if (mode === 'new') {
-        const { error: insertError } = await supabase.from('flowence_class').insert([data]);
-        error = insertError;
-      } else {
-        const { error: updateError } = await supabase.from('flowence_class').update(data).eq('id', id);
-        error = updateError;
-      }
-      if (error) {
-        alert('Erro ao salvar: ' + error.message);
-        return;
-      }
-      closeModal(turmaModal);
-      initTurmas();
-    });
-
-    // Students modal
-    async function openStudentsModal(classId, className) {
-      document.getElementById('turma-students-title').textContent = `Alunos - ${className}`;
-      const list = document.getElementById('turma-students-list');
-      const students = allStudents.filter(s => s.class_id === classId);
-      list.innerHTML = '';
-      if (students.length === 0) {
-        list.innerHTML = '<div class="empty">Nenhum aluno matriculado.</div>';
-      } else {
-        students.forEach(s => {
-          const item = document.createElement('div');
-          item.className = 'panel turma-student';
-          item.innerHTML = `
-            <div class="turma-student-name">${s.name}</div>
-            <div class="turma-student-info">
-              <span>Nível: ${s.level}</span>
-              <span class="badge">${s.status}</span>
+    <!-- Modal Ver Alunos -->
+    <div class="modal" id="modalAlunos">
+        <div class="modal-content">
+            <h2 id="alunosTitle">Alunos da Turma</h2>
+            <ul id="listaAlunos"></ul>
+            <div class="modal-buttons">
+                <button class="btn-primary" id="fecharAlunos">Fechar</button>
             </div>
-          `;
-          list.appendChild(item);
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Substitua pelas suas credenciais reais do Supabase
+            const supabaseUrl = 'https://seu-projeto.supabase.co';
+            const supabaseAnonKey = 'sua-chave-anon-publica';
+            const { createClient } = supabase;
+            const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const novaTurma = document.getElementById('novaTurma');
+            const search = document.getElementById('search');
+            const nivelFilter = document.getElementById('nivelFilter');
+            const cardsContainer = document.getElementById('cardsContainer');
+            const modalTurma = document.getElementById('modalTurma');
+            const formTurma = document.getElementById('formTurma');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const modalAlunos = document.getElementById('modalAlunos');
+            const fecharAlunos = document.getElementById('fecharAlunos');
+            const listaAlunos = document.getElementById('listaAlunos');
+
+            let editingId = null;
+            let allTurmas = [];
+            let alunosByTurma = {};
+            let displayTurmas = [];
+
+            hamburger.addEventListener('click', () => sidebar.classList.toggle('open'));
+            novaTurma.addEventListener('click', () => openModalTurma(null));
+            search.addEventListener('input', debounce(filterTurmas, 300));
+            nivelFilter.addEventListener('change', filterTurmas);
+            cancelBtn.addEventListener('click', closeModalTurma);
+            fecharAlunos.addEventListener('click', () => modalAlunos.classList.remove('open'));
+            modalTurma.addEventListener('click', (e) => { if (e.target === modalTurma) closeModalTurma(); });
+            modalAlunos.addEventListener('click', (e) => { if (e.target === modalAlunos) modalAlunos.classList.remove('open'); });
+            formTurma.addEventListener('submit', handleSubmit);
+
+            await loadData();
+
+            async function loadData() {
+                try {
+                    const { data: turmasData, error: turmasError } = await supabase
+                        .from('turmas')
+                        .select('*')
+                        .order('nome', { ascending: true });
+                    if (turmasError) throw turmasError;
+
+                    allTurmas = turmasData || [];
+
+                    const { data: alunosData, error: alunosError } = await supabase
+                        .from('alunos')
+                        .select('id, nome, turma_id')
+                        .order('nome');
+                    if (alunosError) throw alunosError;
+
+                    alunosByTurma = {};
+                    alunosData?.forEach((aluno) => {
+                        if (!alunosByTurma[aluno.turma_id]) {
+                            alunosByTurma[aluno.turma_id] = [];
+                        }
+                        alunosByTurma[aluno.turma_id].push(aluno.nome);
+                    });
+
+                    allTurmas.forEach((turma) => {
+                        turma.alunos_count = alunosByTurma[turma.id]?.length || 0;
+                    });
+
+                    displayTurmas = [...allTurmas];
+                    renderCards();
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                    cardsContainer.innerHTML = '<div class="empty">Erro ao carregar turmas. Verifique as credenciais do Supabase e as tabelas.</div>';
+                }
+            }
+
+            function debounce(fn, delay) {
+                let timeout;
+                return (...args) => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => fn(...args), delay);
+                };
+            }
+
+            function filterTurmas() {
+                const searchTerm = search.value.toLowerCase();
+                const selectedNivel = nivelFilter.value;
+                displayTurmas = allTurmas.filter((turma) =>
+                    turma.nome.toLowerCase().includes(searchTerm) &&
+                    (selectedNivel === 'Todos' || turma.nivel === selectedNivel)
+                );
+                renderCards();
+            }
+
+            function renderCards() {
+                if (displayTurmas.length === 0) {
+                    cardsContainer.innerHTML = '<div class="empty">Nenhuma turma encontrada.</div>';
+                    return;
+                }
+                cardsContainer.innerHTML = displayTurmas.map((turma) => `
+                    <div class="card">
+                        <h3>${escapeHtml(turma.nome)}</h3>
+                        <p><strong>Professor:</strong> ${escapeHtml(turma.professor)}</p>
+                        <p><strong>Nível:</strong> ${escapeHtml(turma.nivel)}</p>
+                        <p><strong>Horário:</strong> ${escapeHtml(turma.horario)}</p>
+                        <p><strong>Alunos:</strong> ${turma.alunos_count}</p>
+                        <div class="card-actions">
+                            <button class="action-btn" title="Ver alunos" data-id="${turma.id}">👁️</button>
+                            <button class="action-btn" title="Editar" data-id="${turma.id}" style="background:#10B981;color:white;">✏️</button>
+                            <button class="action-btn" title="Deletar" data-id="${turma.id}" style="background:#EF4444;color:white;">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Adicionar event listeners
+                cardsContainer.querySelectorAll('[title="Ver alunos"]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const turmaId = parseInt(e.target.dataset.id);
+                        viewAlunos(turmaId);
+                    });
+                });
+                cardsContainer.querySelectorAll('[title="Editar"]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const turmaId = parseInt(e.target.dataset.id);
+                        const turma = allTurmas.find(t => t.id === turmaId);
+                        openModalTurma(turma);
+                    });
+                });
+                cardsContainer.querySelectorAll('[title="Deletar"]').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if (confirm('Tem certeza que deseja deletar esta turma?')) {
+                            await deleteTurma(parseInt(e.target.dataset.id));
+                        }
+                    });
+                });
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function openModalTurma(turma) {
+                editingId = turma ? turma.id : null;
+                document.getElementById('modalTitle').textContent = turma ? 'Editar Turma' : 'Nova Turma';
+                document.getElementById('nome').value = turma?.nome || '';
+                document.getElementById('professor').value = turma?.professor || '';
+                document.getElementById('nivelSelect').value = turma?.nivel || '';
+                document.getElementById('horario').value = turma?.horario || '';
+                modalTurma.classList.add('open');
+            }
+
+            function closeModalTurma() {
+                modalTurma.classList.remove('open');
+                formTurma.reset();
+                editingId = null;
+            }
+
+            async function handleSubmit(e) {
+                e.preventDefault();
+                const nome = document.getElementById('nome').value.trim();
+                const professor = document.getElementById('professor').value.trim();
+                const nivel = document.getElementById('nivelSelect').value;
+                const horario = document.getElementById('horario').value.trim();
+                if (!nome || !professor || !nivel || !horario) {
+                    alert('Por favor, preencha todos os campos.');
+                    return;
+                }
+                const turmaData = { nome, professor, nivel, horario };
+                try {
+                    let error;
+                    if (editingId) {
+                        const { error: updateError } = await supabase
+                            .from('turmas')
+                            .update(turmaData)
+                            .eq('id', editingId);
+                        error = updateError;
+                    } else {
+                        const { error: insertError } = await supabase.from('turmas').insert(turmaData);
+                        error = insertError;
+                    }
+                    if (error) throw error;
+                    closeModalTurma();
+                    await loadData();
+                } catch (err) {
+                    console.error('Erro ao salvar:', err);
+                    alert('Erro ao salvar turma: ' + err.message);
+                }
+            }
+
+            async function deleteTurma(id) {
+                try {
+                    const { error } = await supabase.from('turmas').delete().eq('id', id);
+                    if (error) throw error;
+                    await loadData();
+                } catch (err) {
+                    console.error('Erro ao deletar:', err);
+                    alert('Erro ao deletar turma.');
+                }
+            }
+
+            function viewAlunos(turmaId) {
+                const alunos = alunosByTurma[turmaId] || [];
+                const turma = allTurmas.find(t => t.id === turmaId);
+                document.getElementById('alunosTitle').textContent = `Alunos da turma: ${turma ? escapeHtml(turma.nome) : 'Desconhecida'}`;
+                listaAlunos.innerHTML = alunos.length > 0
+                    ? alunos.map(nome => `<li>${escapeHtml(nome)}</li>`).join('')
+                    : '<li>Nenhum aluno matriculado.</li>';
+                modalAlunos.classList.add('open');
+            }
         });
-      }
-      studentsModal.classList.add('show');
-    }
-
-    // Close modals
-    document.querySelectorAll('.turma-modal-backdrop, [data-close]').forEach(el => {
-      el.addEventListener('click', (e) => {
-        if (e.target.dataset.close || e.target.classList.contains('turma-modal-backdrop')) {
-          const modal = e.target.closest('.turma-modal');
-          closeModal(modal);
-        }
-      });
-    });
-
-    // ESC key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.turma-modal.show').forEach(closeModal);
-      }
-    });
-
-    // Init on load
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initTurmas);
-    } else {
-      initTurmas();
-    }
-  </script>
+    </script>
 </body>
 </html>
