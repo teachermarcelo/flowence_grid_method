@@ -3,161 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turmas</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>▣ Turmas</title>
+    <!-- Estilos CSS externos assumidos como no alunos.html -->
 </head>
 <body>
-    <!-- Sidebar idêntica ao alunos.html: logo, menu com Turmas active, footer -->
-    <nav class="sidebar" id="sidebar">
-        <div class="logo">
-            <!-- Logo da instituição -->
-            <img src="logo.png" alt="Logo da Escola">
-        </div>
-        <ul class="menu">
-            <li><a href="home.html">🏠 Home</a></li>
-            <li><a href="alunos.html">👥 Alunos</a></li>
-            <li><a href="turmas.html" class="active">📚 Turmas</a></li>
-            <!-- Outros itens do menu conforme alunos.html -->
-        </ul>
-        <div class="sidebar-footer">
-            <!-- Footer da sidebar -->
-            <p>&copy; 2024 Escola. Todos os direitos reservados.</p>
-        </div>
-    </nav>
-
-    <!-- Topbar: hamburger, título "▣ Turmas", botão "+ Nova Turma" -->
-    <header class="topbar">
-        <button class="hamburger" id="hamburger-btn">
-            ☰
-        </button>
-        <h1>▣ Turmas</h1>
-        <button class="btn-primary" id="nova-turma-btn">+ Nova Turma</button>
-    </header>
-
-    <!-- Conteúdo principal -->
-    <main class="main">
-        <!-- Toolbar: search-box (buscar por nome/professor) + filter-group (nível, status) -->
-        <div class="toolbar">
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Buscar por nome ou professor...">
-            </div>
-            <div class="filter-group">
-                <select id="nivel-filter">
-                    <option value="">Todos os Níveis</option>
-                    <option value="fundamental">Fundamental</option>
-                    <option value="medio">Médio</option>
-                    <option value="superior">Superior</option>
-                </select>
-                <select id="status-filter">
-                    <option value="">Todos os Status</option>
-                    <option value="ativa">Ativa</option>
-                    <option value="inativa">Inativa</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Quick-stats: Total Turmas, Turmas Ativas, Total Alunos -->
-        <div class="quick-stats">
-            <div class="stat">
-                <span class="stat-number" id="total-turmas">0</span>
-                <span class="stat-label">Total Turmas</span>
-            </div>
-            <div class="stat">
-                <span class="stat-number" id="turmas-ativas">0</span>
-                <span class="stat-label">Turmas Ativas</span>
-            </div>
-            <div class="stat">
-                <span class="stat-number" id="total-alunos">0</span>
-                <span class="stat-label">Total Alunos</span>
-            </div>
-        </div>
-
-        <!-- Painel da tabela de turmas -->
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Lista de Turmas</h2>
-            </div>
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Professor</th>
-                            <th>Nível</th>
-                            <th>Horário</th>
-                            <th>Data Início</th>
-                            <th>Status</th>
-                            <th>Total Alunos</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="turmas-table-body">
-                        <!-- Linhas populadas dinamicamente pelo turmas.js -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <!-- Modal para criar/editar turma: campos nome, professor, nível, horário, data_inicio, status, observações -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal">
-            <h2 id="modal-title">Nova Turma</h2>
-            <form class="form-grid" id="turma-form">
-                <input type="hidden" id="turma-id">
+    <div class="app">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a href="alunos.html">Alunos</a></li>
+                    <li class="active"><a href="turmas.html">Turmas</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
                 <div>
-                    <label for="nome">Nome da Turma *</label>
-                    <input type="text" id="nome" required>
+                    <button id="new-turma-btn" class="btn btn-primary">+ Nova Turma</button>
                 </div>
-                <div>
-                    <label for="professor">Professor *</label>
-                    <input type="text" id="professor" required>
-                </div>
-                <div>
-                    <label for="nivel">Nível *</label>
-                    <select id="nivel" required>
-                        <option value="">Selecione</option>
-                        <option value="fundamental">Fundamental</option>
-                        <option value="medio">Médio</option>
-                        <option value="superior">Superior</option>
+            </header>
+            <div class="page-header">
+                <h1>▣ Turmas</h1>
+            </div>
+            <div class="toolbar">
+                <input type="text" id="search-turmas" class="search-box" placeholder="Buscar por nome ou professor...">
+                <div class="filter-group">
+                    <select id="filter-nivel">
+                        <option value="">Todos os Níveis</option>
+                        <option value="Iniciante">Iniciante</option>
+                        <option value="Intermediário">Intermediário</option>
+                        <option value="Avançado">Avançado</option>
+                    </select>
+                    <select id="filter-status">
+                        <option value="">Todos os Status</option>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo">Inativo</option>
                     </select>
                 </div>
-                <div>
-                    <label for="horario">Horário *</label>
-                    <input type="text" id="horario" placeholder="Ex: Seg/Sex 14h-16h" required>
+            </div>
+            <div class="quick-stats">
+                <div class="panel">
+                    <h3>Total Turmas</h3>
+                    <span id="total-turmas">0</span>
                 </div>
-                <div>
-                    <label for="data_inicio">Data Início *</label>
-                    <input type="date" id="data_inicio" required>
+                <div class="panel">
+                    <h3>Turmas Ativas</h3>
+                    <span id="turmas-ativas">0</span>
                 </div>
-                <div>
-                    <label for="status">Status *</label>
-                    <select id="status" required>
-                        <option value="ativa">Ativa</option>
-                        <option value="inativa">Inativa</option>
-                    </select>
+                <div class="panel">
+                    <h3>Total Alunos</h3>
+                    <span id="total-alunos">0</span>
                 </div>
-                <div class="full-width">
-                    <label for="observacoes">Observações</label>
-                    <textarea id="observacoes" rows="4"></textarea>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Professor</th>
+                        <th>Nível</th>
+                        <th>Horário</th>
+                        <th>Data Início</th>
+                        <th>Status</th>
+                        <th>Total Alunos</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="turmas-table-body">
+                    <!-- Linhas populadas pelo JS -->
+                </tbody>
+            </table>
+            <!-- Modal -->
+            <div class="modal-overlay" id="turma-modal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2 id="modal-title">Nova Turma</h2>
+                        <button class="close-btn" id="close-modal">&times;</button>
+                    </div>
+                    <form id="turma-form" class="form-grid">
+                        <input type="hidden" id="turma-id">
+                        <div>
+                            <label for="nome">Nome:</label>
+                            <input type="text" id="nome" required>
+                        </div>
+                        <div>
+                            <label for="professor">Professor:</label>
+                            <input type="text" id="professor" required>
+                        </div>
+                        <div>
+                            <label for="nivel">Nível:</label>
+                            <select id="nivel" required>
+                                <option value="">Selecione o nível</option>
+                                <option value="Iniciante">Iniciante</option>
+                                <option value="Intermediário">Intermediário</option>
+                                <option value="Avançado">Avançado</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="horario">Horário:</label>
+                            <input type="text" id="horario" required>
+                        </div>
+                        <div>
+                            <label for="data_inicio">Data Início:</label>
+                            <input type="date" id="data_inicio" required>
+                        </div>
+                        <div>
+                            <label for="status">Status:</label>
+                            <select id="status" required>
+                                <option value="Ativo">Ativo</option>
+                                <option value="Inativo">Inativo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="observacoes">Observações:</label>
+                            <textarea id="observacoes" rows="4"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="cancel-btn">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-actions">
-                    <button type="button" id="cancelar-btn">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar Turma</button>
-                </div>
-            </form>
-        </div>
+            </div>
+        </main>
     </div>
-
-    <!-- Scripts: referenciar supabase-config.js e turmas.js (sem credenciais hardcoded) -->
     <script src="supabase-config.js"></script>
     <script src="turmas.js"></script>
-
-    <!-- Script inline para toggle sidebar (comum em dashboards) -->
-    <script>
-        document.getElementById('hamburger-btn').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
-    </script>
 </body>
 </html>
