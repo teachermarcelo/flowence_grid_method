@@ -193,9 +193,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
-<script src="turmas.js"></script>
+
 <script>
-  // Setup de navegação + hamburger (presente em todas as páginas)
+  // Setup de navegação + hamburger (ANTES de carregar turmas.js)
   (function() {
     document.querySelectorAll('.menu-item[data-href]').forEach(el => {
       el.style.cursor = 'pointer';
@@ -211,5 +211,9 @@
     }
   })();
 </script>
+
+<!-- ✅ Carregar turmas.js por ÚLTIMO para encontrar window.sb -->
+<script src="turmas.js"></script>
+
 </body>
 </html>
