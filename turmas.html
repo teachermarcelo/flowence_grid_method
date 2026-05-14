@@ -3,1007 +3,378 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Turmas - Flowence Grid Method</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f5f5f7;
-      color: #1f2937;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      left: 0;
-      top: 0;
-      height: 100vh;
-      width: 280px;
-      background: #1a1a2e;
-      color: white;
-      z-index: 40;
-      display: flex;
-      flex-direction: column;
-      transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow-y: auto;
-    }
-
-    @media (min-width: 1024px) {
-      .sidebar {
-        transform: translateX(0);
-      }
-    }
-
-    .logo {
-      padding: 1.5rem;
-      border-bottom: 1px solid #2d3748;
-    }
-
-    .logo a {
-      display: block;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: white;
-      text-decoration: none;
-      line-height: 1.2;
-    }
-
-    .menu h4 {
-      padding: 1.5rem 1.5rem 0.75rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      color: #9ca3af;
-      text-transform: uppercase;
-    }
-
-    .menu-item {
-      display: block;
-      padding: 0.75rem 1.5rem;
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.2s;
-      border-radius: 0.5rem;
-      margin: 0.125rem 0.25rem;
-    }
-
-    .menu-item:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .menu-item.active {
-      background: rgba(88, 80, 236, 0.3);
-      color: #a5b4fc;
-    }
-
-    .footer {
-      margin-top: auto;
-      padding: 1.5rem;
-      border-top: 1px solid #2d3748;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 0.875rem;
-    }
-
-    /* Overlay */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 30;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    @media (min-width: 1024px) {
-      .overlay {
-        display: none !important;
-      }
-    }
-
-    body.sidebar-open .overlay {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    body.sidebar-open .sidebar {
-      transform: translateX(0) !important;
-    }
-
-    /* Topbar */
-    .topbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4rem;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      padding: 0 1.5rem;
-    }
-
-    @media (min-width: 1024px) {
-      .topbar {
-        left: 280px;
-      }
-    }
-
-    .hamburger {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #374151;
-      padding: 0.5rem;
-      border-radius: 0.375rem;
-      transition: background-color 0.2s;
-      display: none;
-    }
-
-    @media (max-width: 1023px) {
-      .hamburger {
-        display: flex;
-      }
-    }
-
-    .hamburger:hover {
-      background: rgba(0, 0, 0, 0.05);
-    }
-
-    .title {
-      margin-left: 1rem;
-      font-weight: 600;
-      font-size: 1.25rem;
-      color: #1f2937;
-    }
-
-    /* Main */
-    .main {
-      margin-left: 0;
-      padding-top: 4rem;
-      min-height: 100vh;
-      padding: 1.5rem;
-    }
-
-    @media (min-width: 1024px) {
-      .main {
-        margin-left: 280px;
-      }
-    }
-
-    .content {
-      max-width: 1280px;
-      margin: 0 auto;
-    }
-
-    /* Filters */
-    .filters {
-      background: white;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      border-radius: 1.5rem;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    @media (min-width: 768px) {
-      .filters {
-        flex-direction: row;
-        align-items: end;
-      }
-    }
-
-    .filters input,
-    .filters select {
-      flex: 1;
-      min-width: 200px;
-      padding: 0.75rem 1rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.75rem;
-      font-size: 1rem;
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(10px);
-      transition: all 0.2s;
-    }
-
-    .filters input:focus,
-    .filters select:focus {
-      outline: none;
-      border-color: #5850ec;
-      box-shadow: 0 0 0 3px rgba(88, 80, 236, 0.1);
-    }
-
-    #newClass {
-      background: #5850ec;
-      color: white;
-      border: none;
-      padding: 0.75rem 2rem;
-      border-radius: 0.75rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    #newClass:hover {
-      background: #4c45c8;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(88, 80, 236, 0.3);
-    }
-
-    /* Grid */
-    .grid-container {
-      position: relative;
-    }
-
-    .classes-grid {
-      display: grid;
-      gap: 2rem;
-      grid-template-columns: 1fr;
-    }
-
-    @media (min-width: 768px) {
-      .classes-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (min-width: 1200px) {
-      .classes-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 5rem 1.5rem;
-    }
-
-    .empty-icon {
-      font-size: 6rem;
-      opacity: 0.5;
-      margin-bottom: 1.5rem;
-    }
-
-    .empty-title {
-      font-size: 1.875rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      color: #6b7280;
-    }
-
-    .empty-subtitle {
-      color: #9ca3af;
-    }
-
-    /* Card */
-    .card {
-      background: white;
-      border-radius: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      padding: 2rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      overflow: hidden;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
-
-    .card h3 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-
-    .prof {
-      font-size: 1.125rem;
-      color: #6b7280;
-      margin-bottom: 0.5rem;
-    }
-
-    .badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.625rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .level-a1 { background-color: #d1fae5; color: #065f46; }
-    .level-a2 { background-color: #dbeafe; color: #1e40af; }
-    .level-b1 { background-color: #ede9fe; color: #581c87; }
-    .level-b2 { background-color: #fed7aa; color: #c2410c; }
-    .level-c1 { background-color: #fee2e2; color: #991b1b; }
-
-    .status-ativa { background-color: #d1fae5; color: #065f46; }
-    .status-inativa { background-color: #f3f4f6; color: #374151; }
-
-    .schedule,
-    .date {
-      font-size: 0.875rem;
-      color: #6b7280;
-      margin-bottom: 0.25rem;
-    }
-
-    .alunos {
-      font-size: 1.125rem;
-      font-weight: 600;
-      margin: 1rem 0 1.5rem;
-    }
-
-    .obs {
-      color: #9ca3af;
-      font-size: 0.875rem;
-      line-height: 1.5;
-      max-height: 3rem;
-      overflow: hidden;
-      margin-bottom: 1.5rem;
-    }
-
-    .actions {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .btn-alunos {
-      flex: 1;
-      border: 1px solid #5850ec;
-      color: #5850ec;
-      background: white;
-      padding: 0.75rem 1.5rem;
-      border-radius: 1.5rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.875rem;
-    }
-
-    .btn-alunos:hover {
-      background: rgba(88, 80, 236, 0.1);
-    }
-
-    .btn-edit {
-      background: #fef3c7;
-      color: #92400e;
-      border: none;
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.75rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-edit:hover {
-      background: #fde68a;
-    }
-
-    .btn-del {
-      background: #fecaca;
-      color: #be123c;
-      border: none;
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.75rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-del:hover {
-      background: #fca5a5;
-    }
-
-    /* Modals */
-    .backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(8px);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .backdrop:not(.hidden) {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .backdrop:not(.hidden) .modal {
-      transform: scale(1);
-    }
-
-    .modal {
-      background: white;
-      border-radius: 1.5rem;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-      width: 100%;
-      max-width: 36rem;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 2rem;
-      position: relative;
-      transform: scale(0.95);
-      transition: transform 0.3s ease;
-    }
-
-    #modalStudentsBackdrop .modal {
-      max-width: 80rem;
-      padding: 3rem;
-    }
-
-    .close {
-      position: absolute;
-      top: 1.5rem;
-      right: 1.5rem;
-      background: none;
-      border: none;
-      font-size: 1.875rem;
-      cursor: pointer;
-      color: #6b7280;
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .close:hover {
-      background: #f3f4f6;
-      color: #111;
-    }
-
-    .modal-title {
-      font-size: 1.875rem;
-      font-weight: 700;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .field label {
-      font-weight: 500;
-      font-size: 0.875rem;
-      color: #374151;
-    }
-
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.75rem;
-      font-size: 1rem;
-      transition: all 0.2s;
-      background: white;
-    }
-
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      outline: none;
-      border-color: #5850ec;
-      box-shadow: 0 0 0 3px rgba(88, 80, 236, 0.1);
-    }
-
-    .field textarea {
-      min-height: 6rem;
-      resize: vertical;
-    }
-
-    .grid-cols-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 1rem;
-      justify-content: flex-end;
-      margin-top: 2rem;
-    }
-
-    .btn-secondary {
-      padding: 0.75rem 2rem;
-      border: 1px solid #d1d5db;
-      background: white;
-      color: #374151;
-      border-radius: 0.75rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-secondary:hover {
-      background: #f9fafb;
-    }
-
-    .btn-primary {
-      padding: 0.75rem 2rem;
-      background: #5850ec;
-      color: white;
-      border: none;
-      border-radius: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-primary:hover {
-      background: #4c45c8;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(88, 80, 236, 0.3);
-    }
-
-    /* Students Table */
-    .students-table-container {
-      overflow-x: auto;
-      margin-top: 1rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.95rem;
-    }
-
-    th {
-      text-align: left;
-      padding: 1rem 1rem;
-      background: #f9fafb;
-      font-weight: 600;
-      color: #374151;
-      border-bottom: 2px solid #e5e7eb;
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 1rem;
-      border-bottom: 1px solid #f3f4f6;
-    }
-
-    .avatar {
-      display: flex;
-      align-items: center;
-    }
-
-    .avatar img {
-      width: 3rem;
-      height: 3rem;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 0.75rem;
-    }
-
-    tr:hover {
-      background: #f9fafb;
-    }
-  </style>
+  <title>Turmas - Flowence Grid</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <!-- Sidebar -->
-  <nav class="sidebar" id="sidebar">
-    <div class="logo">
-      <a href="index.html">Flowence Grid<br>/ METHOD™ MANAGEMENT</a>
-    </div>
-    <div class="menu">
-      <h4>PRINCIPAL</h4>
-      <a href="index.html" class="menu-item">Dashboard</a>
-      <a href="alunos.html" class="menu-item">Alunos</a>
-      <a href="turmas.html" class="menu-item">Turmas</a>
-      <h4>PLANEJAMENTO</h4>
-      <a href="niveis.html" class="menu-item">Níveis CEFR</a>
-      <a href="temas.html" class="menu-item">Temas Mensais</a>
-      <a href="atribuicoes.html" class="menu-item">Atribuições</a>
-      <a href="aulas.html" class="menu-item">Aulas</a>
-      <h4>RECUSOS</h4>
-      <a href="materiais.html" class="menu-item">Materiais</a>
-      <a href="missoes.html" class="menu-item">Missões</a>
-      <a href="metodo.html" class="menu-item">O Método</a>
-    </div>
-    <div class="footer">
-      <p>Grid Method™ v1.0</p>
-      <p>Conectado ao Supabase</p>
-    </div>
-  </nav>
-
-  <!-- Overlay -->
-  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-  <!-- Topbar -->
-  <div class="topbar">
-    <button class="hamburger" onclick="toggleSidebar()">☰</button>
-    <div class="title">▣ Turmas</div>
+  <div class="app">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <div class="logo-title"><span>Flowence</span> <span>Grid</span></div>
+          <div class="logo-subtitle">METHOD™ MANAGEMENT</div>
+        </div>
+        <nav>
+          <div class="menu-section">
+            <div class="menu-label">PRINCIPAL</div>
+            <div class="menu-item" data-href="index.html"><span class="menu-icon">▦</span>Dashboard</div>
+            <div class="menu-item" data-href="alunos.html"><span class="menu-icon">✉</span>Alunos</div>
+            <div class="menu-item active" data-href="turmas.html"><span class="menu-icon">▣</span>Turmas</div>
+          </div>
+          <div class="menu-section">
+            <div class="menu-label">PLANEJAMENTO</div>
+            <div class="menu-item" data-href="niveis.html"><span class="menu-icon">⌁</span>Níveis CEFR</div>
+            <div class="menu-item" data-href="temas.html"><span class="menu-icon">◎</span>Temas Mensais</div>
+            <div class="menu-item" data-href="atribuicoes.html"><span class="menu-icon">▤</span>Atribuições</div>
+            <div class="menu-item" data-href="aulas.html"><span class="menu-icon">◫</span>Aulas</div>
+          </div>
+          <div class="menu-section">
+            <div class="menu-label">RECURSOS</div>
+            <div class="menu-item" data-href="materiais.html"><span class="menu-icon">↗</span>Materiais</div>
+            <div class="menu-item" data-href="missoes.html"><span class="menu-icon">🏆</span>Missões</div>
+            <div class="menu-item" data-href="metodo.html"><span class="menu-icon">♡</span>O Método</div>
+          </div>
+        </nav>
+      </div>
+      <div class="sidebar-footer">
+        <div class="avatar">N</div>
+        <div class="footer-text">
+          <strong>Grid Method™ v1.0</strong>
+          <small>Em construção</small>
+        </div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+        <div class="page-title"><span>▣</span> Turmas</div>
+      </header>
+      <section class="content">
+        <div class="turma-filters">
+          <input type="text" class="turma-search" placeholder="Buscar por nome ou professor...">
+          <select class="turma-level-filter">
+            <option value="">Todos os Níveis</option>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C1">C1</option>
+            <option value="C2">C2</option>
+          </select>
+          <button class="btn btn-primary turma-new-btn">+ Nova Turma</button>
+        </div>
+        <div id="turma-grid" class="grid">
+          <div class="shimmer turma-shimmer"></div>
+          <div class="shimmer turma-shimmer"></div>
+          <div class="shimmer turma-shimmer"></div>
+          <div class="shimmer turma-shimmer"></div>
+          <div class="shimmer turma-shimmer"></div>
+          <div class="shimmer turma-shimmer"></div>
+        </div>
+        <div id="turma-empty" class="empty" style="display: none;">
+          Nenhuma turma encontrada.
+          <button class="btn btn-primary turma-new-btn">Criar primeira turma</button>
+        </div>
+      </section>
+      <footer class="footer">Flowence Grid Method™ — Sistema de Gestão Educacional</footer>
+    </main>
   </div>
 
-  <!-- Main Content -->
-  <main class="main">
-    <div class="content">
-      <!-- Filters -->
-      <div class="filters">
-        <input type="text" id="search" placeholder="Buscar turmas...">
-        <select id="levelFilter">
-          <option value="all">Todos os Níveis</option>
-          <option value="A1">A1</option>
-          <option value="A2">A2</option>
-          <option value="B1">B1</option>
-          <option value="B2">B2</option>
-          <option value="C1">C1</option>
-        </select>
-        <button id="newClass">+ Nova Turma</button>
-      </div>
-
-      <!-- Grid Container -->
-      <div class="grid-container">
-        <div id="emptyState" class="empty-state hidden">
-          <div class="empty-icon">📚</div>
-          <h2 class="empty-title">Nenhuma turma encontrada.</h2>
-          <p class="empty-subtitle">Crie uma nova turma ou ajuste os filtros.</p>
+  <!-- Modal Criar/Editar Turma -->
+  <div class="turma-modal" id="turma-modal">
+    <div class="turma-modal-backdrop"></div>
+    <div class="turma-modal-content">
+      <h3>Nova Turma</h3>
+      <form id="turma-form">
+        <div class="form-group">
+          <label>Nome da Turma</label>
+          <input type="text" name="name" required>
         </div>
-        <div id="classesGrid" class="classes-grid"></div>
-      </div>
-    </div>
-  </main>
-
-  <!-- Class Modal -->
-  <div id="modalClassBackdrop" class="backdrop hidden">
-    <div class="modal">
-      <button class="close" onclick="closeModalClass()">&times;</button>
-      <h2 id="modalClassTitle" class="modal-title">Nova Turma</h2>
-      <form id="classForm">
-        <div class="field">
-          <label for="className">Nome *</label>
-          <input id="className" required>
+        <div class="form-group">
+          <label>Nível</label>
+          <select name="level" required>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C1">C1</option>
+            <option value="C2">C2</option>
+          </select>
         </div>
-        <div class="grid-cols-2">
-          <div class="field">
-            <label for="classLevel">Nível</label>
-            <select id="classLevel">
-              <option value="A1">A1</option>
-              <option value="A2">A2</option>
-              <option value="B1">B1</option>
-              <option value="B2">B2</option>
-              <option value="C1">C1</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="classStatus">Status</label>
-            <select id="classStatus">
-              <option value="Ativa">Ativa</option>
-              <option value="Inativa">Inativa</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label>Professor</label>
+          <input type="text" name="professor">
         </div>
-        <div class="field">
-          <label for="classTeacher">Professor</label>
-          <input id="classTeacher">
+        <div class="form-group">
+          <label>Horário</label>
+          <input type="text" name="schedule" placeholder="Ex: Segunda 19h">
         </div>
-        <div class="grid-cols-2">
-          <div class="field">
-            <label for="classSchedule">Horário</label>
-            <input id="classSchedule">
-          </div>
-          <div class="field">
-            <label for="classStartDate">Data de Início</label>
-            <input id="classStartDate" type="date">
-          </div>
+        <div class="form-group">
+          <label>Data de Início</label>
+          <input type="date" name="start_date">
         </div>
-        <div class="field">
-          <label for="classObservations">Observações</label>
-          <textarea id="classObservations" placeholder="Notas sobre a turma..."></textarea>
+        <div class="form-group">
+          <label>Status</label>
+          <select name="status">
+            <option value="ativa">Ativa</option>
+            <option value="pausada">Pausada</option>
+            <option value="concluida">Concluída</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Notas</label>
+          <textarea name="notes" rows="3"></textarea>
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" onclick="closeModalClass()">Cancelar</button>
-          <button type="submit" class="btn-primary">Salvar Turma</button>
+          <button type="button" class="btn" data-close>Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Students Modal -->
-  <div id="modalStudentsBackdrop" class="backdrop hidden">
-    <div class="modal">
-      <button class="close" onclick="closeModalStudents()">&times;</button>
-      <h2 id="modalStudentsTitle" class="modal-title">Alunos da Turma</h2>
-      <div class="students-table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Avatar</th>
-              <th>Nome</th>
-              <th>Nível</th>
-              <th>Status</th>
-              <th>Missões</th>
-            </tr>
-          </thead>
-          <tbody id="studentsTableBody">
-          </tbody>
-        </table>
+  <!-- Modal Alunos -->
+  <div class="turma-modal" id="turma-students-modal">
+    <div class="turma-modal-backdrop"></div>
+    <div class="turma-modal-content">
+      <div class="modal-header">
+        <h3 id="turma-students-title">Alunos da Turma</h3>
+        <button class="close-btn" data-close>&times;</button>
       </div>
-      <div class="modal-actions">
-        <button class="btn-primary" onclick="closeModalStudents()">Fechar</button>
-      </div>
+      <div id="turma-students-list" class="grid turma-students-grid"></div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script>
-    let sb;
-    let allClasses = [];
-    let filteredClasses = [];
-    let students = [];
-    let editingId = null;
-
-    // Toggle Sidebar
-    function toggleSidebar() {
-      document.body.classList.toggle('sidebar-open');
-    }
-
-    // Set Active Menu
-    function setActiveMenu() {
-      const path = window.location.pathname.split('/').pop() || 'index.html';
-      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-      const activeItem = document.querySelector(`a[href="${path}"]`);
-      if (activeItem) {
-        activeItem.classList.add('active');
-      }
-    }
-
-    // Load Data
-    async function loadData() {
-      try {
-        const [classesRes, studentsRes] = await Promise.all([
-          sb.from('flowence_class').select('*').order('name', { ascending: true }),
-          sb.from('flowence_student').select('*')
-        ]);
-
-        allClasses = (classesRes.data || []).map(c => ({
-          ...c,
-          studentCount: (studentsRes.data || []).filter(s => s.class_id === c.id).length
-        }));
-        students = studentsRes.data || [];
-        filteredClasses = [...allClasses];
-        renderGrid();
-      } catch (error) {
-        console.error('Error loading data:', error);
-        alert('Erro ao carregar dados: ' + error.message);
-      }
-    }
-
-    // Apply Filters
-    function applyFilters() {
-      const search = document.getElementById('search').value.toLowerCase().trim();
-      const level = document.getElementById('levelFilter').value;
-      filteredClasses = allClasses.filter(c =>
-        c.name.toLowerCase().includes(search) &&
-        (level === 'all' || c.level === level)
-      );
-      renderGrid();
-    }
-
-    // Render Grid
-    function renderGrid() {
-      const grid = document.getElementById('classesGrid');
-      const empty = document.getElementById('emptyState');
-      grid.innerHTML = '';
-      if (filteredClasses.length === 0) {
-        empty.classList.remove('hidden');
-        grid.classList.add('hidden');
-      } else {
-        empty.classList.add('hidden');
-        grid.classList.remove('hidden');
-        filteredClasses.forEach(c => {
-          grid.innerHTML += createCard(c);
-        });
-      }
-    }
-
-    // Create Card
-    function createCard(c) {
-      const levelClass = `badge level-${c.level.toLowerCase()}`;
-      const statusClass = `badge status-${c.status.toLowerCase()}`;
-      const teacherHtml = c.teacher ? `<p class="prof">👨‍🏫 ${c.teacher}</p>` : '';
-      const scheduleHtml = c.schedule ? `<p class="schedule">⏰ ${c.schedule}</p>` : '';
-      const dateStr = c.start_date ? new Intl.DateTimeFormat('pt-BR').format(new Date(c.start_date)) : '';
-      const dateHtml = dateStr ? `<p class="date">📅 ${dateStr}</p>` : '';
-      const obsHtml = c.observations ? `<p class="obs">${c.observations.length > 100 ? c.observations.slice(0, 100) + '...' : c.observations}</p>` : '';
-      return `
-        <div class="card">
-          <h3>${c.name}</h3>
-          ${teacherHtml}
-          <div class="badges">
-            <span class="${levelClass}">${c.level}</span>
-            <span class="${statusClass}">${c.status}</span>
-          </div>
-          ${scheduleHtml}
-          ${dateHtml}
-          <p class="alunos">👥 ${c.studentCount} alunos</p>
-          ${obsHtml}
-          <div class="actions">
-            <button class="btn-alunos" onclick="openModalStudents('${c.id}')">Alunos</button>
-            <button class="btn-edit" onclick="openModalClass('${c.id}')">✏️</button>
-            <button class="btn-del" onclick="deleteClass('${c.id}')">🗑️</button>
-          </div>
-        </div>
-      `;
-    }
-
-    // Open Class Modal
-    function openModalClass(id = null) {
-      editingId = id;
-      const title = document.getElementById('modalClassTitle');
-      const form = document.getElementById('classForm');
-      title.textContent = id ? 'Editar Turma' : 'Nova Turma';
-      form.reset();
-      document.getElementById('classStatus').value = 'Ativa';
-      document.getElementById('classLevel').value = 'A1';
-      if (id) {
-        const cls = allClasses.find(c => c.id === id);
-        if (cls) {
-          document.getElementById('className').value = cls.name || '';
-          document.getElementById('classLevel').value = cls.level || 'A1';
-          document.getElementById('classTeacher').value = cls.teacher || '';
-          document.getElementById('classSchedule').value = cls.schedule || '';
-          document.getElementById('classStartDate').value = cls.start_date ? new Date(cls.start_date).toISOString().split('T')[0] : '';
-          document.getElementById('classStatus').value = cls.status || 'Ativa';
-          document.getElementById('classObservations').value = cls.observations || '';
-        }
-      }
-      document.getElementById('modalClassBackdrop').classList.remove('hidden');
-    }
-
-    // Close Class Modal
-    function closeModalClass() {
-      document.getElementById('modalClassBackdrop').classList.add('hidden');
-      editingId = null;
-    }
-
-    // Class Form Submit
-    async function handleClassSubmit(e) {
-      e.preventDefault();
-      const data = {
-        name: document.getElementById('className').value,
-        level: document.getElementById('classLevel').value,
-        teacher: document.getElementById('classTeacher').value,
-        schedule: document.getElementById('classSchedule').value,
-        start_date: document.getElementById('classStartDate').value,
-        status: document.getElementById('classStatus').value,
-        observations: document.getElementById('classObservations').value
-      };
-      try {
-        let error;
-        if (editingId) {
-          const { error: err } = await sb.from('flowence_class').update(data).eq('id', editingId);
-          error = err;
-        } else {
-          const { error: err } = await sb.from('flowence_class').insert(data);
-          error = err;
-        }
-        if (!error) {
-          await loadData();
-          closeModalClass();
-        } else {
-          alert('Erro ao salvar: ' + error.message);
-        }
-      } catch (err) {
-        alert('Erro: ' + err.message);
-      }
-    }
-
-    // Open Students Modal
-    function openModalStudents(classId) {
-      const cls = allClasses.find(c => c.id === classId);
-      if (!cls) return;
-      document.getElementById('modalStudentsTitle').textContent = `Alunos da Turma “${cls.name}”`;
-      const classStudents = students.filter(s => s.class_id === classId);
-      const tbody = document.getElementById('studentsTableBody');
-      tbody.innerHTML = '';
-      classStudents.forEach(s => {
-        const avatar = s.avatar_url ? `<img src="${s.avatar_url}" alt="${s.name}">` : '👤';
-        const levelClass = `badge level-${s.level ? s.level.toLowerCase() : 'a1'}`;
-        const statusClass = `badge status-${s.status ? s.status.toLowerCase() : 'ativo'}`;
-        const row = `
-          <tr>
-            <td><div class="avatar">${avatar}</div></td>
-            <td>${s.name || 'N/A'}</td>
-            <td><span class="${levelClass}">${s.level || 'A1'}</span></td>
-            <td><span class="${statusClass}">${s.status || 'Ativo'}</span></td>
-            <td>${s.missions || 0}</td>
-          </tr>
-        `;
-        tbody.innerHTML += row;
+    (function() {
+      document.querySelectorAll('.menu-item[data-href]').forEach(el => {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', () => { window.location.href = el.dataset.href; });
       });
-      document.getElementById('modalStudentsBackdrop').classList.remove('hidden');
-    }
-
-    // Close Students Modal
-    function closeModalStudents() {
-      document.getElementById('modalStudentsBackdrop').classList.add('hidden');
-    }
-
-    // Delete Class
-    async function deleteClass(id) {
-      if (confirm('Tem certeza que deseja excluir esta turma? Os alunos permanecerão, mas perderão a referência à turma.')) {
-        try {
-          const { error } = await sb.from('flowence_class').delete().eq('id', id);
-          if (!error) {
-            await loadData();
-          } else {
-            alert('Erro ao excluir: ' + error.message);
-          }
-        } catch (err) {
-          alert('Erro: ' + err.message);
-        }
+      const h = document.getElementById('hamburger');
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebar-backdrop');
+      if (h && s && b) {
+        const t = () => { s.classList.toggle('open'); b.classList.toggle('show'); };
+        h.addEventListener('click', t);
+        b.addEventListener('click', t);
       }
-    }
+    })();
 
-    // Init
-    window.addEventListener('DOMContentLoaded', async () => {
-      if (!window.SUPABASE_CONFIG) {
-        alert('Configuração do Supabase não encontrada. Verifique supabase-config.js');
+    // Turmas functionality
+    let supabase;
+    let allClasses = [];
+    let allStudents = [];
+    let filteredClasses = [];
+
+    async function initTurmas() {
+      if (!window.supabase) {
+        console.error('Supabase not loaded');
         return;
       }
-      sb = window.supabase.createClient(
-        window.SUPABASE_CONFIG.url,
-        window.SUPABASE_CONFIG.anonKey
-      );
-      window.sb = sb;
-      setActiveMenu();
-      await loadData();
-      document.getElementById('search').addEventListener('input', applyFilters);
-      document.getElementById('levelFilter').addEventListener('change', applyFilters);
-      document.getElementById('newClass').addEventListener('click', () => openModalClass());
-      document.getElementById('classForm').addEventListener('submit', handleClassSubmit);
+      supabase = window.supabase;
+
+      // Hide shimmers
+      document.querySelectorAll('.turma-shimmer').forEach(el => el.remove());
+
+      const { data: classesData, error: classesError } = await supabase
+        .from('flowence_class')
+        .select('*')
+        .order('name');
+      if (classesError) {
+        console.error(classesError);
+        return;
+      }
+      allClasses = classesData || [];
+
+      const { data: studentsData, error: studentsError } = await supabase
+        .from('flowence_student')
+        .select('*');
+      if (studentsError) console.error(studentsError);
+      allStudents = studentsData || [];
+
+      filteredClasses = [...allClasses];
+      renderClasses();
+      setupFilters();
+      setupEvents();
+    }
+
+    function renderClasses() {
+      const grid = document.getElementById('turma-grid');
+      const empty = document.getElementById('turma-empty');
+      grid.innerHTML = '';
+      if (filteredClasses.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+      filteredClasses.forEach(c => {
+        const card = createTurmaCard(c);
+        grid.appendChild(card);
+      });
+    }
+
+    function createTurmaCard(c) {
+      const count = allStudents.filter(s => s.class_id === c.id).length;
+      const div = document.createElement('div');
+      div.className = 'panel turma-card';
+      div.dataset.id = c.id;
+      div.innerHTML = `
+        <div class="panel-title">${c.name}</div>
+        <div class="turma-meta">
+          <div><strong>Nível:</strong> ${c.level}</div>
+          <div><strong>Professor:</strong> ${c.professor || 'N/A'}</div>
+          <div><strong>Horário:</strong> ${c.schedule || 'N/A'}</div>
+          <div><strong>Início:</strong> ${c.start_date ? new Date(c.start_date).toLocaleDateString('pt-BR') : 'N/A'}</div>
+          <div><strong>Alunos:</strong> ${count}</div>
+          <span class="badge">${c.status || 'ativa'}</span>
+        </div>
+        <div class="turma-actions">
+          <button class="btn btn-primary turma-view-students" data-id="${c.id}">Ver Alunos</button>
+          <button class="btn turma-edit" data-id="${c.id}">Editar</button>
+        </div>
+      `;
+      return div;
+    }
+
+    function setupFilters() {
+      const search = document.querySelector('.turma-search');
+      const levelFilter = document.querySelector('.turma-level-filter');
+      const filterFn = () => {
+        const term = search.value.toLowerCase();
+        const level = levelFilter.value;
+        filteredClasses = allClasses.filter(c =>
+          (c.name.toLowerCase().includes(term) || (c.professor || '').toLowerCase().includes(term)) &&
+          (!level || c.level === level)
+        );
+        renderClasses();
+      };
+      search.addEventListener('input', filterFn);
+      levelFilter.addEventListener('change', filterFn);
+    }
+
+    function setupEvents() {
+      // New turma buttons
+      document.querySelectorAll('.turma-new-btn').forEach(btn => {
+        btn.addEventListener('click', () => openTurmaModal('new'));
+      });
+
+      // Event delegation for actions
+      document.addEventListener('click', (e) => {
+        if (e.target.matches('.turma-view-students')) {
+          const id = e.target.dataset.id;
+          const card = e.target.closest('.turma-card');
+          const name = card.querySelector('.panel-title').textContent;
+          openStudentsModal(id, name);
+        } else if (e.target.matches('.turma-edit')) {
+          const id = e.target.dataset.id;
+          const turma = allClasses.find(c => c.id === id);
+          openTurmaModal('edit', turma);
+        }
+      });
+    }
+
+    const turmaModal = document.getElementById('turma-modal');
+    const studentsModal = document.getElementById('turma-students-modal');
+
+    function openTurmaModal(mode, turmaData = null) {
+      turmaModal.dataset.mode = mode;
+      turmaModal.dataset.id = turmaData?.id || '';
+      const title = turmaModal.querySelector('h3');
+      const form = document.getElementById('turma-form');
+      title.textContent = mode === 'new' ? 'Nova Turma' : 'Editar Turma';
+      if (mode === 'edit') {
+        form.elements.name.value = turmaData.name || '';
+        form.elements.level.value = turmaData.level || '';
+        form.elements.professor.value = turmaData.professor || '';
+        form.elements.schedule.value = turmaData.schedule || '';
+        form.elements.start_date.value = turmaData.start_date ? new Date(turmaData.start_date).toISOString().split('T')[0] : '';
+        form.elements.status.value = turmaData.status || 'ativa';
+        form.elements.notes.value = turmaData.notes || '';
+      } else {
+        form.reset();
+      }
+      turmaModal.classList.add('show');
+    }
+
+    function closeModal(modal) {
+      modal.classList.remove('show');
+    }
+
+    // Turma form submit
+    document.getElementById('turma-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      const mode = turmaModal.dataset.mode;
+      const id = turmaModal.dataset.id;
+      let error;
+      if (mode === 'new') {
+        const { error: insertError } = await supabase.from('flowence_class').insert([data]);
+        error = insertError;
+      } else {
+        const { error: updateError } = await supabase.from('flowence_class').update(data).eq('id', id);
+        error = updateError;
+      }
+      if (error) {
+        alert('Erro ao salvar: ' + error.message);
+        return;
+      }
+      closeModal(turmaModal);
+      initTurmas();
     });
+
+    // Students modal
+    async function openStudentsModal(classId, className) {
+      document.getElementById('turma-students-title').textContent = `Alunos - ${className}`;
+      const list = document.getElementById('turma-students-list');
+      const students = allStudents.filter(s => s.class_id === classId);
+      list.innerHTML = '';
+      if (students.length === 0) {
+        list.innerHTML = '<div class="empty">Nenhum aluno matriculado.</div>';
+      } else {
+        students.forEach(s => {
+          const item = document.createElement('div');
+          item.className = 'panel turma-student';
+          item.innerHTML = `
+            <div class="turma-student-name">${s.name}</div>
+            <div class="turma-student-info">
+              <span>Nível: ${s.level}</span>
+              <span class="badge">${s.status}</span>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      }
+      studentsModal.classList.add('show');
+    }
+
+    // Close modals
+    document.querySelectorAll('.turma-modal-backdrop, [data-close]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target.dataset.close || e.target.classList.contains('turma-modal-backdrop')) {
+          const modal = e.target.closest('.turma-modal');
+          closeModal(modal);
+        }
+      });
+    });
+
+    // ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.turma-modal.show').forEach(closeModal);
+      }
+    });
+
+    // Init on load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTurmas);
+    } else {
+      initTurmas();
+    }
   </script>
 </body>
 </html>
