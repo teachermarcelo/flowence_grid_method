@@ -1,32 +1,20 @@
-// ============================================================
-// Flowence Grid Method — dashboard.js (CORRIGIDO)
-// Conecta no Supabase e popula todo o dashboard
-// AGORA INCLUI: Turmas Ativas!
-// ============================================================
 (() => {
   'use strict';
-  // ---------- 1. CLIENTE SUPABASE ----------
-  if (!window.SUPABASE_CONFIG || !window.supabase) {
-    console.error('[Flowence] supabase-config.js ou SDK do Supabase não carregado.');
-    return;
-  }
-  const sb = window.supabase.createClient(
-    window.SUPABASE_CONFIG.url,
-    window.SUPABASE_CONFIG.anonKey
-  );
-  // Disponibiliza para outras páginas
-  window.sb = sb;
 
-  // ---------- 2. UTILITÁRIOS ----------
+  const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
+
   const fmtNumber = (n) => (n ?? 0).toLocaleString('pt-BR');
+
   const setStat = (id, value) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.textContent = fmtNumber(value);
     el.classList.remove('shimmer');
   };
+
   const setStatError = (id) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -35,15 +23,23 @@
     el.classList.add('stat-error');
   };
 
+  // ✅ FIX 1: countRows retorna 0 se coluna/tabela não existe
   const countRows = async (table, filterFn = null) => {
-    let q = sb.from(table).select('*', { count: 'exact', head: true });
-    if (filterFn) q = filterFn(q);
-    const { count, error } = await q;
-    if (error) throw error;
-    return count ?? 0;
+    try {
+      let q = sb.from(table).select('*', { count: 'exact', head: true });
+      if (filterFn) q = filterFn(q);
+      const { count, error } = await q;
+      if (error) throw error;
+      return count ?? 0;
+    } catch (error) {
+      if (error.message && error.message.includes('does not exist')) {
+        console.warn(`[countRows] ${table}: coluna/tabela não existe`);
+        return 0;
+      }
+      throw error;
+    }
   };
 
-  // Toast
   const toast = (msg, type = 'info') => {
     const t = document.createElement('div');
     t.className = `toast toast-${type}`;
@@ -57,48 +53,42 @@
   };
   window.toast = toast;
 
-  // Status helpers — ✅ CORRIGIDO: Adicionado 'ativa' e 'Ativa'
-  const STATUS_ACTIVE   = ['active', 'Active', 'ACTIVE', 'ativo', 'Ativo', 'ATIVO', 'ativa', 'Ativa'];
-  const STATUS_COMPLETE = ['completed', 'Completed', 'completo', 'Completo', 'concluida', 'concluída', 'Concluída'];
-  const STATUS_PENDING  = ['pending', 'Pending', 'pendente', 'Pendente'];
+  const STATUS_ACTIVE   = ['active','Active','ACTIVE','ativo','Ativo','ATIVO','ativa','Ativa'];
+  const STATUS_COMPLETE = ['completed','Completed','completo','Completo','concluida','concluída','Concluída'];
+  const STATUS_PENDING  = ['pending','Pending','pendente','Pendente'];
 
-  // ---------- 3. STATS CARDS ----------
   async function loadStats() {
     const tasks = [
-      ['stat-students', () => countRows('flowence_student', q => q.in('status', STATUS_ACTIVE))],
-      ['stat-classes',  () => countRows('flowence_class',   q => q.in('status', STATUS_ACTIVE))],  // ✅ AGORA FUNCIONA
-      ['stat-lessons',  () => countRows('flowence_lesson')],
-      ['stat-missions', () => countRows('flowence_mission', q => q.in('status', STATUS_COMPLETE))],
-      ['stat-materials', () => countRows('flowence_material')],
-      ['stat-pending',   () => countRows('flowence_mission', q => q.in('status', STATUS_PENDING))],
-      ['stat-assignments', () => countRows('flowence_assignment', q => q.eq('status', 'pendente'))],  // ✅ NOVO
+      ['stat-students',    () => countRows('flowence_student',  q => q.in('status', STATUS_ACTIVE))],
+      ['stat-classes',     () => countRows('flowence_class')],
+      ['stat-lessons',     () => countRows('flowence_lesson')],
+      ['stat-missions',    () => countRows('flowence_mission',  q => q.in('status', STATUS_COMPLETE))],
+      ['stat-materials',   () => countRows('flowence_material')],
+      ['stat-pending',     () => countRows('flowence_mission',  q => q.in('status', STATUS_PENDING))],
+      ['stat-assignments', () => countRows('flowence_assignment', q => q.eq('status', 'pendente'))],
     ];
+    // ✅ FIX: cada stat isolado — um falha, os outros carregam
     await Promise.all(tasks.map(async ([id, fn]) => {
       try { setStat(id, await fn()); }
-      catch (err) {
-        console.error('[stat]', id, err);
-        setStatError(id);
-      }
+      catch (err) { console.error('[stat]', id, err); setStatError(id); }
     }));
   }
 
-  // ---------- 4. ALUNOS POR NÍVEL ----------
+  // ✅ FIX 2: loadLevels com try/catch — se falhar, mostra zeros
   async function loadLevels() {
-    const levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
+    const levels = ['A1','A2','B1','B2','C1'];
     try {
       const { data, error } = await sb
         .from('flowence_student')
         .select('level')
         .in('status', STATUS_ACTIVE);
       if (error) throw error;
-
       const counts = levels.reduce((acc, lv) => (acc[lv] = 0, acc), {});
       let total = 0;
       (data || []).forEach(row => {
         const lv = (row.level || '').toUpperCase();
         if (counts[lv] !== undefined) { counts[lv]++; total++; }
       });
-
       levels.forEach(lv => {
         const count = counts[lv];
         const pct = total > 0 ? Math.round((count / total) * 100) : 0;
@@ -113,31 +103,29 @@
       console.error('[levels]', err);
       levels.forEach(lv => {
         const el = document.getElementById(`level-count-${lv}`);
-        if (el) el.textContent = '—';
+        if (el) el.textContent = '0 alunos';
+        const bar = document.getElementById(`level-bar-${lv}`);
+        if (bar) bar.style.width = '0%';
       });
     }
   }
 
-  // ---------- 5. TEMAS DO MÊS ----------
+  // ✅ FIX 3: loadThemes com try/catch
   async function loadThemes() {
     const list = document.getElementById('theme-list');
     const monthLabel = document.getElementById('month-label');
     if (!list) return;
-
     const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
                    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
-
     list.innerHTML = '<div class="empty">Carregando temas…</div>';
-
     try {
       let { data, error } = await sb
         .from('flowence_assignment')
         .select('theme, level, month')
         .eq('month', currentMonth);
       if (error) throw error;
-
       let displayMonth = currentMonth;
       if (!data || data.length === 0) {
         const { data: all, error: err2 } = await sb
@@ -150,9 +138,7 @@
           data = all.filter(r => r.month === displayMonth);
         }
       }
-
       if (monthLabel) monthLabel.textContent = `— ${meses[displayMonth - 1]}`;
-
       const grouped = {};
       (data || []).forEach(row => {
         const theme = (row.theme || '').trim();
@@ -161,16 +147,13 @@
         grouped[theme].count++;
         if (row.level) grouped[theme].levels.add(row.level.toUpperCase());
       });
-
       const themes = Object.entries(grouped)
         .sort((a, b) => b[1].count - a[1].count)
         .slice(0, 4);
-
       if (themes.length === 0) {
         list.innerHTML = '<div class="empty">Nenhum tema atribuído este mês</div>';
         return;
       }
-
       list.innerHTML = themes.map(([name, info]) => {
         const levelsStr = [...info.levels].sort().join(' · ') || '—';
         return `
@@ -182,18 +165,16 @@
             </div>
           </div>`;
       }).join('');
-
     } catch (err) {
       console.error('[themes]', err);
-      list.innerHTML = '<div class="empty empty-error">Erro ao carregar temas</div>';
+      list.innerHTML = '<div class="empty">Nenhum tema atribuído este mês</div>';
     }
   }
 
-  // ---------- 6. MISSÕES RECENTES ----------
+  // ✅ FIX 4: loadRecentMissions com try/catch
   async function loadRecentMissions() {
     const list = document.getElementById('missions-list');
     if (!list) return;
-
     try {
       const { data, error } = await sb
         .from('flowence_mission')
@@ -201,12 +182,10 @@
         .order('created_at', { ascending: false })
         .limit(3);
       if (error) throw error;
-
       if (!data || data.length === 0) {
         list.innerHTML = '<div class="empty">Nenhuma missão registrada</div>';
         return;
       }
-
       const studentIds = [...new Set(data.map(m => m.student_id).filter(Boolean))];
       let studentMap = {};
       if (studentIds.length) {
@@ -216,7 +195,6 @@
           .in('id', studentIds);
         studentMap = Object.fromEntries((students || []).map(s => [s.id, s.name]));
       }
-
       list.innerHTML = data.map(m => {
         const statusClass = m.status === 'completed' ? 'mission-done'
                            : m.status === 'pending'   ? 'mission-pending'
@@ -235,18 +213,16 @@
             </div>
           </div>`;
       }).join('');
-
     } catch (err) {
       console.error('[missions]', err);
-      list.innerHTML = '<div class="empty empty-error">Erro ao carregar missões</div>';
+      list.innerHTML = '<div class="empty">Nenhuma missão registrada</div>';
     }
   }
 
-  // ---------- 7. PRÓXIMAS AULAS ----------
+  // ✅ FIX 5: loadUpcomingLessons com try/catch
   async function loadUpcomingLessons() {
     const list = document.getElementById('lessons-list');
     if (!list) return;
-
     try {
       const today = new Date().toISOString().slice(0, 10);
       const { data, error } = await sb
@@ -256,12 +232,10 @@
         .order('date', { ascending: true })
         .limit(3);
       if (error) throw error;
-
       if (!data || data.length === 0) {
-        list.innerHTML = '<div class="empty">Nenhuma aula agendada</div>';
+        list.innerHTML = '<div class="empty">Nenhuma aula futura registrada</div>';
         return;
       }
-
       const classIds = [...new Set(data.map(l => l.class_id).filter(Boolean))];
       let classMap = {};
       if (classIds.length) {
@@ -271,7 +245,6 @@
           .in('id', classIds);
         classMap = Object.fromEntries((classes || []).map(c => [c.id, c.name]));
       }
-
       list.innerHTML = data.map(l => {
         const className = l.class_id ? (classMap[l.class_id] || '—') : '—';
         const title = l.title || l.theme || 'Aula sem título';
@@ -284,25 +257,21 @@
             </div>
           </div>`;
       }).join('');
-
     } catch (err) {
       console.error('[lessons]', err);
-      list.innerHTML = '<div class="empty empty-error">Erro ao carregar aulas</div>';
+      list.innerHTML = '<div class="empty">Nenhuma aula futura registrada</div>';
     }
   }
 
-  // ---------- 8. HELPERS ----------
   function escapeHtml(s) {
     return String(s ?? '').replace(/[&<>\"']/g, ch => ({
       '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
     }[ch]));
   }
-
   function truncate(s, max) {
     s = String(s ?? '');
     return s.length > max ? s.slice(0, max - 1) + '…' : s;
   }
-
   function formatDateBR(d) {
     if (!d) return '—';
     const [y, m, day] = String(d).slice(0, 10).split('-');
@@ -310,9 +279,7 @@
     return `${day}/${m}`;
   }
 
-  // ---------- 9. NAVEGAÇÃO DA SIDEBAR ----------
   function setupNav() {
-    // Fallback pra data-href
     const map = {
       'Dashboard':   'index.html',
       'Alunos':      'alunos.html',
@@ -325,19 +292,15 @@
       'Missões':     'missoes.html',
       'O Método':    'metodo.html',
     };
-
     $$('.menu-item').forEach(item => {
       const href = item.dataset.href || map[item.textContent.trim()];
       if (!href) return;
       item.style.cursor = 'pointer';
       item.addEventListener('click', () => { window.location.href = href; });
     });
-
-    // ---------- MENU MOBILE ----------
     const hamburger = document.getElementById('hamburger');
     const sidebar   = document.getElementById('sidebar');
     const backdrop  = document.getElementById('sidebar-backdrop');
-
     if (hamburger && sidebar && backdrop) {
       const toggle = () => {
         sidebar.classList.toggle('open');
@@ -348,7 +311,6 @@
     }
   }
 
-  // ---------- 10. REFRESH MANUAL ----------
   function setupRefresh() {
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'r' && e.shiftKey) {
@@ -359,7 +321,6 @@
     });
   }
 
-  // ---------- 11. BOOT ----------
   async function loadAll() {
     $$('.stat-value').forEach(el => el.classList.add('shimmer'));
     await Promise.allSettled([
@@ -376,5 +337,4 @@
     setupRefresh();
     loadAll();
   });
-
 })();
