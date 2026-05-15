@@ -485,6 +485,58 @@
   color: var(--danger);
 }
 
+/* LINKS */
+.link-item {
+  display: grid;
+  grid-template-columns: 1.5fr 2fr 1fr auto;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.link-item:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.link-label,
+.link-url,
+.link-type {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color var(--t-fast);
+}
+
+.link-label::placeholder,
+.link-url::placeholder {
+  color: var(--text-3);
+}
+
+.link-label:focus,
+.link-url:focus,
+.link-type:focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+}
+
 /* EMPTY STATE */
 .empty {
   padding: 40px 20px;
