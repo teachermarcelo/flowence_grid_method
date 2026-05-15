@@ -1,0 +1,39 @@
+INSTRUÇÕES RÁPIDAS - COPIE PARA SEU PROJETO:
+
+1. COPIE PARA A RAIZ DO PROJETO:
+   - package.json
+   - tsconfig.json
+   - next.config.js
+   - tailwind.config.js
+   - postcss.config.js
+   - .env.example (rename para .env.local depois)
+
+2. COPIE PARA src/lib/:
+   - types.ts
+   - hooks.ts
+   - supabase.ts
+
+3. COPIE PARA src/components/ui/ (crie a pasta):
+   Todos os componentes do arquivo ui-components.tsx e ui-components-extended.tsx
+   separados em arquivos individuais:
+   - card.tsx
+   - badge.tsx
+   - button.tsx
+   - input.tsx
+   - label.tsx
+   - textarea.tsx
+   - avatar.tsx
+   - dialog.tsx
+   - table.tsx
+
+4. EXECUTE:
+   npm install
+   npm run dev
+
+5. ACESSE:
+   http://localhost:3000
+
+6. FAÇA:
+   git add .
+   git commit -m "setup: configure next.js base structure"
+   git push
