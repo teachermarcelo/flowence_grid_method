@@ -3,16 +3,29 @@
 (function() {
   'use strict';
 
-  // ---------- CONFIGURAÇÃO DE COLUNAS (CORRETAS!) ----------
+  // ---------- CONFIGURAÇÃO DE COLUNAS ----------
   const COLUMNS = {
-    id:          'id',           // ✅ text
-    nome:        'name',         // ✅ text
-    professor:   'teacher',      // ✅ text
-    nivel:       'level',        // ✅ text
-    horario:     'schedule',     // ✅ text
-    data_inicio: 'start_date',   // ✅ text
-    status:      'status',       // ✅ text
-    observacoes: 'notes',        // ✅ text
+    id:                  'id',
+    nome:                'name',
+    professor:           'teacher',
+    nivel:               'level',
+    horario:             'schedule',
+    data_inicio:         'start_date',
+    data_fim:            'end_date',
+    status:              'status',
+    observacoes:         'notes',
+    localizacao:         'location',
+    capacidade_max:      'max_capacity',
+    descricao:           'description',
+    coordenador:         'coordinator',
+    turno:               'shift',
+    dias_semana:         'days_of_week',
+    duracao_minutos:     'duration_minutes',
+    material_id:         'material_id',
+    metas:               'learning_goals',
+    visivel_alunos:      'visible_to_students',
+    cor:                 'color',
+    ativo:               'active',
   };
 
   // ---------- 1. AGUARDAR SUPABASE ----------
@@ -50,7 +63,7 @@
     }
     
     console.error('[Turmas] Supabase não está disponível');
-    mostrarErro('Supabase não configurado. Verifique supabase-config.js');
+    mostrarErro('Supabase não configurado');
     return false;
   }
 
@@ -125,21 +138,34 @@
     };
   }
 
-  // ---------- 3. NORMALIZAR DADOS DO SUPABASE ----------
+  // ---------- 3. NORMALIZAR DADOS ----------
   function normalizeRow(row) {
     return {
-      id:          row[COLUMNS.id],
-      nome:        row[COLUMNS.nome],
-      professor:   row[COLUMNS.professor],
-      nivel:       row[COLUMNS.nivel],
-      horario:     row[COLUMNS.horario],
-      data_inicio: row[COLUMNS.data_inicio],
-      status:      row[COLUMNS.status],
-      observacoes: row[COLUMNS.observacoes],
+      id:                row[COLUMNS.id],
+      nome:              row[COLUMNS.nome],
+      professor:         row[COLUMNS.professor],
+      nivel:             row[COLUMNS.nivel],
+      horario:           row[COLUMNS.horario],
+      data_inicio:       row[COLUMNS.data_inicio],
+      data_fim:          row[COLUMNS.data_fim],
+      status:            row[COLUMNS.status],
+      observacoes:       row[COLUMNS.observacoes],
+      localizacao:       row[COLUMNS.localizacao],
+      capacidade_max:    row[COLUMNS.capacidade_max],
+      descricao:         row[COLUMNS.descricao],
+      coordenador:       row[COLUMNS.coordenador],
+      turno:             row[COLUMNS.turno],
+      dias_semana:       row[COLUMNS.dias_semana],
+      duracao_minutos:   row[COLUMNS.duracao_minutos],
+      material_id:       row[COLUMNS.material_id],
+      metas:             row[COLUMNS.metas],
+      visivel_alunos:    row[COLUMNS.visivel_alunos],
+      cor:               row[COLUMNS.cor],
+      ativo:             row[COLUMNS.ativo],
     };
   }
 
-  // ---------- 4. ESTADO EM MEMÓRIA ----------
+  // ---------- 4. ESTADO ----------
   let turmas = [];
   let alunos = [];
 
@@ -148,22 +174,19 @@
     try {
       showToast('Carregando turmas...', 'info');
 
-      // Carregar turmas
       const { data: classData, error: classError } = await supabaseClient
         .from('flowence_class')
-        .select('*')
-        .order(COLUMNS.nome, { ascending: true });
+        .select('id,name,teacher,level,schedule,start_date,end_date,status,notes,location,max_capacity,description,coordinator,shift,days_of_week,duration_minutes,material_id,learning_goals,visible_to_students,color,active')
+        .order('name', { ascending: true });
 
       if (classError) {
         console.error('[loadAll] Erro ao carregar turmas:', classError);
         throw classError;
       }
 
-      // Normalizar dados
       turmas = (classData || []).map(normalizeRow);
       console.log('[Turmas] Carregadas:', turmas.length);
 
-      // Carregar alunos para contar
       const { data: studentData, error: studentError } = await supabaseClient
         .from('flowence_student')
         .select('id, class_id');
@@ -203,7 +226,7 @@
     });
   }
 
-  // ---------- 7. RENDERIZAR STATS ----------
+  // ---------- 7. STATS ----------
   function renderQuickStats() {
     const filtered = getFiltered();
     const total = turmas.length;
@@ -220,7 +243,7 @@
     if (qsShown) qsShown.textContent = shown;
   }
 
-  // ---------- 8. RENDERIZAR TABELA ----------
+  // ---------- 8. TABELA ----------
   function renderTable() {
     const container = $('#data-container');
     if (!container) return;
@@ -242,14 +265,15 @@
       const dataInicio = formatDate(turma.data_inicio);
       const levelB = levelBadge(turma.nivel);
       const statusP = statusPill(turma.status);
+      const turnoEsc = esc(turma.turno || '—');
 
       html += `
         <div class="table-row">
           <div class="table-cell-turma">
-            <div class="avatar">${avatar}</div>
+            <div class="avatar" style="background: ${turma.cor || '#4f46e5'}">${avatar}</div>
             <div class="turma-info">
               <div class="turma-nome">${nomeEsc}</div>
-              <div class="turma-meta">${professorEsc}</div>
+              <div class="turma-meta">${professorEsc} • ${turnoEsc}</div>
             </div>
           </div>
           <div class="table-cell">${professorEsc}</div>
@@ -259,6 +283,7 @@
           <div class="table-cell">${statusP}</div>
           <div class="table-cell table-cell-center">${count}</div>
           <div class="table-cell table-cell-actions">
+            <button class="btn-icon btn-view" data-id="${turma.id}" title="Ver Detalhes">👁️</button>
             <button class="btn-icon btn-edit" data-id="${turma.id}" title="Editar">✏️</button>
             <button class="btn-icon btn-del" data-id="${turma.id}" title="Deletar">🗑️</button>
           </div>
@@ -269,7 +294,7 @@
     container.innerHTML = html;
   }
 
-  // ---------- 9. ABRIR MODAL ----------
+  // ---------- 9. MODAL ----------
   function openModal(id = null) {
     const modal = $('#modal-overlay');
     const title = $('.modal-title');
@@ -283,10 +308,20 @@
     $('#f-nivel').value = 'A1';
     $('#f-horario').value = '';
     $('#f-data_inicio').value = '';
+    $('#f-data_fim').value = '';
     $('#f-status').value = 'ativa';
     $('#f-observacoes').value = '';
+    $('#f-localizacao').value = '';
+    $('#f-capacidade').value = '30';
+    $('#f-descricao').value = '';
+    $('#f-coordenador').value = '';
+    $('#f-turno').value = 'Tarde';
+    $('#f-dias_semana').value = '';
+    $('#f-duracao').value = '60';
+    $('#f-material_id').value = '';
+    $('#f-metas').value = '';
+    $('#f-cor').value = '#4f46e5';
 
-    // Se editando
     if (id) {
       const turma = turmas.find(t => t.id === id);
       if (!turma) {
@@ -299,8 +334,19 @@
       $('#f-nivel').value = turma.nivel || 'A1';
       $('#f-horario').value = turma.horario || '';
       $('#f-data_inicio').value = turma.data_inicio || '';
+      $('#f-data_fim').value = turma.data_fim || '';
       $('#f-status').value = normalizeStatus(turma.status);
       $('#f-observacoes').value = turma.observacoes || '';
+      $('#f-localizacao').value = turma.localizacao || '';
+      $('#f-capacidade').value = turma.capacidade_max || '30';
+      $('#f-descricao').value = turma.descricao || '';
+      $('#f-coordenador').value = turma.coordenador || '';
+      $('#f-turno').value = turma.turno || 'Tarde';
+      $('#f-dias_semana').value = turma.dias_semana || '';
+      $('#f-duracao').value = turma.duracao_minutos || '60';
+      $('#f-material_id').value = turma.material_id || '';
+      $('#f-metas').value = turma.metas || '';
+      $('#f-cor').value = turma.cor || '#4f46e5';
       title.textContent = 'Editar Turma';
     } else {
       title.textContent = 'Nova Turma';
@@ -315,17 +361,27 @@
     if (modal) modal.classList.remove('show');
   }
 
-  // ---------- 11. SALVAR TURMA ----------
+  // ---------- 11. SALVAR ----------
   async function saveTurma() {
     const nome = ($('#f-nome').value || '').trim();
     const professor = ($('#f-professor').value || '').trim();
     const nivel = $('#f-nivel').value || '';
     const horario = ($('#f-horario').value || '').trim();
     const data_inicio = $('#f-data_inicio').value || null;
+    const data_fim = $('#f-data_fim').value || null;
     const status = $('#f-status').value || 'ativa';
     const observacoes = ($('#f-observacoes').value || '').trim();
+    const localizacao = ($('#f-localizacao').value || '').trim();
+    const capacidade_max = parseInt($('#f-capacidade').value) || 30;
+    const descricao = ($('#f-descricao').value || '').trim();
+    const coordenador = ($('#f-coordenador').value || '').trim();
+    const turno = $('#f-turno').value || 'Tarde';
+    const dias_semana = ($('#f-dias_semana').value || '').trim();
+    const duracao_minutos = parseInt($('#f-duracao').value) || 60;
+    const material_id = ($('#f-material_id').value || '').trim();
+    const metas = ($('#f-metas').value || '').trim();
+    const cor = $('#f-cor').value || '#4f46e5';
 
-    // Validação
     if (!nome) {
       showToast('Nome da turma é obrigatório', 'error');
       $('#f-nome').focus();
@@ -339,15 +395,25 @@
 
     const id = $('#f-id').value;
     
-    // Mapeado para as colunas corretas do BD
     const data = {
       [COLUMNS.nome]: nome,
       [COLUMNS.professor]: professor,
       [COLUMNS.nivel]: nivel,
       [COLUMNS.horario]: horario,
       [COLUMNS.data_inicio]: data_inicio,
+      [COLUMNS.data_fim]: data_fim,
       [COLUMNS.status]: status,
       [COLUMNS.observacoes]: observacoes,
+      [COLUMNS.localizacao]: localizacao,
+      [COLUMNS.capacidade_max]: capacidade_max,
+      [COLUMNS.descricao]: descricao,
+      [COLUMNS.coordenador]: coordenador,
+      [COLUMNS.turno]: turno,
+      [COLUMNS.dias_semana]: dias_semana,
+      [COLUMNS.duracao_minutos]: duracao_minutos,
+      [COLUMNS.material_id]: material_id,
+      [COLUMNS.metas]: metas,
+      [COLUMNS.cor]: cor,
     };
 
     try {
@@ -373,7 +439,7 @@
     }
   }
 
-  // ---------- 12. DELETAR TURMA ----------
+  // ---------- 12. DELETAR ----------
   async function deleteTurma(id) {
     const turma = turmas.find(t => t.id === id);
     if (!turma) return;
@@ -394,7 +460,7 @@
     }
   }
 
-  // ---------- 13. SETUP EVENTOS ----------
+  // ---------- 13. EVENTOS ----------
   function setupEvents() {
     const btnNew = $('#btn-new');
     if (btnNew) btnNew.addEventListener('click', () => openModal());
@@ -460,8 +526,7 @@
 
   // ---------- 14. INIT ----------
   function init() {
-    console.log('[Turmas] Inicializando...');
-    console.log('[Turmas] Colunas mapeadas:', COLUMNS);
+    console.log('[Turmas] Inicializando... (COMPLETO)');
     setupEvents();
     loadAll();
   }
