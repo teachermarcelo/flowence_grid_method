@@ -26,9 +26,9 @@
     visivel_alunos:      'visible_to_students',
     cor:                 'color',
     ativo:               'active',
+    links:               'links',  // ✅ NOVO
   };
 
-  // ---------- 1. AGUARDAR SUPABASE ----------
   let supabaseClient = null;
   let tentativas = 0;
   
@@ -67,7 +67,7 @@
     return false;
   }
 
-  // ---------- 2. UTILITÁRIOS ----------
+  // ---------- UTILITÁRIOS ----------
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -138,7 +138,7 @@
     };
   }
 
-  // ---------- 3. NORMALIZAR DADOS ----------
+  // ---------- NORMALIZAR DADOS ----------
   function normalizeRow(row) {
     return {
       id:                row[COLUMNS.id],
@@ -162,21 +162,37 @@
       visivel_alunos:    row[COLUMNS.visivel_alunos],
       cor:               row[COLUMNS.cor],
       ativo:             row[COLUMNS.ativo],
+      links:             parseLinks(row[COLUMNS.links]),  // ✅ Parse JSON
     };
   }
 
-  // ---------- 4. ESTADO ----------
+  // ---------- PARSE LINKS ----------
+  function parseLinks(linksStr) {
+    if (!linksStr) return [];
+    try {
+      return JSON.parse(linksStr);
+    } catch {
+      return [];
+    }
+  }
+
+  function stringifyLinks(links) {
+    return JSON.stringify(links || []);
+  }
+
+  // ---------- ESTADO ----------
   let turmas = [];
   let alunos = [];
+  let linksAdicionados = [];  // ✅ Estado temporário de links
 
-  // ---------- 5. CARREGAR DADOS ----------
+  // ---------- CARREGAR DADOS ----------
   async function loadAll() {
     try {
       showToast('Carregando turmas...', 'info');
 
       const { data: classData, error: classError } = await supabaseClient
         .from('flowence_class')
-        .select('id,name,teacher,level,schedule,start_date,end_date,status,notes,location,max_capacity,description,coordinator,shift,days_of_week,duration_minutes,material_id,learning_goals,visible_to_students,color,active')
+        .select('id,name,teacher,level,schedule,start_date,end_date,status,notes,location,max_capacity,description,coordinator,shift,days_of_week,duration_minutes,material_id,learning_goals,visible_to_students,color,active,links')
         .order('name', { ascending: true });
 
       if (classError) {
@@ -210,7 +226,7 @@
     }
   }
 
-  // ---------- 6. FILTRAR ----------
+  // ---------- FILTRAR ----------
   function getFiltered() {
     const search = ($('#search-input')?.value || '').toLowerCase().trim();
     const levelFilter = ($('#filter-level')?.value || '').toLowerCase().trim();
@@ -226,7 +242,7 @@
     });
   }
 
-  // ---------- 7. STATS ----------
+  // ---------- STATS ----------
   function renderQuickStats() {
     const filtered = getFiltered();
     const total = turmas.length;
@@ -243,7 +259,7 @@
     if (qsShown) qsShown.textContent = shown;
   }
 
-  // ---------- 8. TABELA ----------
+  // ---------- TABELA ----------
   function renderTable() {
     const container = $('#data-container');
     if (!container) return;
@@ -283,7 +299,6 @@
           <div class="table-cell">${statusP}</div>
           <div class="table-cell table-cell-center">${count}</div>
           <div class="table-cell table-cell-actions">
-            <button class="btn-icon btn-view" data-id="${turma.id}" title="Ver Detalhes">👁️</button>
             <button class="btn-icon btn-edit" data-id="${turma.id}" title="Editar">✏️</button>
             <button class="btn-icon btn-del" data-id="${turma.id}" title="Deletar">🗑️</button>
           </div>
@@ -294,14 +309,56 @@
     container.innerHTML = html;
   }
 
-  // ---------- 9. MODAL ----------
+  // ---------- RENDERIZAR LINKS ----------
+  function renderLinks(links) {
+    const container = $('#links-container');
+    if (!container) return;
+
+    if (!links || links.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    let html = '';
+    links.forEach((link, idx) => {
+      html += `
+        <div class="link-item">
+          <input type="text" class="link-label" placeholder="Nome" value="${esc(link.label || '')}" data-idx="${idx}">
+          <input type="url" class="link-url" placeholder="URL" value="${esc(link.url || '')}" data-idx="${idx}">
+          <select class="link-type" data-idx="${idx}">
+            <option value="Material" ${link.type === 'Material' ? 'selected' : ''}>Material</option>
+            <option value="Video" ${link.type === 'Video' ? 'selected' : ''}>Video</option>
+            <option value="Aula" ${link.type === 'Aula' ? 'selected' : ''}>Aula</option>
+            <option value="Recurso" ${link.type === 'Recurso' ? 'selected' : ''}>Recurso</option>
+            <option value="Outro" ${link.type === 'Outro' ? 'selected' : ''}>Outro</option>
+          </select>
+          <button type="button" class="btn-icon btn-remove-link" data-idx="${idx}" title="Remover">🗑️</button>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+    // Event listeners para remover links
+    $$('.btn-remove-link').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const idx = parseInt(btn.dataset.idx);
+        linksAdicionados.splice(idx, 1);
+        renderLinks(linksAdicionados);
+      });
+    });
+  }
+
+  // ---------- MODAL ----------
   function openModal(id = null) {
     const modal = $('#modal-overlay');
     const title = $('.modal-title');
 
     if (!modal || !title) return;
 
-    // Limpar form
+    // Reset
+    linksAdicionados = [];
     $('#f-id').value = '';
     $('#f-nome').value = '';
     $('#f-professor').value = '';
@@ -347,21 +404,24 @@
       $('#f-material_id').value = turma.material_id || '';
       $('#f-metas').value = turma.metas || '';
       $('#f-cor').value = turma.cor || '#4f46e5';
+      linksAdicionados = JSON.parse(JSON.stringify(turma.links || []));
       title.textContent = 'Editar Turma';
     } else {
       title.textContent = 'Nova Turma';
     }
 
+    renderLinks(linksAdicionados);
     modal.classList.add('show');
   }
 
-  // ---------- 10. FECHAR MODAL ----------
+  // ---------- FECHAR MODAL ----------
   function closeModal() {
     const modal = $('#modal-overlay');
     if (modal) modal.classList.remove('show');
+    linksAdicionados = [];
   }
 
-  // ---------- 11. SALVAR ----------
+  // ---------- SALVAR ----------
   async function saveTurma() {
     const nome = ($('#f-nome').value || '').trim();
     const professor = ($('#f-professor').value || '').trim();
@@ -381,6 +441,15 @@
     const material_id = ($('#f-material_id').value || '').trim();
     const metas = ($('#f-metas').value || '').trim();
     const cor = $('#f-cor').value || '#4f46e5';
+
+    // ✅ Validar e preparar links
+    const links = linksAdicionados
+      .filter(l => (l.url || '').trim())
+      .map(l => ({
+        label: (l.label || '').trim(),
+        url: (l.url || '').trim(),
+        type: l.type || 'Outro'
+      }));
 
     if (!nome) {
       showToast('Nome da turma é obrigatório', 'error');
@@ -414,6 +483,7 @@
       [COLUMNS.material_id]: material_id,
       [COLUMNS.metas]: metas,
       [COLUMNS.cor]: cor,
+      [COLUMNS.links]: stringifyLinks(links),  // ✅ Salvar links como JSON
     };
 
     try {
@@ -439,7 +509,7 @@
     }
   }
 
-  // ---------- 12. DELETAR ----------
+  // ---------- DELETAR ----------
   async function deleteTurma(id) {
     const turma = turmas.find(t => t.id === id);
     if (!turma) return;
@@ -460,7 +530,7 @@
     }
   }
 
-  // ---------- 13. EVENTOS ----------
+  // ---------- EVENTOS ----------
   function setupEvents() {
     const btnNew = $('#btn-new');
     if (btnNew) btnNew.addEventListener('click', () => openModal());
@@ -473,6 +543,16 @@
 
     const modalClose = $('#modal-close');
     if (modalClose) modalClose.addEventListener('click', () => closeModal());
+
+    // ✅ Botão adicionar link
+    const btnAddLink = $('#btn-add-link');
+    if (btnAddLink) {
+      btnAddLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        linksAdicionados.push({ label: '', url: '', type: 'Material' });
+        renderLinks(linksAdicionados);
+      });
+    }
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeModal();
@@ -509,6 +589,31 @@
       });
     }
 
+    // ✅ Event delegation para atualizar links
+    document.addEventListener('change', (e) => {
+      if (e.target.classList.contains('link-type')) {
+        const idx = parseInt(e.target.dataset.idx);
+        if (linksAdicionados[idx]) {
+          linksAdicionados[idx].type = e.target.value;
+        }
+      }
+    });
+
+    document.addEventListener('input', (e) => {
+      if (e.target.classList.contains('link-label')) {
+        const idx = parseInt(e.target.dataset.idx);
+        if (linksAdicionados[idx]) {
+          linksAdicionados[idx].label = e.target.value;
+        }
+      }
+      if (e.target.classList.contains('link-url')) {
+        const idx = parseInt(e.target.dataset.idx);
+        if (linksAdicionados[idx]) {
+          linksAdicionados[idx].url = e.target.value;
+        }
+      }
+    });
+
     document.addEventListener('click', (e) => {
       const editBtn = e.target.closest('.btn-edit');
       if (editBtn) {
@@ -524,14 +629,14 @@
     });
   }
 
-  // ---------- 14. INIT ----------
+  // ---------- INIT ----------
   function init() {
-    console.log('[Turmas] Inicializando... (COMPLETO)');
+    console.log('[Turmas] Inicializando... (COM LINKS)');
     setupEvents();
     loadAll();
   }
 
-  // ---------- 15. BOOT ----------
+  // ---------- BOOT ----------
   document.addEventListener('DOMContentLoaded', () => {
     console.log('[Turmas] DOM loaded');
     
