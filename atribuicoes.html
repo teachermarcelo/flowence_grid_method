@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="atribuicoes-styles.css">
 </head>
 <body>
 <div class="app">
@@ -24,20 +25,20 @@
         <div class="menu-section">
           <div class="menu-label">PRINCIPAL</div>
           <div class="menu-item" data-href="index.html"><span class="menu-icon">▦</span>Dashboard</div>
-          <div class="menu-item " data-href="alunos.html"><span class="menu-icon">✉</span>Alunos</div>
-          <div class="menu-item " data-href="turmas.html"><span class="menu-icon">▣</span>Turmas</div>
+          <div class="menu-item" data-href="alunos.html"><span class="menu-icon">✉</span>Alunos</div>
+          <div class="menu-item" data-href="turmas.html"><span class="menu-icon">▣</span>Turmas</div>
         </div>
         <div class="menu-section">
           <div class="menu-label">PLANEJAMENTO</div>
           <div class="menu-item" data-href="niveis.html"><span class="menu-icon">⌁</span>Níveis CEFR</div>
-          <div class="menu-item " data-href="temas.html"><span class="menu-icon">◎</span>Temas Mensais</div>
+          <div class="menu-item" data-href="temas.html"><span class="menu-icon">◎</span>Temas Mensais</div>
           <div class="menu-item active" data-href="atribuicoes.html"><span class="menu-icon">▤</span>Atribuições</div>
-          <div class="menu-item " data-href="aulas.html"><span class="menu-icon">◫</span>Aulas</div>
+          <div class="menu-item" data-href="aulas.html"><span class="menu-icon">◫</span>Aulas</div>
         </div>
         <div class="menu-section">
           <div class="menu-label">RECURSOS</div>
-          <div class="menu-item " data-href="materiais.html"><span class="menu-icon">↗</span>Materiais</div>
-          <div class="menu-item " data-href="missoes.html"><span class="menu-icon">🏆</span>Missões</div>
+          <div class="menu-item" data-href="materiais.html"><span class="menu-icon">↗</span>Materiais</div>
+          <div class="menu-item" data-href="missoes.html"><span class="menu-icon">🏆</span>Missões</div>
           <div class="menu-item" data-href="metodo.html"><span class="menu-icon">♡</span>O Método</div>
         </div>
       </nav>
@@ -46,7 +47,7 @@
       <div class="avatar">N</div>
       <div class="footer-text">
         <strong>Grid Method™ v1.0</strong>
-        <small>Em construção</small>
+        <small>Conectado ao Supabase</small>
       </div>
     </div>
   </aside>
@@ -55,47 +56,234 @@
     <header class="topbar">
       <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
       <div class="page-title"><span>▤</span> Atribuições</div>
+      <div class="top-actions">
+        <button id="btn-new" class="btn btn-primary">+ Nova Atribuição</button>
+      </div>
     </header>
 
     <section class="content">
 
-      <div class="placeholder-card">
-        <div class="placeholder-icon">▤</div>
-        <h1 class="placeholder-title">Atribuições</h1>
-        <p class="placeholder-text">Esta seção está em construção. <br>Atribua temas mensais e missões aos alunos baseado no nível CEFR.</p>
-        <div class="placeholder-actions">
-          <a class="btn btn-primary" href="index.html">← Voltar ao Dashboard</a>
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Buscar tema ou aluno...">
         </div>
-        <div class="placeholder-soon">
-          <strong>Em breve:</strong>
-          <ul class="bullet-list">
-            <li>Atribuir tema do mês para aluno ou turma inteira</li><li>Atribuir missões semanais por nível</li><li>Ver progresso das atribuições</li><li>Importar temas do método automaticamente</li>
-          </ul>
+        <div class="filter-group">
+          <select id="filter-level">
+            <option value="">Todos os níveis</option>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C1">C1</option>
+          </select>
+          <select id="filter-status">
+            <option value="">Todos os status</option>
+            <option value="pendente">Pendente</option>
+            <option value="concluida">Concluída</option>
+            <option value="atrasada">Atrasada</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="quick-stats">
+        <div class="qstat">
+          <div class="qstat-value" id="qs-total">0</div>
+          <div class="qstat-label">Total Atribuições</div>
+        </div>
+        <div class="qstat">
+          <div class="qstat-value" id="qs-pending">0</div>
+          <div class="qstat-label">Pendentes</div>
+        </div>
+        <div class="qstat">
+          <div class="qstat-value" id="qs-completed">0</div>
+          <div class="qstat-label">Concluídas</div>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <div class="table-head">
+          <div>TEMA</div>
+          <div>ALUNO</div>
+          <div>NÍVEL</div>
+          <div>ENTREGA</div>
+          <div>STATUS</div>
+          <div>NOTA</div>
+          <div>AÇÕES</div>
+        </div>
+        <div id="data-container">
         </div>
       </div>
 
     </section>
 
-    <footer class="footer">Flowence Grid Method™</footer>
+    <footer class="footer">Flowence Grid Method™ — Sistema de Gestão Educacional</footer>
   </main>
 
 </div>
 
+<!-- MODAL AVANÇADO -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Nova Atribuição</h2>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <form id="form-main" class="modal-body">
+      <input type="hidden" id="f-id">
+
+      <!-- SEÇÃO 1: BÁSICO -->
+      <div class="form-section">
+        <h3 class="form-section-title">Informações Básicas</h3>
+        
+        <div class="form-group">
+          <label for="f-theme">Tema/Assunto *</label>
+          <input type="text" id="f-theme" required>
+        </div>
+
+        <div class="form-group">
+          <label for="f-description">Descrição</label>
+          <textarea id="f-description" rows="3" placeholder="Descreva a atribuição..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-level">Nível *</label>
+            <select id="f-level" required>
+              <option value="">Selecione</option>
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="B1">B1</option>
+              <option value="B2">B2</option>
+              <option value="C1">C1</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="f-teacher">Professor</label>
+            <input type="text" id="f-teacher" placeholder="Nome do professor">
+          </div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 2: VINCULAR -->
+      <div class="form-section">
+        <h3 class="form-section-title">Vincular com</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-class_id">Turma</label>
+            <input type="text" id="f-class_id" placeholder="ID da turma">
+          </div>
+          <div class="form-group">
+            <label for="f-student_id">Aluno</label>
+            <input type="text" id="f-student_id" placeholder="ID ou nome do aluno">
+          </div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 3: DATAS -->
+      <div class="form-section">
+        <h3 class="form-section-title">Datas</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-start_date">Data de Início</label>
+            <input type="date" id="f-start_date">
+          </div>
+          <div class="form-group">
+            <label for="f-due_date">Data de Entrega *</label>
+            <input type="date" id="f-due_date" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-completion_date">Data de Conclusão Real</label>
+          <input type="date" id="f-completion_date">
+        </div>
+      </div>
+
+      <!-- SEÇÃO 4: STATUS & AVALIAÇÃO -->
+      <div class="form-section">
+        <h3 class="form-section-title">Status & Avaliação</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-status">Status *</label>
+            <select id="f-status" required>
+              <option value="pendente">Pendente</option>
+              <option value="concluida">Concluída</option>
+              <option value="atrasada">Atrasada</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="f-max_score">Pontuação Máxima</label>
+            <input type="number" id="f-max_score" value="100">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-obtained_score">Pontuação Obtida</label>
+          <input type="number" id="f-obtained_score" placeholder="Nota do aluno">
+        </div>
+      </div>
+
+      <!-- SEÇÃO 5: CONTEÚDO -->
+      <div class="form-section">
+        <h3 class="form-section-title">Conteúdo & Critérios</h3>
+
+        <div class="form-group">
+          <label for="f-evaluation_criteria">Critérios de Avaliação</label>
+          <textarea id="f-evaluation_criteria" rows="3" placeholder="Ex: Gramática, Pronúncia, Criatividade..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="f-attachment_url">Arquivo/Link do Anexo</label>
+          <input type="url" id="f-attachment_url" placeholder="https://docs.google.com/...">
+        </div>
+
+        <div class="form-group">
+          <label for="f-feedback">Feedback do Professor</label>
+          <textarea id="f-feedback" rows="3" placeholder="Escreva o feedback..."></textarea>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 6: LINKS -->
+      <div class="form-section">
+        <h3 class="form-section-title">Links Externos</h3>
+        
+        <div id="links-container"></div>
+        <button type="button" id="btn-add-link" class="btn btn-secondary">+ Adicionar Link</button>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btn-cancel" class="btn btn-ghost">Cancelar</button>
+        <button type="button" id="btn-save" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+
 <script>
-(function() {
-  document.querySelectorAll('.menu-item[data-href]').forEach(el => {
-    el.style.cursor = 'pointer';
-    el.addEventListener('click', () => { window.location.href = el.dataset.href; });
-  });
-  const h = document.getElementById('hamburger');
-  const s = document.getElementById('sidebar');
-  const b = document.getElementById('sidebar-backdrop');
-  if (h && s && b) {
-    const t = () => { s.classList.toggle('open'); b.classList.toggle('show'); };
-    h.addEventListener('click', t);
-    b.addEventListener('click', t);
-  }
-})();
+  (function() {
+    document.querySelectorAll('.menu-item[data-href]').forEach(el => {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => { window.location.href = el.dataset.href; });
+    });
+    const h = document.getElementById('hamburger');
+    const s = document.getElementById('sidebar');
+    const b = document.getElementById('sidebar-backdrop');
+    if (h && s && b) {
+      const t = () => { s.classList.toggle('open'); b.classList.toggle('show'); };
+      h.addEventListener('click', t);
+      b.addEventListener('click', t);
+    }
+  })();
 </script>
+
+<script src="atribuicoes.js"></script>
+
 </body>
 </html>
