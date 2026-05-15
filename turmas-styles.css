@@ -1,5 +1,5 @@
 /* ============================================================
-   PÁGINA DE TURMAS — Estilos Específicos
+   PÁGINA DE TURMAS — Estilos COMPLETO (Opção C)
    ============================================================ */
 
 /* TOOLBAR */
@@ -177,7 +177,6 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8b5cf6, #14b8a6);
   color: white;
   display: grid;
   place-items: center;
@@ -235,7 +234,7 @@
 .badge.b2 { background: #ffedd5; color: #ea580c; }
 .badge.c1 { background: #ffe4e6; color: #e11d48; }
 
-/* PILL (STATUS) */
+/* PILL */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -281,7 +280,7 @@
   background: var(--surface);
   border-radius: var(--radius-lg);
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -336,6 +335,28 @@
   flex: 1;
 }
 
+/* FORM SECTIONS */
+.form-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.form-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 12px 0;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -373,6 +394,12 @@
 .form-group textarea {
   resize: vertical;
   min-height: 70px;
+}
+
+.form-group input[type="color"] {
+  height: 40px;
+  padding: 4px;
+  cursor: pointer;
 }
 
 .form-row {
@@ -571,6 +598,10 @@
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .form-section {
+    margin-bottom: 16px;
   }
 }
 
