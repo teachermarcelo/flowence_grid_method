@@ -63,7 +63,6 @@
 
     <section class="content">
 
-      <!-- TOOLBAR: Search + Filtros -->
       <div class="toolbar">
         <div class="search-box">
           <span class="search-icon">🔍</span>
@@ -86,7 +85,6 @@
         </div>
       </div>
 
-      <!-- QUICK STATS -->
       <div class="quick-stats">
         <div class="qstat">
           <div class="qstat-value" id="qs-total">0</div>
@@ -102,7 +100,6 @@
         </div>
       </div>
 
-      <!-- TABELA DE TURMAS -->
       <div class="table-wrapper">
         <div class="table-head">
           <div>TURMA</div>
@@ -115,7 +112,6 @@
           <div>AÇÕES</div>
         </div>
         <div id="data-container">
-          <!-- Renderizado por JS -->
         </div>
       </div>
 
@@ -126,7 +122,7 @@
 
 </div>
 
-<!-- MODAL: Criar/Editar Turma -->
+<!-- MODAL COMPLETO -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-header">
@@ -136,51 +132,138 @@
     <form id="form-main" class="modal-body">
       <input type="hidden" id="f-id">
 
-      <div class="form-group">
-        <label for="f-nome">Nome da Turma *</label>
-        <input type="text" id="f-nome" required>
+      <!-- SEÇÃO 1: BÁSICO -->
+      <div class="form-section">
+        <h3 class="form-section-title">Informações Básicas</h3>
+        
+        <div class="form-group">
+          <label for="f-nome">Nome da Turma *</label>
+          <input type="text" id="f-nome" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-professor">Professor(a) *</label>
+            <input type="text" id="f-professor" required>
+          </div>
+          <div class="form-group">
+            <label for="f-coordenador">Coordenador</label>
+            <input type="text" id="f-coordenador">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-nivel">Nível *</label>
+            <select id="f-nivel" required>
+              <option value="">Selecione</option>
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="B1">B1</option>
+              <option value="B2">B2</option>
+              <option value="C1">C1</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="f-turno">Turno</label>
+            <select id="f-turno">
+              <option value="Manhã">Manhã</option>
+              <option value="Tarde">Tarde</option>
+              <option value="Noite">Noite</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="f-professor">Professor(a) *</label>
-        <input type="text" id="f-professor" required>
-      </div>
+      <!-- SEÇÃO 2: HORÁRIOS -->
+      <div class="form-section">
+        <h3 class="form-section-title">Horários & Agenda</h3>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="f-nivel">Nível *</label>
-          <select id="f-nivel" required>
-            <option value="">Selecione o nível</option>
-            <option value="A1">A1</option>
-            <option value="A2">A2</option>
-            <option value="B1">B1</option>
-            <option value="B2">B2</option>
-            <option value="C1">C1</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-horario">Horário (ex: Seg/Qua 14h)</label>
+            <input type="text" id="f-horario">
+          </div>
+          <div class="form-group">
+            <label for="f-duracao">Duração (minutos)</label>
+            <input type="number" id="f-duracao" value="60">
+          </div>
         </div>
-        <div class="form-group">
-          <label for="f-horario">Horário</label>
-          <input type="text" id="f-horario" placeholder="Ex: Seg/Qua 14:00-15:30">
-        </div>
-      </div>
 
-      <div class="form-row">
         <div class="form-group">
-          <label for="f-data_inicio">Data Início</label>
-          <input type="date" id="f-data_inicio">
+          <label for="f-dias_semana">Dias da Semana (ex: Seg,Ter,Qua)</label>
+          <input type="text" id="f-dias_semana" placeholder="Segunda, Terça, Quarta...">
         </div>
-        <div class="form-group">
-          <label for="f-status">Status *</label>
-          <select id="f-status" required>
-            <option value="ativa">Ativa</option>
-            <option value="inativa">Inativa</option>
-          </select>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-data_inicio">Data de Início</label>
+            <input type="date" id="f-data_inicio">
+          </div>
+          <div class="form-group">
+            <label for="f-data_fim">Data de Término</label>
+            <input type="date" id="f-data_fim">
+          </div>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="f-observacoes">Observações</label>
-        <textarea id="f-observacoes" rows="3" placeholder="Observações sobre a turma..."></textarea>
+      <!-- SEÇÃO 3: GESTÃO -->
+      <div class="form-section">
+        <h3 class="form-section-title">Gestão & Configurações</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-status">Status *</label>
+            <select id="f-status" required>
+              <option value="ativa">Ativa</option>
+              <option value="inativa">Inativa</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="f-capacidade">Capacidade Máxima</label>
+            <input type="number" id="f-capacidade" value="30">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-localizacao">Sala/Localização</label>
+          <input type="text" id="f-localizacao" placeholder="Ex: Sala 101, Bloco A">
+        </div>
+
+        <div class="form-group">
+          <label for="f-cor">Cor da Turma</label>
+          <input type="color" id="f-cor" value="#4f46e5">
+        </div>
+      </div>
+
+      <!-- SEÇÃO 4: CONTEÚDO & METAS -->
+      <div class="form-section">
+        <h3 class="form-section-title">Conteúdo & Aprendizado</h3>
+
+        <div class="form-group">
+          <label for="f-descricao">Descrição da Turma</label>
+          <textarea id="f-descricao" rows="2" placeholder="Descreva os objetivos da turma..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="f-metas">Metas de Aprendizado</label>
+          <textarea id="f-metas" rows="2" placeholder="Quais são as metas desta turma?"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="f-material_id">Material Didático (Link/ID)</label>
+          <input type="text" id="f-material_id" placeholder="Link ou ID do material">
+        </div>
+      </div>
+
+      <!-- SEÇÃO 5: OBSERVAÇÕES -->
+      <div class="form-section">
+        <h3 class="form-section-title">Observações</h3>
+
+        <div class="form-group">
+          <label for="f-observacoes">Observações Adicionais</label>
+          <textarea id="f-observacoes" rows="3" placeholder="Anotações sobre a turma..."></textarea>
+        </div>
       </div>
 
       <div class="modal-footer">
@@ -195,7 +278,6 @@
 <script src="supabase-config.js"></script>
 
 <script>
-  // Setup de navegação + hamburger (ANTES de carregar turmas.js)
   (function() {
     document.querySelectorAll('.menu-item[data-href]').forEach(el => {
       el.style.cursor = 'pointer';
@@ -212,7 +294,6 @@
   })();
 </script>
 
-<!-- ✅ Carregar turmas.js por ÚLTIMO para encontrar window.sb -->
 <script src="turmas.js"></script>
 
 </body>
