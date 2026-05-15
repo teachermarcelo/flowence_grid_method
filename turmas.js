@@ -3,7 +3,6 @@
 (function() {
   'use strict';
 
-  // ---------- CONFIGURAÇÃO DE COLUNAS ----------
   const COLUMNS = {
     id:                  'id',
     nome:                'name',
@@ -26,7 +25,7 @@
     visivel_alunos:      'visible_to_students',
     cor:                 'color',
     ativo:               'active',
-    links:               'links',  // ✅ NOVO
+    links:               'links',
   };
 
   let supabaseClient = null;
@@ -67,7 +66,6 @@
     return false;
   }
 
-  // ---------- UTILITÁRIOS ----------
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -138,6 +136,19 @@
     };
   }
 
+  function parseLinks(linksStr) {
+    if (!linksStr) return [];
+    try {
+      return JSON.parse(linksStr);
+    } catch {
+      return [];
+    }
+  }
+
+  function stringifyLinks(links) {
+    return JSON.stringify(links || []);
+  }
+
   // ---------- NORMALIZAR DADOS ----------
   function normalizeRow(row) {
     return {
@@ -162,30 +173,14 @@
       visivel_alunos:    row[COLUMNS.visivel_alunos],
       cor:               row[COLUMNS.cor],
       ativo:             row[COLUMNS.ativo],
-      links:             parseLinks(row[COLUMNS.links]),  // ✅ Parse JSON
+      links:             parseLinks(row[COLUMNS.links]),
     };
   }
 
-  // ---------- PARSE LINKS ----------
-  function parseLinks(linksStr) {
-    if (!linksStr) return [];
-    try {
-      return JSON.parse(linksStr);
-    } catch {
-      return [];
-    }
-  }
-
-  function stringifyLinks(links) {
-    return JSON.stringify(links || []);
-  }
-
-  // ---------- ESTADO ----------
   let turmas = [];
   let alunos = [];
-  let linksAdicionados = [];  // ✅ Estado temporário de links
+  let linksAdicionados = [];
 
-  // ---------- CARREGAR DADOS ----------
   async function loadAll() {
     try {
       showToast('Carregando turmas...', 'info');
@@ -226,7 +221,6 @@
     }
   }
 
-  // ---------- FILTRAR ----------
   function getFiltered() {
     const search = ($('#search-input')?.value || '').toLowerCase().trim();
     const levelFilter = ($('#filter-level')?.value || '').toLowerCase().trim();
@@ -242,7 +236,6 @@
     });
   }
 
-  // ---------- STATS ----------
   function renderQuickStats() {
     const filtered = getFiltered();
     const total = turmas.length;
@@ -259,7 +252,7 @@
     if (qsShown) qsShown.textContent = shown;
   }
 
-  // ---------- TABELA ----------
+  // ✅ RENDERIZAR TABELA COM PREVIEW DE LINKS
   function renderTable() {
     const container = $('#data-container');
     if (!container) return;
@@ -282,6 +275,17 @@
       const levelB = levelBadge(turma.nivel);
       const statusP = statusPill(turma.status);
       const turnoEsc = esc(turma.turno || '—');
+      
+      // ✅ Preview de links
+      let linksPreviewHtml = '';
+      if (turma.links && turma.links.length > 0) {
+        const linkTooltip = turma.links.map(l => esc(l.label || l.url)).join('<br>');
+        linksPreviewHtml = `
+          <div class="links-badge" title="${esc(turma.links.map(l => l.label || l.url).join(', '))}">
+            ${turma.links.length} 🔗
+          </div>
+        `;
+      }
 
       html += `
         <div class="table-row">
@@ -299,6 +303,7 @@
           <div class="table-cell">${statusP}</div>
           <div class="table-cell table-cell-center">${count}</div>
           <div class="table-cell table-cell-actions">
+            ${linksPreviewHtml}
             <button class="btn-icon btn-edit" data-id="${turma.id}" title="Editar">✏️</button>
             <button class="btn-icon btn-del" data-id="${turma.id}" title="Deletar">🗑️</button>
           </div>
@@ -309,7 +314,7 @@
     container.innerHTML = html;
   }
 
-  // ---------- RENDERIZAR LINKS ----------
+  // ✅ RENDERIZAR LINKS COM LINKS CLICÁVEIS
   function renderLinks(links) {
     const container = $('#links-container');
     if (!container) return;
@@ -321,6 +326,9 @@
 
     let html = '';
     links.forEach((link, idx) => {
+      const urlEsc = esc(link.url || '');
+      const isValidUrl = (link.url || '').startsWith('http');
+      
       html += `
         <div class="link-item">
           <input type="text" class="link-label" placeholder="Nome" value="${esc(link.label || '')}" data-idx="${idx}">
@@ -332,6 +340,7 @@
             <option value="Recurso" ${link.type === 'Recurso' ? 'selected' : ''}>Recurso</option>
             <option value="Outro" ${link.type === 'Outro' ? 'selected' : ''}>Outro</option>
           </select>
+          ${isValidUrl ? `<a href="${urlEsc}" target="_blank" class="btn-icon btn-open-link" title="Abrir Link">🔗</a>` : '<div style="width:28px;"></div>'}
           <button type="button" class="btn-icon btn-remove-link" data-idx="${idx}" title="Remover">🗑️</button>
         </div>
       `;
@@ -339,7 +348,6 @@
 
     container.innerHTML = html;
 
-    // Event listeners para remover links
     $$('.btn-remove-link').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -350,14 +358,12 @@
     });
   }
 
-  // ---------- MODAL ----------
   function openModal(id = null) {
     const modal = $('#modal-overlay');
     const title = $('.modal-title');
 
     if (!modal || !title) return;
 
-    // Reset
     linksAdicionados = [];
     $('#f-id').value = '';
     $('#f-nome').value = '';
@@ -414,14 +420,12 @@
     modal.classList.add('show');
   }
 
-  // ---------- FECHAR MODAL ----------
   function closeModal() {
     const modal = $('#modal-overlay');
     if (modal) modal.classList.remove('show');
     linksAdicionados = [];
   }
 
-  // ---------- SALVAR ----------
   async function saveTurma() {
     const nome = ($('#f-nome').value || '').trim();
     const professor = ($('#f-professor').value || '').trim();
@@ -483,7 +487,7 @@
       [COLUMNS.material_id]: material_id,
       [COLUMNS.metas]: metas,
       [COLUMNS.cor]: cor,
-      [COLUMNS.links]: stringifyLinks(links),  // ✅ Salvar links como JSON
+      [COLUMNS.links]: stringifyLinks(links),
     };
 
     try {
@@ -509,7 +513,6 @@
     }
   }
 
-  // ---------- DELETAR ----------
   async function deleteTurma(id) {
     const turma = turmas.find(t => t.id === id);
     if (!turma) return;
@@ -530,7 +533,6 @@
     }
   }
 
-  // ---------- EVENTOS ----------
   function setupEvents() {
     const btnNew = $('#btn-new');
     if (btnNew) btnNew.addEventListener('click', () => openModal());
@@ -544,7 +546,6 @@
     const modalClose = $('#modal-close');
     if (modalClose) modalClose.addEventListener('click', () => closeModal());
 
-    // ✅ Botão adicionar link
     const btnAddLink = $('#btn-add-link');
     if (btnAddLink) {
       btnAddLink.addEventListener('click', (e) => {
@@ -589,7 +590,6 @@
       });
     }
 
-    // ✅ Event delegation para atualizar links
     document.addEventListener('change', (e) => {
       if (e.target.classList.contains('link-type')) {
         const idx = parseInt(e.target.dataset.idx);
@@ -629,14 +629,12 @@
     });
   }
 
-  // ---------- INIT ----------
   function init() {
-    console.log('[Turmas] Inicializando... (COM LINKS)');
+    console.log('[Turmas] Inicializando... (COM LINKS CLICÁVEIS)');
     setupEvents();
     loadAll();
   }
 
-  // ---------- BOOT ----------
   document.addEventListener('DOMContentLoaded', () => {
     console.log('[Turmas] DOM loaded');
     
