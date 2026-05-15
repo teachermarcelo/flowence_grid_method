@@ -1,8 +1,7 @@
 // ============================================================
-// Flowence Grid Method — dashboard.js
+// Flowence Grid Method — dashboard.js (CORRIGIDO)
 // Conecta no Supabase e popula todo o dashboard
-// Tabelas usadas: flowence_student, flowence_class, flowence_lesson,
-//                 flowence_mission, flowence_material, flowence_assignment
+// AGORA INCLUI: Turmas Ativas!
 // ============================================================
 (() => {
   'use strict';
@@ -58,8 +57,8 @@
   };
   window.toast = toast;
 
-  // Status helpers
-  const STATUS_ACTIVE   = ['active', 'Active', 'ACTIVE', 'ativo', 'Ativo', 'ATIVO'];
+  // Status helpers — ✅ CORRIGIDO: Adicionado 'ativa' e 'Ativa'
+  const STATUS_ACTIVE   = ['active', 'Active', 'ACTIVE', 'ativo', 'Ativo', 'ATIVO', 'ativa', 'Ativa'];
   const STATUS_COMPLETE = ['completed', 'Completed', 'completo', 'Completo', 'concluida', 'concluída', 'Concluída'];
   const STATUS_PENDING  = ['pending', 'Pending', 'pendente', 'Pendente'];
 
@@ -67,7 +66,7 @@
   async function loadStats() {
     const tasks = [
       ['stat-students', () => countRows('flowence_student', q => q.in('status', STATUS_ACTIVE))],
-      ['stat-classes',  () => countRows('flowence_class',   q => q.in('status', STATUS_ACTIVE))],
+      ['stat-classes',  () => countRows('flowence_class',   q => q.in('status', STATUS_ACTIVE))],  // ✅ AGORA FUNCIONA
       ['stat-lessons',  () => countRows('flowence_lesson')],
       ['stat-missions', () => countRows('flowence_mission', q => q.in('status', STATUS_COMPLETE))],
       ['stat-materials', () => countRows('flowence_material')],
