@@ -1,11 +1,5 @@
-// ============================================================
-// students.js — CRUD de alunos com modal, busca, filtros
-// Tabelas: flowence_student, flowence_class, flowence_student_link
-// ============================================================
-
 (() => {
   'use strict';
-
   if (!window.SUPABASE_CONFIG || !window.supabase) {
     console.error('[students] Supabase não carregado');
     return;
@@ -15,20 +9,16 @@
     window.SUPABASE_CONFIG.anonKey
   );
   window.sb = sb;
-
   const $  = (s) => document.querySelector(s);
   const $$ = (s) => document.querySelectorAll(s);
-  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const esc = (s) => String(s ?? '').replace(/[&&lt;>"']/g, ch => ({'&':'&amp;','&lt;':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 
-  // Aceita variações de status
-  const isActive = (s) => ['active', 'Ativo', 'ativo', 'ACTIVE'].includes(s);
+  const isActive = (s) => ['active','Ativo','ativo','ACTIVE'].includes(s);
 
-  // Estado em memória
   let students = [];
   let classes  = [];
-  let editingLinks = []; // links sendo editados no modal
+  let editingLinks = [];
 
-  // ---------- TOAST ----------
   function toast(msg, type = 'info') {
     const t = document.createElement('div');
     t.className = `toast toast-${type}`;
@@ -38,10 +28,9 @@
     setTimeout(() => {
       t.classList.remove('toast-show');
       setTimeout(() => t.remove(), 300);
-    }, 3000);
+    }, 3500);
   }
 
-  // ---------- NAV SIDEBAR ----------
   function setupNav() {
     const map = {
       'Dashboard':'index.html', 'Alunos':'alunos.html', 'Turmas':'turmas.html',
@@ -55,7 +44,6 @@
       el.style.cursor = 'pointer';
       el.addEventListener('click', () => { window.location.href = href; });
     });
-
     const hamburger = document.getElementById('hamburger');
     const sidebar   = document.getElementById('sidebar');
     const backdrop  = document.getElementById('sidebar-backdrop');
@@ -69,43 +57,64 @@
     }
   }
 
-  // ---------- LOAD ----------
+  // ✅ FIX: carrega alunos e turmas INDEPENDENTEMENTE
+  // Se turmas falham (ex: coluna 'level' não existe), alunos ainda carregam
   async function loadAll() {
+    // 1. Carrega alunos
     try {
-      const [studRes, classRes] = await Promise.all([
-        sb.from('flowence_student').select('*').order('name', { ascending: true }),
-        sb.from('flowence_class').select('id, name, level').order('name', { ascending: true })
-      ]);
-      if (studRes.error) throw studRes.error;
-      if (classRes.error) throw classRes.error;
-
-      students = studRes.data || [];
-      classes  = classRes.data || [];
-
-      populateClassFilters();
-      renderTable();
-      renderQuickStats();
+      const { data, error } = await sb.from('flowence_student').select('*').order('name', { ascending: true });
+      if (error) throw error;
+      students = data || [];
     } catch (err) {
-      console.error('[load]', err);
+      console.error('[load] alunos:', err);
       $('#students-table').innerHTML = `<div class="empty empty-error">Erro ao carregar: ${esc(err.message || err)}</div>`;
+      students = [];
     }
+
+    // 2. Carrega turmas (tenta com 'level', se falhar tenta sem)
+    try {
+      let classData;
+      try {
+        const { data, error } = await sb.from('flowence_class').select('id, name, level').order('name', { ascending: true });
+        if (error) throw error;
+        classData = data;
+      } catch (e) {
+        if (e.message && e.message.includes('level') && e.message.includes('does not exist')) {
+          const { data, error } = await sb.from('flowence_class').select('id, name').order('name', { ascending: true });
+          if (error) throw error;
+          classData = data;
+        } else {
+          throw e;
+        }
+      }
+      classes = classData || [];
+    } catch (err) {
+      console.error('[load] turmas:', err);
+      classes = [];
+    }
+
+    populateClassFilters();
+    renderTable();
+    renderQuickStats();
   }
 
   function populateClassFilters() {
     const sel = $('#filter-class');
     const fSel = $('#f-class');
-    const opts = classes.map(c => `<option value="${esc(c.id)}">${esc(c.name)}${c.level ? ' · ' + esc(c.level) : ''}</option>`).join('');
-    sel.innerHTML  = `<option value="">Todas as turmas</option>${opts}`;
-    fSel.innerHTML = `<option value="">— Sem turma —</option>${opts}`;
+    const opts = classes.map(c => {
+      // ✅ Só mostra level se existir no banco
+      const label = c.level ? `${esc(c.name)} · ${esc(c.level)}` : esc(c.name);
+      return `<option value="${esc(c.id)}">${label}</option>`;
+    }).join('');
+    if (sel) sel.innerHTML  = `<option value="">Todas as turmas</option>${opts}`;
+    if (fSel) fSel.innerHTML = `<option value="">— Sem turma —</option>${opts}`;
   }
 
-  // ---------- FILTROS ----------
   function getFiltered() {
     const q      = ($('#search-input').value || '').toLowerCase().trim();
     const fLevel = $('#filter-level').value;
     const fStat  = $('#filter-status').value;
     const fClass = $('#filter-class').value;
-
     return students.filter(s => {
       if (q) {
         const hay = `${s.name || ''} ${s.email || ''} ${s.phone || ''}`.toLowerCase();
@@ -119,14 +128,11 @@
     });
   }
 
-  // ---------- RENDER ----------
   function renderQuickStats() {
-    const total  = students.length;
-    const active = students.filter(s => isActive(s.status)).length;
-    const shown  = getFiltered().length;
-    $('#qs-total').textContent  = total;
-    $('#qs-active').textContent = active;
-    $('#qs-shown').textContent  = shown;
+    const filtered = getFiltered();
+    $('#qs-total').textContent  = students.length;
+    $('#qs-active').textContent = students.filter(s => isActive(s.status)).length;
+    $('#qs-shown').textContent  = filtered.length;
   }
 
   function levelBadge(level) {
@@ -139,7 +145,9 @@
   function classNameOf(class_id) {
     if (!class_id) return '<span class="text-muted">—</span>';
     const c = classes.find(x => x.id === class_id);
-    return c ? esc(c.name) : '<span class="text-muted">—</span>';
+    if (!c) return '<span class="text-muted">—</span>';
+    // ✅ Só usa level se existir
+    return esc(c.name);
   }
 
   function statusPill(status) {
@@ -151,12 +159,10 @@
     const filtered = getFiltered();
     renderQuickStats();
     const table = $('#students-table');
-
     if (filtered.length === 0) {
       table.innerHTML = '<div class="empty">Nenhum aluno encontrado</div>';
       return;
     }
-
     table.innerHTML = `
       <div class="st-head">
         <div>Aluno</div>
@@ -191,8 +197,6 @@
         </div>
       `).join('')}
     `;
-
-    // bind actions
     table.querySelectorAll('.btn-view').forEach(b => b.addEventListener('click', e => {
       const id = e.currentTarget.dataset.id;
       window.location.href = `aluno.html?id=${encodeURIComponent(id)}`;
@@ -216,7 +220,6 @@
     return `${day}/${m}/${y}`;
   }
 
-  // ---------- MODAL ----------
   function openModal(id = null) {
     editingLinks = [];
     if (id) {
@@ -258,7 +261,6 @@
     } catch { return String(tags).split(',').map(t => t.trim()).filter(Boolean); }
   }
 
-  // ---------- LINKS dinâmicos no modal ----------
   async function loadLinksForStudent(studentId) {
     try {
       const { data, error } = await sb
@@ -296,7 +298,6 @@
         <button type="button" class="btn-icon btn-rm-link" data-i="${i}" title="Remover">✕</button>
       </div>
     `).join('');
-
     list.querySelectorAll('.link-label').forEach(el => el.addEventListener('input', e => {
       editingLinks[e.target.dataset.i].label = e.target.value;
     }));
@@ -317,14 +318,11 @@
     renderLinksList();
   });
 
-  // ---------- SAVE ----------
   async function saveStudent(e) {
     e?.preventDefault();
     const id = $('#f-id').value || null;
-
     const name = $('#f-name').value.trim();
     if (!name) { toast('Nome é obrigatório', 'error'); return; }
-
     const payload = {
       name,
       email:    $('#f-email').value.trim() || null,
@@ -339,13 +337,10 @@
         $('#f-tags').value.split(',').map(t => t.trim()).filter(Boolean)
       ),
     };
-
     $('#btn-save').disabled = true;
     $('#btn-save').textContent = 'Salvando…';
-
     try {
       let studentId = id;
-
       if (id) {
         const { error } = await sb.from('flowence_student').update(payload).eq('id', id);
         if (error) throw error;
@@ -354,10 +349,7 @@
         if (error) throw error;
         studentId = data.id;
       }
-
-      // Sincroniza links
       await syncLinks(studentId);
-
       toast(id ? 'Aluno atualizado' : 'Aluno criado', 'success');
       closeModal();
       await loadAll();
@@ -371,15 +363,12 @@
   }
 
   async function syncLinks(studentId) {
-    // estratégia simples: deleta todos e reinsere
     const valid = editingLinks.filter(l => (l.label || '').trim() && (l.url || '').trim());
-
     const { error: delErr } = await sb
       .from('flowence_student_link')
       .delete()
       .eq('student_id', studentId);
     if (delErr) throw delErr;
-
     if (valid.length > 0) {
       const rows = valid.map(l => ({
         student_id: studentId,
@@ -392,22 +381,17 @@
     }
   }
 
-  // ---------- DELETE ----------
   async function deleteStudent(id) {
     const s = students.find(x => x.id === id);
     if (!s) return;
     if (!confirm(`Excluir o aluno "${s.name}"? Esta ação não pode ser desfeita.`)) return;
-
     try {
-      // Apaga dependências primeiro (FK)
       await sb.from('flowence_student_link').delete().eq('student_id', id);
       await sb.from('flowence_student_note').delete().eq('student_id', id);
       await sb.from('flowence_mission').delete().eq('student_id', id);
       await sb.from('flowence_assignment').delete().eq('student_id', id);
-
       const { error } = await sb.from('flowence_student').delete().eq('id', id);
       if (error) throw error;
-
       toast('Aluno excluído', 'success');
       await loadAll();
     } catch (err) {
@@ -416,7 +400,6 @@
     }
   }
 
-  // ---------- BIND ----------
   function setupEvents() {
     $('#btn-new-student').addEventListener('click', () => openModal());
     $('#btn-save').addEventListener('click', saveStudent);
@@ -426,7 +409,6 @@
       if (e.target.id === 'modal-overlay') closeModal();
     });
     $('#student-form').addEventListener('submit', saveStudent);
-
     let searchTimer;
     $('#search-input').addEventListener('input', () => {
       clearTimeout(searchTimer);
@@ -435,8 +417,6 @@
     $('#filter-level').addEventListener('change', renderTable);
     $('#filter-status').addEventListener('change', renderTable);
     $('#filter-class').addEventListener('change', renderTable);
-
-    // ESC fecha modal
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && $('#modal-overlay').classList.contains('open')) {
         closeModal();
@@ -444,7 +424,6 @@
     });
   }
 
-  // ---------- BOOT ----------
   document.addEventListener('DOMContentLoaded', () => {
     setupNav();
     setupEvents();
