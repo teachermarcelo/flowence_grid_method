@@ -71,6 +71,7 @@
       ['stat-missions', () => countRows('flowence_mission', q => q.in('status', STATUS_COMPLETE))],
       ['stat-materials', () => countRows('flowence_material')],
       ['stat-pending',   () => countRows('flowence_mission', q => q.in('status', STATUS_PENDING))],
+      ['stat-assignments', () => countRows('flowence_assignment', q => q.eq('status', 'pendente'))],  // ✅ NOVO
     ];
     await Promise.all(tasks.map(async ([id, fn]) => {
       try { setStat(id, await fn()); }
